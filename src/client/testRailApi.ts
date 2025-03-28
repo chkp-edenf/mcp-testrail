@@ -1,26 +1,25 @@
-import {
-	HttpClient,
-	HttpClientConfig,
-	RequestData,
-	RequestParams,
-} from "./api.js";
+import axios, { AxiosInstance, AxiosError } from "axios";
 import FormData from "form-data";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-// Response type definitions for TestRail API
-interface TestRailAttachment {
-	attachment_id: number;
+/**
+ * TestRail API Response for Project
+ */
+export interface TestRailProject {
+	id: number;
 	name: string;
-	filename: string;
-	size: number;
-	created_on: number;
-	created_by: number;
-	project_id: number;
-	case_id?: number;
-	result_id?: number;
+	announcement: string;
+	show_announcement: boolean;
+	is_completed: boolean;
+	completed_on: number;
+	suite_mode: number;
+	url: string;
 }
 
+/**
+ * TestRail API Response for Case
+ */
 interface TestRailCase {
 	id: number;
 	title: string;
@@ -50,62 +49,38 @@ interface TestRailStep {
 	expected: string;
 }
 
-interface TestRailCaseField {
+/**
+ * TestRail API Response for Run
+ */
+export interface TestRailRun {
 	id: number;
-	type_id: number;
+	suite_id: number;
 	name: string;
-	label: string;
 	description: string;
-	system_name?: string;
-	configs: TestRailCaseFieldConfig[];
-	display_order: number;
+	milestone_id: number | null;
+	assignedto_id: number | null;
 	include_all: boolean;
-	template_ids: number[];
-}
-
-interface TestRailCaseFieldConfig {
-	id: string;
-	context: {
-		is_global: boolean;
-		project_ids: number[];
-	};
-	options: {
-		default_value?: string | boolean | null;
-		format?: string;
-		is_required?: boolean;
-		rows?: string;
-		items?: string;
-	};
-}
-
-interface TestRailMilestone {
-	id: number;
-	name: string;
-	description: string;
-	start_on: number;
-	started_on: number;
-	due_on: number;
-	completed_on: number;
-	project_id: number;
-	parent_id: number;
+	is_completed: boolean;
+	completed_on: number | null;
+	config: string | null;
+	config_ids: number[];
+	passed_count: number;
+	blocked_count: number;
+	untested_count: number;
+	retest_count: number;
+	failed_count: number;
+	custom_status_count: Record<string, number>;
+	created_on: number;
+	created_by: number;
+	plan_id: number;
+	url: string;
 	refs: string;
-	url: string;
-	is_completed: boolean;
-	is_started: boolean;
 }
 
-interface TestRailProject {
-	id: number;
-	name: string;
-	announcement: string;
-	show_announcement: boolean;
-	is_completed: boolean;
-	completed_on: number;
-	suite_mode: number;
-	url: string;
-}
-
-interface TestRailResult {
+/**
+ * TestRail API Response for Result
+ */
+export interface TestRailResult {
 	id: number;
 	test_id: number;
 	status_id: number;
@@ -117,6 +92,7 @@ interface TestRailResult {
 	elapsed: string;
 	defects: string;
 	custom_step_results?: TestRailStepResult[];
+	custom_fields?: Record<string, unknown>;
 }
 
 interface TestRailStepResult {
@@ -126,89 +102,24 @@ interface TestRailStepResult {
 	actual: string;
 }
 
-interface TestRailResultField {
-	id: number;
-	type_id: number;
+/**
+ * TestRail API Response for Attachment
+ */
+interface TestRailAttachment {
+	attachment_id: number;
 	name: string;
-	label: string;
-	description: string;
-	system_name?: string;
-	configs: TestRailResultFieldConfig[];
-	display_order: number;
-	include_all: boolean;
-	template_ids: number[];
-}
-
-interface TestRailResultFieldConfig {
-	id: string;
-	context: {
-		is_global: boolean;
-		project_ids: number[];
-	};
-	options: {
-		default_value?: string | boolean | null;
-		format?: string;
-		is_required?: boolean;
-		rows?: string;
-		items?: string;
-	};
-}
-
-interface TestRailRun {
-	id: number;
-	suite_id: number;
-	name: string;
-	description: string;
-	milestone_id: number;
-	assignedto_id: number;
-	include_all: boolean;
-	is_completed: boolean;
-	completed_on: number;
-	config: string;
-	config_ids: number[];
-	created_by: number;
+	filename: string;
+	size: number;
 	created_on: number;
-	plan_id: number;
-	url: string;
-	refs: string;
-}
-
-interface TestRailSharedStep {
-	id: number;
-	title: string;
 	created_by: number;
-	created_on: number;
-	updated_by: number;
-	updated_on: number;
-	steps: TestRailStep[];
-	refs: string;
 	project_id: number;
+	case_id?: number;
+	result_id?: number;
 }
 
-interface TestRailStatus {
-	id: number;
-	name: string;
-	label: string;
-	color_dark: string;
-	color_medium: string;
-	color_bright: string;
-	is_system: boolean;
-	is_untested: boolean;
-	is_final: boolean;
-}
-
-interface TestRailSuite {
-	id: number;
-	name: string;
-	description: string;
-	project_id: number;
-	is_master: boolean;
-	is_baseline: boolean;
-	is_completed: boolean;
-	completed_on: number;
-	url: string;
-}
-
+/**
+ * TestRail API Response for User
+ */
 interface TestRailUser {
 	id: number;
 	name: string;
@@ -217,6 +128,9 @@ interface TestRailUser {
 	role_id: number;
 }
 
+/**
+ * TestRail API Response for Test
+ */
 interface TestRailTest {
 	id: number;
 	case_id: number;
@@ -236,6 +150,43 @@ interface TestRailTest {
 	custom_expected: string;
 }
 
+/**
+ * Payload for creating a new test run
+ */
+export interface AddRunPayload {
+	suite_id?: number;
+	name: string;
+	description?: string;
+	milestone_id?: number;
+	assignedto_id?: number;
+	include_all?: boolean;
+	case_ids?: number[];
+}
+
+/**
+ * Payload for adding a test result
+ */
+export interface AddResultPayload {
+	status_id: number;
+	comment?: string;
+	version?: string;
+	elapsed?: string;
+	defects?: string;
+	assignedto_id?: number;
+	custom_fields?: Record<string, unknown>;
+}
+
+/**
+ * Status IDs used in TestRail
+ */
+export enum TestStatus {
+	Passed = 1,
+	Blocked = 2,
+	Untested = 3,
+	Retest = 4,
+	Failed = 5,
+}
+
 interface PaginatedResponse<T> {
 	offset: number;
 	limit: number;
@@ -248,18 +199,56 @@ interface PaginatedResponse<T> {
 }
 
 // TestRail API client configuration interface
-export interface TestRailClientConfig extends HttpClientConfig {
+export interface TestRailClientConfig {
+	baseURL: string;
 	auth: {
 		username: string;
 		password: string;
 	};
+	timeout?: number;
+	headers?: Record<string, string>;
+}
+
+/**
+ * Handle API errors with better logging
+ * @param message Context message for the error
+ * @param error The original error
+ */
+function handleApiError(message: string, error: unknown): void {
+	if (axios.isAxiosError(error)) {
+		const status = error.response?.status;
+		const responseData = error.response?.data;
+
+		console.error(`${message}: HTTP ${status}`);
+		if (responseData) {
+			console.error("Response:", JSON.stringify(responseData, null, 2));
+		}
+	} else {
+		console.error(`${message}:`, error);
+	}
+	throw error;
 }
 
 export class TestRailClient {
-	private client: HttpClient;
+	private client: AxiosInstance;
 
 	constructor(config: TestRailClientConfig) {
-		this.client = new HttpClient(config);
+		this.client = axios.create({
+			baseURL: config.baseURL,
+			headers: {
+				"Content-Type": "application/json",
+				...(config.headers || {}),
+			},
+			timeout: config.timeout || 30000,
+			auth: config.auth,
+		});
+	}
+
+	/**
+	 * Set a custom header
+	 */
+	setHeader(name: string, value: string): void {
+		this.client.defaults.headers.common[name] = value;
 	}
 
 	// Attachments API
@@ -268,485 +257,197 @@ export class TestRailClient {
 		caseId: number,
 		filePath: string,
 	): Promise<{ attachment_id: number }> {
-		const formData = new FormData();
-		formData.append(
-			"attachment",
-			fs.createReadStream(filePath),
-			path.basename(filePath),
-		);
+		try {
+			const formData = new FormData();
+			formData.append(
+				"attachment",
+				fs.createReadStream(filePath),
+				path.basename(filePath),
+			);
 
-		// Set Content-Type header for multipart/form-data
-		this.client.setHeader("Content-Type", "multipart/form-data");
+			// Set Content-Type header for multipart/form-data
+			const headers = { "Content-Type": "multipart/form-data" };
 
-		// Use direct axios for form-data requests
-		const response = await this.client
-			.getAxiosInstance()
-			.post<{ attachment_id: number }>(
+			const response = await this.client.post<{ attachment_id: number }>(
 				`/api/v2/add_attachment_to_case/${caseId}`,
 				formData,
+				{ headers }
 			);
 
-		return response.data;
-	}
-
-	async addAttachmentToPlan(
-		planId: number,
-		filePath: string,
-	): Promise<{ attachment_id: number }> {
-		const formData = new FormData();
-		formData.append(
-			"attachment",
-			fs.createReadStream(filePath),
-			path.basename(filePath),
-		);
-
-		// Set Content-Type header for multipart/form-data
-		this.client.setHeader("Content-Type", "multipart/form-data");
-
-		// Use direct axios for form-data requests
-		const response = await this.client
-			.getAxiosInstance()
-			.post<{ attachment_id: number }>(
-				`/api/v2/add_attachment_to_plan/${planId}`,
-				formData,
-			);
-
-		return response.data;
-	}
-
-	async addAttachmentToPlanEntry(
-		planId: number,
-		entryId: number,
-		filePath: string,
-	): Promise<{ attachment_id: number }> {
-		const formData = new FormData();
-		formData.append(
-			"attachment",
-			fs.createReadStream(filePath),
-			path.basename(filePath),
-		);
-
-		// Set Content-Type header for multipart/form-data
-		this.client.setHeader("Content-Type", "multipart/form-data");
-
-		// Use direct axios for form-data requests
-		const response = await this.client
-			.getAxiosInstance()
-			.post<{ attachment_id: number }>(
-				`/api/v2/add_attachment_to_plan_entry/${planId}/${entryId}`,
-				formData,
-			);
-
-		return response.data;
-	}
-
-	async addAttachmentToResult(
-		resultId: number,
-		filePath: string,
-	): Promise<{ attachment_id: number }> {
-		const formData = new FormData();
-		formData.append(
-			"attachment",
-			fs.createReadStream(filePath),
-			path.basename(filePath),
-		);
-
-		// Set Content-Type header for multipart/form-data
-		this.client.setHeader("Content-Type", "multipart/form-data");
-
-		// Use direct axios for form-data requests
-		const response = await this.client
-			.getAxiosInstance()
-			.post<{ attachment_id: number }>(
-				`/api/v2/add_attachment_to_result/${resultId}`,
-				formData,
-			);
-
-		return response.data;
-	}
-
-	async addAttachmentToRun(
-		runId: number,
-		filePath: string,
-	): Promise<{ attachment_id: number }> {
-		const formData = new FormData();
-		formData.append(
-			"attachment",
-			fs.createReadStream(filePath),
-			path.basename(filePath),
-		);
-
-		// Set Content-Type header for multipart/form-data
-		this.client.setHeader("Content-Type", "multipart/form-data");
-
-		// Use direct axios for form-data requests
-		const response = await this.client
-			.getAxiosInstance()
-			.post<{ attachment_id: number }>(
-				`/api/v2/add_attachment_to_run/${runId}`,
-				formData,
-			);
-
-		return response.data;
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add attachment to case ${caseId}`, error);
+			throw error;
+		}
 	}
 
 	async getAttachmentsForCase(
 		caseId: number,
 		params?: { limit?: number; offset?: number },
 	): Promise<TestRailAttachment[] | PaginatedResponse<TestRailAttachment>> {
-		return this.client.get<
-			TestRailAttachment[] | PaginatedResponse<TestRailAttachment>
-		>(`/api/v2/get_attachments_for_case/${caseId}`, params);
-	}
-
-	async getAttachmentsForPlan(
-		planId: number,
-		params?: { limit?: number; offset?: number },
-	): Promise<TestRailAttachment[] | PaginatedResponse<TestRailAttachment>> {
-		return this.client.get<
-			TestRailAttachment[] | PaginatedResponse<TestRailAttachment>
-		>(`/api/v2/get_attachments_for_plan/${planId}`, params);
-	}
-
-	async getAttachmentsForPlanEntry(
-		planId: number,
-		entryId: number,
-		params?: { limit?: number; offset?: number },
-	): Promise<TestRailAttachment[] | PaginatedResponse<TestRailAttachment>> {
-		return this.client.get<
-			TestRailAttachment[] | PaginatedResponse<TestRailAttachment>
-		>(`/api/v2/get_attachments_for_plan_entry/${planId}/${entryId}`, params);
-	}
-
-	async getAttachmentsForRun(
-		runId: number,
-		params?: { limit?: number; offset?: number },
-	): Promise<TestRailAttachment[] | PaginatedResponse<TestRailAttachment>> {
-		return this.client.get<
-			TestRailAttachment[] | PaginatedResponse<TestRailAttachment>
-		>(`/api/v2/get_attachments_for_run/${runId}`, params);
-	}
-
-	async getAttachmentsForTest(testId: number): Promise<TestRailAttachment[]> {
-		return this.client.get<TestRailAttachment[]>(
-			`/api/v2/get_attachments_for_test/${testId}`,
-		);
-	}
-
-	async getAttachment(attachmentId: number): Promise<Blob> {
-		return this.client.get<Blob>(`/api/v2/get_attachment/${attachmentId}`);
+		try {
+			const response = await this.client.get<
+				TestRailAttachment[] | PaginatedResponse<TestRailAttachment>
+			>(`/api/v2/get_attachments_for_case/${caseId}`, { params });
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get attachments for case ${caseId}`, error);
+			throw error;
+		}
 	}
 
 	async deleteAttachment(attachmentId: number): Promise<void> {
-		return this.client.post<void>(`/api/v2/delete_attachment/${attachmentId}`);
+		try {
+			await this.client.post<void>(`/api/v2/delete_attachment/${attachmentId}`);
+		} catch (error) {
+			handleApiError(`Failed to delete attachment ${attachmentId}`, error);
+			throw error;
+		}
 	}
 
 	// Test Cases API
 
 	async getCase(caseId: number): Promise<TestRailCase> {
-		return this.client.get<TestRailCase>(`/api/v2/get_case/${caseId}`);
+		try {
+			const response = await this.client.get<TestRailCase>(`/api/v2/get_case/${caseId}`);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get case ${caseId}`, error);
+			throw error;
+		}
 	}
 
 	async getCases(
 		projectId: number,
-		params?: RequestParams,
+		params?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailCase[]> {
-		return this.client.get<TestRailCase[]>(
-			`/api/v2/get_cases/${projectId}`,
-			params,
-		);
+		try {
+			const response = await this.client.get<TestRailCase[]>(
+				`/api/v2/get_cases/${projectId}`,
+				{ params }
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get cases for project ${projectId}`, error);
+			throw error;
+		}
 	}
 
-	async addCase(sectionId: number, data: RequestData): Promise<TestRailCase> {
-		return this.client.post<TestRailCase>(
-			`/api/v2/add_case/${sectionId}`,
-			data,
-		);
-	}
-
-	async updateCase(caseId: number, data: RequestData): Promise<TestRailCase> {
-		return this.client.post<TestRailCase>(
-			`/api/v2/update_case/${caseId}`,
-			data,
-		);
-	}
-
-	async deleteCase(caseId: number): Promise<void> {
-		return this.client.post<void>(`/api/v2/delete_case/${caseId}`);
-	}
-
-	// Case Fields API
-
-	async getCaseFields(): Promise<TestRailCaseField[]> {
-		return this.client.get<TestRailCaseField[]>("/api/v2/get_case_fields");
-	}
-
-	async addCaseField(data: RequestData): Promise<TestRailCaseField> {
-		return this.client.post<TestRailCaseField>("/api/v2/add_case_field", data);
-	}
-
-	// Milestones API
-
-	async getMilestone(milestoneId: number): Promise<TestRailMilestone> {
-		return this.client.get<TestRailMilestone>(
-			`/api/v2/get_milestone/${milestoneId}`,
-		);
-	}
-
-	async getMilestones(
-		projectId: number,
-		params?: RequestParams,
-	): Promise<TestRailMilestone[]> {
-		return this.client.get<TestRailMilestone[]>(
-			`/api/v2/get_milestones/${projectId}`,
-			params,
-		);
-	}
-
-	async addMilestone(
-		projectId: number,
-		data: RequestData,
-	): Promise<TestRailMilestone> {
-		return this.client.post<TestRailMilestone>(
-			`/api/v2/add_milestone/${projectId}`,
-			data,
-		);
-	}
-
-	async updateMilestone(
-		milestoneId: number,
-		data: RequestData,
-	): Promise<TestRailMilestone> {
-		return this.client.post<TestRailMilestone>(
-			`/api/v2/update_milestone/${milestoneId}`,
-			data,
-		);
-	}
-
-	async deleteMilestone(milestoneId: number): Promise<void> {
-		return this.client.post<void>(`/api/v2/delete_milestone/${milestoneId}`);
+	async addCase(sectionId: number, data: Record<string, unknown>): Promise<TestRailCase> {
+		try {
+			const response = await this.client.post<TestRailCase>(
+				`/api/v2/add_case/${sectionId}`,
+				data
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add case to section ${sectionId}`, error);
+			throw error;
+		}
 	}
 
 	// Projects API
 
 	async getProject(projectId: number): Promise<TestRailProject> {
-		return this.client.get<TestRailProject>(`/api/v2/get_project/${projectId}`);
+		try {
+			const response = await this.client.get<TestRailProject>(`/api/v2/get_project/${projectId}`);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get project ${projectId}`, error);
+			throw error;
+		}
 	}
 
-	async getProjects(params?: RequestParams): Promise<TestRailProject[]> {
-		return this.client.get<TestRailProject[]>("/api/v2/get_projects", params);
-	}
-
-	async addProject(data: RequestData): Promise<TestRailProject> {
-		return this.client.post<TestRailProject>("/api/v2/add_project", data);
-	}
-
-	async updateProject(
-		projectId: number,
-		data: RequestData,
-	): Promise<TestRailProject> {
-		return this.client.post<TestRailProject>(
-			`/api/v2/update_project/${projectId}`,
-			data,
-		);
-	}
-
-	async deleteProject(projectId: number): Promise<void> {
-		return this.client.post<void>(`/api/v2/delete_project/${projectId}`);
+	async getProjects(params?: Record<string, string | number | boolean | null | undefined>): Promise<TestRailProject[]> {
+		try {
+			const response = await this.client.get<TestRailProject[]>(
+				"/api/v2/get_projects",
+				{ params }
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError("Failed to get projects", error);
+			throw error;
+		}
 	}
 
 	// Results API
 
-	async getResults(
-		testId: number,
-		params?: RequestParams,
-	): Promise<TestRailResult[]> {
-		return this.client.get<TestRailResult[]>(
-			`/api/v2/get_results/${testId}`,
-			params,
-		);
-	}
-
-	async getResultsForCase(
-		runId: number,
-		caseId: number,
-		params?: RequestParams,
-	): Promise<TestRailResult[]> {
-		return this.client.get<TestRailResult[]>(
-			`/api/v2/get_results_for_case/${runId}/${caseId}`,
-			params,
-		);
-	}
-
-	async getResultsForRun(
-		runId: number,
-		params?: RequestParams,
-	): Promise<TestRailResult[] | PaginatedResponse<TestRailResult>> {
-		return this.client.get<
-			TestRailResult[] | PaginatedResponse<TestRailResult>
-		>(`/api/v2/get_results_for_run/${runId}`, params);
-	}
-
-	async addResult(testId: number, data: RequestData): Promise<TestRailResult> {
-		return this.client.post<TestRailResult>(
-			`/api/v2/add_result/${testId}`,
-			data,
-		);
+	async addResult(testId: number, data: Record<string, unknown>): Promise<TestRailResult> {
+		try {
+			const response = await this.client.post<TestRailResult>(
+				`/api/v2/add_result/${testId}`,
+				data
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add result for test ${testId}`, error);
+			throw error;
+		}
 	}
 
 	async addResultForCase(
 		runId: number,
 		caseId: number,
-		data: RequestData,
+		data: Record<string, unknown>,
 	): Promise<TestRailResult> {
-		return this.client.post<TestRailResult>(
-			`/api/v2/add_result_for_case/${runId}/${caseId}`,
-			data,
-		);
-	}
-
-	async addResults(
-		runId: number,
-		data: RequestData,
-	): Promise<{ results: TestRailResult[] }> {
-		return this.client.post<{ results: TestRailResult[] }>(
-			`/api/v2/add_results/${runId}`,
-			data,
-		);
-	}
-
-	async addResultsForCases(
-		runId: number,
-		data: RequestData,
-	): Promise<{ results: TestRailResult[] }> {
-		return this.client.post<{ results: TestRailResult[] }>(
-			`/api/v2/add_results_for_cases/${runId}`,
-			data,
-		);
-	}
-
-	// Result Fields API
-
-	async getResultFields(): Promise<TestRailResultField[]> {
-		return this.client.get<TestRailResultField[]>("/api/v2/get_result_fields");
+		try {
+			const response = await this.client.post<TestRailResult>(
+				`/api/v2/add_result_for_case/${runId}/${caseId}`,
+				data
+			);
+			return response.data;
+		} catch (error) {
+			// 400エラーの場合は、ログを出力してスキップ（ユーザーのTestID指定ミスの可能性）
+			if (axios.isAxiosError(error) && error.response?.status === 400) {
+				console.error(
+					`Skipping result for case ${caseId} in run ${runId} due to 400 Bad Request`
+				);
+				if (error.response?.data) {
+					console.error(
+						"Response:",
+						JSON.stringify(error.response.data, null, 2)
+					);
+				}
+			}
+			handleApiError(`Failed to add result for case ${caseId} in run ${runId}`, error);
+			throw error;
+		}
 	}
 
 	// Runs API
 
 	async getRun(runId: number): Promise<TestRailRun> {
-		return this.client.get<TestRailRun>(`/api/v2/get_run/${runId}`);
+		try {
+			const response = await this.client.get<TestRailRun>(`/api/v2/get_run/${runId}`);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get run ${runId}`, error);
+			throw error;
+		}
 	}
 
-	async getRuns(
-		projectId: number,
-		params?: RequestParams,
-	): Promise<TestRailRun[] | PaginatedResponse<TestRailRun>> {
-		return this.client.get<TestRailRun[] | PaginatedResponse<TestRailRun>>(
-			`/api/v2/get_runs/${projectId}`,
-			params,
-		);
-	}
-
-	async addRun(projectId: number, data: RequestData): Promise<TestRailRun> {
-		return this.client.post<TestRailRun>(`/api/v2/add_run/${projectId}`, data);
-	}
-
-	async updateRun(runId: number, data: RequestData): Promise<TestRailRun> {
-		return this.client.post<TestRailRun>(`/api/v2/update_run/${runId}`, data);
-	}
-
-	async closeRun(runId: number): Promise<TestRailRun> {
-		return this.client.post<TestRailRun>(`/api/v2/close_run/${runId}`);
-	}
-
-	async deleteRun(runId: number): Promise<void> {
-		return this.client.post<void>(`/api/v2/delete_run/${runId}`);
-	}
-
-	// Shared Steps API
-
-	async getSharedStep(stepId: number): Promise<TestRailSharedStep> {
-		return this.client.get<TestRailSharedStep>(
-			`/api/v2/get_shared_step/${stepId}`,
-		);
-	}
-
-	async getSharedSteps(
-		projectId: number,
-		params?: RequestParams,
-	): Promise<TestRailSharedStep[]> {
-		return this.client.get<TestRailSharedStep[]>(
-			`/api/v2/get_shared_steps/${projectId}`,
-			params,
-		);
-	}
-
-	// Statuses API
-
-	async getStatuses(): Promise<TestRailStatus[]> {
-		return this.client.get<TestRailStatus[]>("/api/v2/get_statuses");
-	}
-
-	// Suites API
-
-	async getSuite(suiteId: number): Promise<TestRailSuite> {
-		return this.client.get<TestRailSuite>(`/api/v2/get_suite/${suiteId}`);
-	}
-
-	async getSuites(projectId: number): Promise<TestRailSuite[]> {
-		return this.client.get<TestRailSuite[]>(`/api/v2/get_suites/${projectId}`);
-	}
-
-	async addSuite(projectId: number, data: RequestData): Promise<TestRailSuite> {
-		return this.client.post<TestRailSuite>(
-			`/api/v2/add_suite/${projectId}`,
-			data,
-		);
-	}
-
-	async updateSuite(
-		suiteId: number,
-		data: RequestData,
-	): Promise<TestRailSuite> {
-		return this.client.post<TestRailSuite>(
-			`/api/v2/update_suite/${suiteId}`,
-			data,
-		);
-	}
-
-	async deleteSuite(suiteId: number): Promise<void> {
-		return this.client.post<void>(`/api/v2/delete_suite/${suiteId}`);
+	async addRun(projectId: number, data: AddRunPayload): Promise<TestRailRun> {
+		try {
+			const response = await this.client.post<TestRailRun>(`/api/v2/add_run/${projectId}`, data);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add run to project ${projectId}`, error);
+			throw error;
+		}
 	}
 
 	// Users API
 
-	async getUser(userId: number): Promise<TestRailUser> {
-		return this.client.get<TestRailUser>(`/api/v2/get_user/${userId}`);
-	}
-
 	async getUserByEmail(email: string): Promise<TestRailUser> {
-		return this.client.get<TestRailUser>(
-			`/api/v2/get_user_by_email&email=${encodeURIComponent(email)}`,
-		);
-	}
-
-	async getUsers(): Promise<TestRailUser[]> {
-		return this.client.get<TestRailUser[]>("/api/v2/get_users");
-	}
-
-	// Tests API
-
-	async getTest(testId: number): Promise<TestRailTest> {
-		return this.client.get<TestRailTest>(`/api/v2/get_test/${testId}`);
-	}
-
-	async getTests(
-		runId: number,
-		params?: RequestParams,
-	): Promise<TestRailTest[] | PaginatedResponse<TestRailTest>> {
-		return this.client.get<TestRailTest[] | PaginatedResponse<TestRailTest>>(
-			`/api/v2/get_tests/${runId}`,
-			params,
-		);
+		try {
+			const response = await this.client.get<TestRailUser>(
+				`/api/v2/get_user_by_email?email=${encodeURIComponent(email)}`
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get user by email ${email}`, error);
+			throw error;
+		}
 	}
 }

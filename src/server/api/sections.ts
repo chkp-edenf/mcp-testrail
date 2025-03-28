@@ -1,67 +1,87 @@
 import { z } from "zod";
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 
 /**
  * セクション関連のAPIツールを登録する関数
- * @param server FastMCPサーバーインスタンス
+ * @param server McpServerインスタンス
  * @param testRailClient TestRailクライアントインスタンス
  */
 export function registerSectionTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// セクション取得
-	server.addTool({
-		name: "getSection",
-		description: "Get details of a specific section from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getSection",
+		{
 			sectionId: z.number().describe("TestRail Section ID"),
-		}),
-		execute: async ({ sectionId }) => {
+		},
+		async ({ sectionId }) => {
 			try {
 				const section = await testRailClient.getSection(sectionId);
-				return createSuccessResponse("Section retrieved successfully", {
-					section,
-				});
+				const successResponse = createSuccessResponse(
+					"Section retrieved successfully",
+					{
+						section,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(`Error getting section ${sectionId}`, error);
+				const errorResponse = createErrorResponse(
+					`Error getting section ${sectionId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// プロジェクトのセクション一覧取得
-	server.addTool({
-		name: "getSections",
-		description: "Get all sections for a project from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getSections",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
 			suiteId: z
 				.number()
 				.optional()
 				.describe("TestRail Suite ID (optional for single suite projects)"),
-		}),
-		execute: async ({ projectId, suiteId }) => {
+		},
+		async ({ projectId, suiteId }) => {
 			try {
 				const sections = await testRailClient.getSections(projectId, suiteId);
-				return createSuccessResponse("Sections retrieved successfully", {
-					sections,
-				});
+				const successResponse = createSuccessResponse(
+					"Sections retrieved successfully",
+					{
+						sections,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error getting sections for project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// セクション作成
-	server.addTool({
-		name: "addSection",
-		description: "Add a new section to TestRail",
-		parameters: z.object({
+	server.tool(
+		"addSection",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
 			name: z.string().describe("Section name (required)"),
 			description: z.string().optional().describe("Section description"),
@@ -70,8 +90,8 @@ export function registerSectionTools(
 				.optional()
 				.describe("Test Suite ID (required for multi-suite projects)"),
 			parentId: z.number().optional().describe("Parent section ID"),
-		}),
-		execute: async ({ projectId, name, description, suiteId, parentId }) => {
+		},
+		async ({ projectId, name, description, suiteId, parentId }) => {
 			try {
 				const sectionData = {
 					name: name,
@@ -81,21 +101,30 @@ export function registerSectionTools(
 				};
 
 				const section = await testRailClient.addSection(projectId, sectionData);
-				return createSuccessResponse("Section added successfully", { section });
+				const successResponse = createSuccessResponse(
+					"Section added successfully",
+					{ section },
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error adding section to project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// セクション移動
-	server.addTool({
-		name: "moveSection",
-		description: "Move a section to a different parent or position in TestRail",
-		parameters: z.object({
+	server.tool(
+		"moveSection",
+		{
 			sectionId: z.number().describe("TestRail Section ID"),
 			parentId: z
 				.number()
@@ -107,72 +136,103 @@ export function registerSectionTools(
 				.nullable()
 				.optional()
 				.describe("ID of the section to position after"),
-		}),
-		execute: async ({ sectionId, parentId, afterId }) => {
+		},
+		async ({ sectionId, parentId, afterId }) => {
 			try {
 				const data: Record<string, unknown> = {};
 				if (parentId !== undefined) data.parent_id = parentId;
 				if (afterId !== undefined) data.after_id = afterId;
 
 				const section = await testRailClient.moveSection(sectionId, data);
-				return createSuccessResponse("Section moved successfully", { section });
+				const successResponse = createSuccessResponse(
+					"Section moved successfully",
+					{ section },
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(`Error moving section ${sectionId}`, error);
+				const errorResponse = createErrorResponse(
+					`Error moving section ${sectionId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// セクション更新
-	server.addTool({
-		name: "updateSection",
-		description: "Update an existing section in TestRail",
-		parameters: z.object({
+	server.tool(
+		"updateSection",
+		{
 			sectionId: z.number().describe("TestRail Section ID"),
 			name: z.string().optional().describe("Section name"),
 			description: z.string().optional().describe("Section description"),
-		}),
-		execute: async ({ sectionId, name, description }) => {
+		},
+		async ({ sectionId, name, description }) => {
 			try {
 				const data: Record<string, unknown> = {};
 				if (name) data.name = name;
 				if (description !== undefined) data.description = description;
 
 				const section = await testRailClient.updateSection(sectionId, data);
-				return createSuccessResponse("Section updated successfully", {
-					section,
-				});
+				const successResponse = createSuccessResponse(
+					"Section updated successfully",
+					{
+						section,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error updating section ${sectionId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// セクション削除
-	server.addTool({
-		name: "deleteSection",
-		description: "Delete an existing section in TestRail",
-		parameters: z.object({
+	server.tool(
+		"deleteSection",
+		{
 			sectionId: z.number().describe("TestRail Section ID"),
 			soft: z
 				.boolean()
 				.optional()
 				.describe("True for soft delete (preview only)"),
-		}),
-		execute: async ({ sectionId, soft }) => {
+		},
+		async ({ sectionId, soft }) => {
 			try {
 				await testRailClient.deleteSection(sectionId, soft);
-				return createSuccessResponse("Section deleted successfully", {
-					sectionId,
-				});
+				const successResponse = createSuccessResponse(
+					"Section deleted successfully",
+					{
+						sectionId,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error deleting section ${sectionId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 }

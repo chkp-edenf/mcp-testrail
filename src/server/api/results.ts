@@ -1,22 +1,21 @@
 import { z } from "zod";
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 
 /**
  * Function to register test result-related API tools
- * @param server FastMCP server instance
+ * @param server McpServer instance
  * @param testRailClient TestRail client instance
  */
 export function registerResultTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// Add a test result
-	server.addTool({
-		name: "addTestResult",
-		description: "Add a test result",
-		parameters: z.object({
+	server.tool(
+		"addTestResult",
+		{
 			testId: z.number().describe("TestRail Test ID"),
 			statusId: z
 				.number()
@@ -37,8 +36,8 @@ export function registerResultTools(
 				.string()
 				.optional()
 				.describe("Time spent testing (e.g., '30s', '2m 30s')"),
-		}),
-		execute: async ({
+		},
+		async ({
 			testId,
 			statusId,
 			comment,
@@ -59,23 +58,32 @@ export function registerResultTools(
 				if (elapsed) data.elapsed = elapsed;
 
 				const result = await testRailClient.addResult(testId, data);
-				return createSuccessResponse("Test result added successfully", {
-					result,
-				});
+				const successResponse = createSuccessResponse(
+					"Test result added successfully",
+					{
+						result,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error adding result for test ${testId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Add a result for a specific test case
-	server.addTool({
-		name: "addResultForCase",
-		description: "Add a test result for a specific test case in a test run",
-		parameters: z.object({
+	server.tool(
+		"addResultForCase",
+		{
 			runId: z.number().describe("TestRail Run ID"),
 			caseId: z.number().describe("TestRail Case ID"),
 			statusId: z
@@ -97,8 +105,8 @@ export function registerResultTools(
 				.string()
 				.optional()
 				.describe("Time spent testing (e.g., '30s', '2m 30s')"),
-		}),
-		execute: async ({
+		},
+		async ({
 			runId,
 			caseId,
 			statusId,
@@ -124,15 +132,25 @@ export function registerResultTools(
 					caseId,
 					data,
 				);
-				return createSuccessResponse("Test result added successfully", {
-					result,
-				});
+				const successResponse = createSuccessResponse(
+					"Test result added successfully",
+					{
+						result,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error adding result for case ${caseId} in run ${runId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 }

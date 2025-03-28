@@ -1,72 +1,98 @@
 import { z } from "zod";
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 
 /**
  * Function to register user-related API tools
- * @param server FastMCP server instance
+ * @param server McpServer instance
  * @param testRailClient TestRail client instance
  */
 export function registerUserTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// Get all users
-	server.addTool({
-		name: "getUsers",
-		description: "Get a list of users from TestRail",
-		parameters: z.object({}),
-		execute: async () => {
-			try {
-				const users = await testRailClient.getUsers();
-				return createSuccessResponse("Users retrieved successfully", {
+	server.tool("getUsers", {}, async () => {
+		try {
+			const users = await testRailClient.getUsers();
+			const successResponse = createSuccessResponse(
+				"Users retrieved successfully",
+				{
 					users,
-				});
-			} catch (error) {
-				return createErrorResponse("Error fetching users", error);
-			}
-		},
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse("Error fetching users", error);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
 	});
 
 	// Get user by ID
-	server.addTool({
-		name: "getUser",
-		description: "Get a specific user by ID from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getUser",
+		{
 			userId: z.number().describe("TestRail User ID"),
-		}),
-		execute: async ({ userId }) => {
+		},
+		async ({ userId }) => {
 			try {
 				const user = await testRailClient.getUser(userId);
-				return createSuccessResponse("User retrieved successfully", {
-					user,
-				});
+				const successResponse = createSuccessResponse(
+					"User retrieved successfully",
+					{
+						user,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(`Error fetching user ${userId}`, error);
+				const errorResponse = createErrorResponse(
+					`Error fetching user ${userId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Get user by email
-	server.addTool({
-		name: "getUserByEmail",
-		description: "Get a specific user by email from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getUserByEmail",
+		{
 			email: z.string().email().describe("Email address of the user"),
-		}),
-		execute: async ({ email }) => {
+		},
+		async ({ email }) => {
 			try {
 				const user = await testRailClient.getUserByEmail(email);
-				return createSuccessResponse("User retrieved successfully", {
-					user,
-				});
+				const successResponse = createSuccessResponse(
+					"User retrieved successfully",
+					{
+						user,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error fetching user with email ${email}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 }

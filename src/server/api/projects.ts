@@ -1,61 +1,77 @@
 import { z } from "zod";
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 
 /**
  * プロジェクト関連のAPIツールを登録する関数
- * @param server FastMCPサーバーインスタンス
+ * @param server McpServerインスタンス
  * @param testRailClient TestRailクライアントインスタンス
  */
 export function registerProjectTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// プロジェクト一覧取得
-	server.addTool({
-		name: "getProjects",
-		description: "Get a list of projects from TestRail",
-		parameters: z.object({}),
-		execute: async () => {
-			try {
-				const projects = await testRailClient.getProjects();
-				return createSuccessResponse("Projects retrieved successfully", {
+	server.tool("getProjects", {}, async () => {
+		try {
+			const projects = await testRailClient.getProjects();
+			const successResponse = createSuccessResponse(
+				"Projects retrieved successfully",
+				{
 					data: projects,
-				});
-			} catch (error) {
-				return createErrorResponse("Error fetching projects", error);
-			}
-		},
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				"Error fetching projects",
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
 	});
 
 	// 特定のプロジェクトの詳細取得
-	server.addTool({
-		name: "getProject",
-		description: "Get details of a specific project from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getProject",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
-		}),
-		execute: async ({ projectId }) => {
+		},
+		async ({ projectId }) => {
 			try {
 				const project = await testRailClient.getProject(projectId);
-				return createSuccessResponse("Project retrieved successfully", {
-					project,
-				});
+				const successResponse = createSuccessResponse(
+					"Project retrieved successfully",
+					{
+						project,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error fetching project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// 新規プロジェクト作成
-	server.addTool({
-		name: "addProject",
-		description: "Create a new project in TestRail",
-		parameters: z.object({
+	server.tool(
+		"addProject",
+		{
 			name: z.string().describe("Project name (required)"),
 			announcement: z
 				.string()
@@ -71,8 +87,8 @@ export function registerProjectTools(
 				.describe(
 					"Suite mode (1: single suite, 2: single + baselines, 3: multiple suites)",
 				),
-		}),
-		execute: async ({ name, announcement, show_announcement, suite_mode }) => {
+		},
+		async ({ name, announcement, show_announcement, suite_mode }) => {
 			try {
 				const project = await testRailClient.addProject({
 					name,
@@ -80,20 +96,32 @@ export function registerProjectTools(
 					show_announcement,
 					suite_mode,
 				});
-				return createSuccessResponse("Project created successfully", {
-					project,
-				});
+				const successResponse = createSuccessResponse(
+					"Project created successfully",
+					{
+						project,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse("Error creating project", error);
+				const errorResponse = createErrorResponse(
+					"Error creating project",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// プロジェクト更新
-	server.addTool({
-		name: "updateProject",
-		description: "Update an existing project in TestRail",
-		parameters: z.object({
+	server.tool(
+		"updateProject",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
 			name: z.string().optional().describe("Project name"),
 			announcement: z
@@ -108,8 +136,8 @@ export function registerProjectTools(
 				.boolean()
 				.optional()
 				.describe("Mark project as completed"),
-		}),
-		execute: async ({
+		},
+		async ({
 			projectId,
 			name,
 			announcement,
@@ -123,37 +151,53 @@ export function registerProjectTools(
 					show_announcement,
 					is_completed,
 				});
-				return createSuccessResponse("Project updated successfully", {
-					project,
-				});
+				const successResponse = createSuccessResponse(
+					"Project updated successfully",
+					{
+						project,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error updating project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// プロジェクト削除
-	server.addTool({
-		name: "deleteProject",
-		description: "Delete an existing project in TestRail (cannot be undone)",
-		parameters: z.object({
+	server.tool(
+		"deleteProject",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
-		}),
-		execute: async ({ projectId }) => {
+		},
+		async ({ projectId }) => {
 			try {
 				await testRailClient.deleteProject(projectId);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Project ${projectId} deleted successfully`,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error deleting project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 }

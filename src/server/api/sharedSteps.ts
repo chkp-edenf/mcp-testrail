@@ -1,44 +1,52 @@
 import { z } from "zod";
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 
 /**
  * 共有ステップ関連のAPIツールを登録する関数
- * @param server FastMCPサーバーインスタンス
+ * @param server McpServerインスタンス
  * @param testRailClient TestRailクライアントインスタンス
  */
 export function registerSharedStepTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// 共有ステップ取得
-	server.addTool({
-		name: "getSharedStep",
-		description: "Get a specific shared step from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getSharedStep",
+		{
 			sharedStepId: z.number().describe("TestRail Shared Step ID"),
-		}),
-		execute: async ({ sharedStepId }) => {
+		},
+		async ({ sharedStepId }) => {
 			try {
 				const sharedStep = await testRailClient.getSharedStep(sharedStepId);
-				return createSuccessResponse("Shared step retrieved successfully", {
-					sharedStep,
-				});
+				const successResponse = createSuccessResponse(
+					"Shared step retrieved successfully",
+					{
+						sharedStep,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error fetching shared step ${sharedStepId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// プロジェクトの共有ステップ一覧取得
-	server.addTool({
-		name: "getSharedSteps",
-		description: "Get all shared steps for a project from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getSharedSteps",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
 			createdAfter: z
 				.number()
@@ -72,30 +80,39 @@ export function registerSharedStepTools(
 				.number()
 				.optional()
 				.describe("The offset to start returning shared steps"),
-		}),
-		execute: async ({ projectId, ...filters }) => {
+		},
+		async ({ projectId, ...filters }) => {
 			try {
 				const sharedSteps = await testRailClient.getSharedSteps(
 					projectId,
 					filters,
 				);
-				return createSuccessResponse("Shared steps retrieved successfully", {
-					sharedSteps,
-				});
+				const successResponse = createSuccessResponse(
+					"Shared steps retrieved successfully",
+					{
+						sharedSteps,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error fetching shared steps for project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// 共有ステップ作成
-	server.addTool({
-		name: "addSharedStep",
-		description: "Add a new shared step to a project in TestRail",
-		parameters: z.object({
+	server.tool(
+		"addSharedStep",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
 			title: z.string().describe("Shared step title"),
 			steps: z
@@ -111,8 +128,8 @@ export function registerSharedStepTools(
 					}),
 				)
 				.describe("Shared step items"),
-		}),
-		execute: async ({ projectId, title, steps }) => {
+		},
+		async ({ projectId, title, steps }) => {
 			try {
 				const custom_steps_separated = steps.map((step) => ({
 					content: step.content,
@@ -126,23 +143,32 @@ export function registerSharedStepTools(
 					custom_steps_separated,
 				});
 
-				return createSuccessResponse("Shared step added successfully", {
-					sharedStep,
-				});
+				const successResponse = createSuccessResponse(
+					"Shared step added successfully",
+					{
+						sharedStep,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error adding shared step to project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// 共有ステップ更新
-	server.addTool({
-		name: "updateSharedStep",
-		description: "Update an existing shared step in TestRail",
-		parameters: z.object({
+	server.tool(
+		"updateSharedStep",
+		{
 			sharedStepId: z.number().describe("TestRail Shared Step ID"),
 			title: z.string().optional().describe("Shared step title"),
 			steps: z
@@ -159,8 +185,8 @@ export function registerSharedStepTools(
 				)
 				.optional()
 				.describe("Shared step items"),
-		}),
-		execute: async ({ sharedStepId, title, steps }) => {
+		},
+		async ({ sharedStepId, title, steps }) => {
 			try {
 				const data: Record<string, unknown> = {};
 
@@ -183,41 +209,60 @@ export function registerSharedStepTools(
 					data,
 				);
 
-				return createSuccessResponse("Shared step updated successfully", {
-					sharedStep,
-				});
+				const successResponse = createSuccessResponse(
+					"Shared step updated successfully",
+					{
+						sharedStep,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error updating shared step ${sharedStepId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// 共有ステップ削除
-	server.addTool({
-		name: "deleteSharedStep",
-		description: "Delete a shared step from TestRail",
-		parameters: z.object({
+	server.tool(
+		"deleteSharedStep",
+		{
 			sharedStepId: z.number().describe("TestRail Shared Step ID"),
 			keepInCases: z
 				.boolean()
 				.optional()
 				.describe("Whether to keep the steps in cases that use them"),
-		}),
-		execute: async ({ sharedStepId, keepInCases = true }) => {
+		},
+		async ({ sharedStepId, keepInCases = true }) => {
 			try {
 				await testRailClient.deleteSharedStep(sharedStepId, keepInCases);
-				return createSuccessResponse("Shared step deleted successfully", {
-					sharedStepId,
-				});
+				const successResponse = createSuccessResponse(
+					"Shared step deleted successfully",
+					{
+						sharedStepId,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error deleting shared step ${sharedStepId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 }

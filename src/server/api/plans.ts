@@ -1,63 +1,83 @@
 import { z } from "zod";
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 
 /**
  * Function to register test plan-related API tools
- * @param server FastMCP server instance
+ * @param server McpServer instance
  * @param testRailClient TestRail client instance
  */
 export function registerPlanTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// Get all test plans for a project
-	server.addTool({
-		name: "getPlans",
-		description: "Get all test plans for a project from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getPlans",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
-		}),
-		execute: async ({ projectId }) => {
+		},
+		async ({ projectId }) => {
 			try {
 				const plans = await testRailClient.getPlans(projectId);
-				return createSuccessResponse("Test plans retrieved successfully", {
-					plans,
-				});
+				const successResponse = createSuccessResponse(
+					"Test plans retrieved successfully",
+					{
+						plans,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error fetching test plans for project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Get a specific test plan
-	server.addTool({
-		name: "getPlan",
-		description: "Get a specific test plan from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getPlan",
+		{
 			planId: z.number().describe("TestRail Plan ID"),
-		}),
-		execute: async ({ planId }) => {
+		},
+		async ({ planId }) => {
 			try {
 				const plan = await testRailClient.getPlan(planId);
-				return createSuccessResponse("Test plan retrieved successfully", {
-					plan,
-				});
+				const successResponse = createSuccessResponse(
+					"Test plan retrieved successfully",
+					{
+						plan,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(`Error fetching test plan ${planId}`, error);
+				const errorResponse = createErrorResponse(
+					`Error fetching test plan ${planId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Create a new test plan
-	server.addTool({
-		name: "addPlan",
-		description: "Create a new test plan in TestRail",
-		parameters: z.object({
+	server.tool(
+		"addPlan",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
 			name: z.string().describe("Test plan name (required)"),
 			description: z.string().optional().describe("Test plan description"),
@@ -91,14 +111,8 @@ export function registerPlanTools(
 				)
 				.optional()
 				.describe("Test suite entries to include in the plan"),
-		}),
-		execute: async ({
-			projectId,
-			name,
-			description,
-			milestone_id,
-			entries,
-		}) => {
+		},
+		async ({ projectId, name, description, milestone_id, entries }) => {
 			try {
 				const planData: Record<string, unknown> = {
 					name,
@@ -109,23 +123,32 @@ export function registerPlanTools(
 				if (entries) planData.entries = entries;
 
 				const plan = await testRailClient.addPlan(projectId, planData);
-				return createSuccessResponse("Test plan created successfully", {
-					plan,
-				});
+				const successResponse = createSuccessResponse(
+					"Test plan created successfully",
+					{
+						plan,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error creating test plan for project ${projectId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Add an entry to a test plan
-	server.addTool({
-		name: "addPlanEntry",
-		description: "Add an entry to an existing test plan in TestRail",
-		parameters: z.object({
+	server.tool(
+		"addPlanEntry",
+		{
 			planId: z.number().describe("TestRail Plan ID"),
 			suite_id: z.number().describe("Test suite ID"),
 			name: z.string().optional().describe("Name of the test run"),
@@ -146,8 +169,8 @@ export function registerPlanTools(
 				.optional()
 				.describe("Configuration IDs to use"),
 			refs: z.string().optional().describe("Reference/requirement IDs"),
-		}),
-		execute: async ({
+		},
+		async ({
 			planId,
 			suite_id,
 			name,
@@ -170,23 +193,32 @@ export function registerPlanTools(
 				if (refs) entryData.refs = refs;
 
 				const entry = await testRailClient.addPlanEntry(planId, entryData);
-				return createSuccessResponse("Plan entry added successfully", {
-					entry,
-				});
+				const successResponse = createSuccessResponse(
+					"Plan entry added successfully",
+					{
+						entry,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error adding entry to test plan ${planId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Update an existing test plan
-	server.addTool({
-		name: "updatePlan",
-		description: "Update an existing test plan in TestRail",
-		parameters: z.object({
+	server.tool(
+		"updatePlan",
+		{
 			planId: z.number().describe("TestRail Plan ID"),
 			name: z.string().optional().describe("Test plan name"),
 			description: z.string().optional().describe("Test plan description"),
@@ -194,8 +226,8 @@ export function registerPlanTools(
 				.number()
 				.optional()
 				.describe("Milestone ID to associate with"),
-		}),
-		execute: async ({ planId, name, description, milestone_id }) => {
+		},
+		async ({ planId, name, description, milestone_id }) => {
 			try {
 				const planData: Record<string, unknown> = {};
 
@@ -204,20 +236,32 @@ export function registerPlanTools(
 				if (milestone_id !== undefined) planData.milestone_id = milestone_id;
 
 				const plan = await testRailClient.updatePlan(planId, planData);
-				return createSuccessResponse("Test plan updated successfully", {
-					plan,
-				});
+				const successResponse = createSuccessResponse(
+					"Test plan updated successfully",
+					{
+						plan,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(`Error updating test plan ${planId}`, error);
+				const errorResponse = createErrorResponse(
+					`Error updating test plan ${planId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Update an entry in a test plan
-	server.addTool({
-		name: "updatePlanEntry",
-		description: "Update an entry in an existing test plan in TestRail",
-		parameters: z.object({
+	server.tool(
+		"updatePlanEntry",
+		{
 			planId: z.number().describe("TestRail Plan ID"),
 			entryId: z.string().describe("TestRail Plan Entry ID"),
 			name: z.string().optional().describe("Name of the test run"),
@@ -233,15 +277,8 @@ export function registerPlanTools(
 				.array(z.number())
 				.optional()
 				.describe("Specific test case IDs to include"),
-		}),
-		execute: async ({
-			planId,
-			entryId,
-			name,
-			description,
-			include_all,
-			case_ids,
-		}) => {
+		},
+		async ({ planId, entryId, name, description, include_all, case_ids }) => {
 			try {
 				const entryData: Record<string, unknown> = {};
 
@@ -255,74 +292,110 @@ export function registerPlanTools(
 					entryId,
 					entryData,
 				);
-				return createSuccessResponse("Plan entry updated successfully", {
-					entry,
-				});
+				const successResponse = createSuccessResponse(
+					"Plan entry updated successfully",
+					{
+						entry,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error updating entry in test plan ${planId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Delete an entry from a test plan
-	server.addTool({
-		name: "deletePlanEntry",
-		description: "Delete an entry from a test plan in TestRail",
-		parameters: z.object({
+	server.tool(
+		"deletePlanEntry",
+		{
 			planId: z.number().describe("TestRail Plan ID"),
 			entryId: z.string().describe("TestRail Plan Entry ID"),
-		}),
-		execute: async ({ planId, entryId }) => {
+		},
+		async ({ planId, entryId }) => {
 			try {
 				await testRailClient.deletePlanEntry(planId, entryId);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Entry ${entryId} deleted from test plan ${planId} successfully`,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(
+				const errorResponse = createErrorResponse(
 					`Error deleting entry from test plan ${planId}`,
 					error,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Close a test plan
-	server.addTool({
-		name: "closePlan",
-		description: "Close a test plan in TestRail",
-		parameters: z.object({
+	server.tool(
+		"closePlan",
+		{
 			planId: z.number().describe("TestRail Plan ID"),
-		}),
-		execute: async ({ planId }) => {
+		},
+		async ({ planId }) => {
 			try {
 				await testRailClient.closePlan(planId);
-				return createSuccessResponse(`Test plan ${planId} closed successfully`);
+				const successResponse = createSuccessResponse(
+					`Test plan ${planId} closed successfully`,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(`Error closing test plan ${planId}`, error);
+				const errorResponse = createErrorResponse(
+					`Error closing test plan ${planId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// Delete a test plan
-	server.addTool({
-		name: "deletePlan",
-		description: "Delete a test plan from TestRail",
-		parameters: z.object({
+	server.tool(
+		"deletePlan",
+		{
 			planId: z.number().describe("TestRail Plan ID"),
-		}),
-		execute: async ({ planId }) => {
+		},
+		async ({ planId }) => {
 			try {
 				await testRailClient.deletePlan(planId);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Test plan ${planId} deleted successfully`,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse(`Error deleting test plan ${planId}`, error);
+				const errorResponse = createErrorResponse(
+					`Error deleting test plan ${planId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 }

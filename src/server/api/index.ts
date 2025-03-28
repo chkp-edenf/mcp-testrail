@@ -1,4 +1,4 @@
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { registerProjectTools } from "./projects.js";
 import { registerCaseTools } from "./cases.js";
@@ -13,22 +13,22 @@ import { registerUserTools } from "./users.js";
 
 /**
  * Function to register all API tools to the server
- * @param server FastMCP server instance
+ * @param server McpServer server instance
  * @param testRailClient TestRail client instance
  */
 export function registerAllTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// Register tools for each resource type
 	registerProjectTools(server, testRailClient);
 	registerCaseTools(server, testRailClient);
 	registerSectionTools(server, testRailClient);
+	registerSuiteTools(server, testRailClient);
+	registerRunTools(server, testRailClient);
 	registerSharedStepTools(server, testRailClient);
 	registerMilestoneTools(server, testRailClient);
-	registerSuiteTools(server, testRailClient);
 	registerPlanTools(server, testRailClient);
-	registerRunTools(server, testRailClient);
 	registerResultTools(server, testRailClient);
 	registerUserTools(server, testRailClient);
 

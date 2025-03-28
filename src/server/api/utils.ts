@@ -1,15 +1,15 @@
-// レスポンスの型定義
+// Response type definition
 export type FastMCPToolResponse = {
 	type: "text";
 	text: string;
 };
 
-// エラーメッセージをフォーマットする関数
+// Function to format error messages
 export function formatErrorMessage(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
 }
 
-// 成功レスポンスを作成する関数
+// Function to create success response
 export function createSuccessResponse(
 	message: string,
 	data?: Record<string, unknown>,
@@ -27,7 +27,7 @@ export function createSuccessResponse(
 	};
 }
 
-// エラーレスポンスを作成する関数
+// Function to create error response
 export function createErrorResponse(
 	baseMessage: string,
 	error: unknown,

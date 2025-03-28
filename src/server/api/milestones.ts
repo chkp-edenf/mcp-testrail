@@ -1,62 +1,79 @@
 import { z } from "zod";
-import { FastMCP } from "fastmcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 
 /**
  * マイルストーン関連のAPIツールを登録する関数
- * @param server FastMCPサーバーインスタンス
+ * @param server McpServerインスタンス
  * @param testRailClient TestRailクライアントインスタンス
  */
 export function registerMilestoneTools(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// プロジェクトのマイルストーン一覧取得
-	server.addTool({
-		name: "getMilestones",
-		description: "Get all milestones for a project from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getMilestones",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
-		}),
-		execute: async ({ projectId }) => {
+		},
+		async ({ projectId }) => {
 			try {
 				const milestones = await testRailClient.getMilestones(projectId);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Milestones for project ${projectId} retrieved successfully`,
 					{ milestones },
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse("Error fetching milestones", error);
+				const errorResponse = createErrorResponse(
+					"Error fetching milestones",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// マイルストーン取得
-	server.addTool({
-		name: "getMilestone",
-		description: "Get a specific milestone from TestRail",
-		parameters: z.object({
+	server.tool(
+		"getMilestone",
+		{
 			milestoneId: z.number().describe("TestRail Milestone ID"),
-		}),
-		execute: async ({ milestoneId }) => {
+		},
+		async ({ milestoneId }) => {
 			try {
 				const milestone = await testRailClient.getMilestone(milestoneId);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Milestone ${milestoneId} retrieved successfully`,
 					{ milestone },
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse("Error fetching milestone", error);
+				const errorResponse = createErrorResponse(
+					"Error fetching milestone",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// マイルストーン作成
-	server.addTool({
-		name: "addMilestone",
-		description: "Create a new milestone in TestRail",
-		parameters: z.object({
+	server.tool(
+		"addMilestone",
+		{
 			projectId: z.number().describe("TestRail Project ID"),
 			name: z.string().describe("Milestone name (required)"),
 			description: z.string().optional().describe("Milestone description"),
@@ -78,29 +95,38 @@ export function registerMilestoneTools(
 				.boolean()
 				.optional()
 				.describe("Started status of the milestone"),
-		}),
-		execute: async (params) => {
+		},
+		async (params) => {
 			try {
 				const { projectId, ...milestoneData } = params;
 				const milestone = await testRailClient.addMilestone(
 					projectId,
 					milestoneData,
 				);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Milestone '${milestoneData.name}' created successfully`,
 					{ milestone },
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse("Error creating milestone", error);
+				const errorResponse = createErrorResponse(
+					"Error creating milestone",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// マイルストーン更新
-	server.addTool({
-		name: "updateMilestone",
-		description: "Update an existing milestone in TestRail",
-		parameters: z.object({
+	server.tool(
+		"updateMilestone",
+		{
 			milestoneId: z.number().describe("TestRail Milestone ID"),
 			name: z.string().optional().describe("Milestone name"),
 			description: z.string().optional().describe("Milestone description"),
@@ -122,40 +148,59 @@ export function registerMilestoneTools(
 				.boolean()
 				.optional()
 				.describe("Started status of the milestone"),
-		}),
-		execute: async (params) => {
+		},
+		async (params) => {
 			try {
 				const { milestoneId, ...milestoneData } = params;
 				const milestone = await testRailClient.updateMilestone(
 					milestoneId,
 					milestoneData,
 				);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Milestone ${milestoneId} updated successfully`,
 					{ milestone },
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse("Error updating milestone", error);
+				const errorResponse = createErrorResponse(
+					"Error updating milestone",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 
 	// マイルストーン削除
-	server.addTool({
-		name: "deleteMilestone",
-		description: "Delete a milestone from TestRail",
-		parameters: z.object({
+	server.tool(
+		"deleteMilestone",
+		{
 			milestoneId: z.number().describe("TestRail Milestone ID"),
-		}),
-		execute: async ({ milestoneId }) => {
+		},
+		async ({ milestoneId }) => {
 			try {
 				await testRailClient.deleteMilestone(milestoneId);
-				return createSuccessResponse(
+				const successResponse = createSuccessResponse(
 					`Milestone ${milestoneId} deleted successfully`,
 				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
 			} catch (error) {
-				return createErrorResponse("Error deleting milestone", error);
+				const errorResponse = createErrorResponse(
+					"Error deleting milestone",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
 			}
 		},
-	});
+	);
 }

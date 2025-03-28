@@ -1,28 +1,23 @@
-import { FastMCP } from "fastmcp";
+import {
+	McpServer,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../client/testRailApi.js";
 
 /**
  * リソーステンプレートを登録する関数
- * @param server FastMCPサーバーインスタンス
+ * @param server McpServerインスタンス
  * @param testRailClient TestRailクライアントインスタンス
  */
 export function registerResourceTemplates(
-	server: FastMCP,
+	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
 	// テストケース詳細テンプレート
-	server.addResourceTemplate({
-		uriTemplate: "testcase://{caseId}",
-		name: "Test Case Details",
-		mimeType: "text/markdown",
-		arguments: [
-			{
-				name: "caseId",
-				description: "TestRail Case ID",
-				required: true,
-			},
-		],
-		async load({ caseId }) {
+	server.resource(
+		"testcase",
+		new ResourceTemplate("testcase://{caseId}", { list: undefined }),
+		async (uri, { caseId }) => {
 			try {
 				const numericCaseId = Number.parseInt(String(caseId), 10);
 				const testCase = await testRailClient.getCase(numericCaseId);
@@ -37,17 +32,27 @@ export function registerResourceTemplates(
 					`## Expected Result\n${testCase.custom_expected || "None"}`;
 
 				return {
-					text: content,
+					contents: [
+						{
+							uri: uri.href,
+							text: content,
+						},
+					],
 				};
 			} catch (error) {
 				const errorMessage =
 					error instanceof Error ? error.message : String(error);
 				return {
-					text: `Error fetching test case ${caseId}: ${errorMessage}`,
+					contents: [
+						{
+							uri: uri.href,
+							text: `Error fetching test case ${caseId}: ${errorMessage}`,
+						},
+					],
 				};
 			}
 		},
-	});
+	);
 
 	// 今後、他のリソーステンプレート（プロジェクト、セクション、マイルストーンなど）を
 	// 追加する場合は、ここに追加します

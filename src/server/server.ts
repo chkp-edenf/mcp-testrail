@@ -1,4 +1,6 @@
-import { FastMCP } from "fastmcp";
+import express from "express";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import "dotenv/config";
 import { TestRailClient, TestRailClientConfig } from "../client/testRailApi.js";
 import { registerAllTools } from "./api/index.js";
@@ -35,29 +37,57 @@ const testRailConfig: TestRailClientConfig = {
 // TestRailクライアントの初期化
 const testRailClient = new TestRailClient(testRailConfig);
 
-// FastMCPサーバーの作成
-const server = new FastMCP({
+// McpServerの作成
+const server = new McpServer({
 	name: "TestRail MCP Server",
 	version: "1.0.0",
 });
 
-// すべてのAPIツールを登録
-registerAllTools(server, testRailClient);
-
-// リソーステンプレートを登録
-registerResourceTemplates(server, testRailClient);
+// トランスポート管理用のマップ
+const transports: { [sessionId: string]: SSEServerTransport } = {};
 
 // サーバーの起動関数
 export const startServer = async () => {
-	console.error("Starting TestRail MCP Server...");
+	console.log("Starting TestRail MCP Server...");
 
-	server.start({
-		transportType: "sse",
-		sse: {
-			endpoint: "/sse",
-			port: 3000,
-		},
+	// Expressアプリの作成
+	const app = express();
+
+	// すべてのAPIツールを登録
+	registerAllTools(server, testRailClient);
+
+	// リソーステンプレートを登録
+	registerResourceTemplates(server, testRailClient);
+
+	// SSEエンドポイントの設定
+	app.get("/sse", async (_, res) => {
+		const transport = new SSEServerTransport("/messages", res);
+		transports[transport.sessionId] = transport;
+
+		res.on("close", () => {
+			delete transports[transport.sessionId];
+		});
+
+		await server.connect(transport);
 	});
 
-	console.error("Server started successfully.");
+	// メッセージ処理エンドポイントの設定
+	app.post("/messages", async (req, res) => {
+		const sessionId = req.query.sessionId as string;
+		const transport = transports[sessionId];
+
+		if (transport) {
+			await transport.handlePostMessage(req, res);
+		} else {
+			res
+				.status(400)
+				.send("セッションIDに対応するトランスポートが見つかりません");
+		}
+	});
+
+	// サーバーの起動
+	app.listen(3000, () => {
+		console.log("Server started successfully.");
+		console.log("server is running on SSE at http://localhost:3000/sse");
+	});
 };

@@ -1,7 +1,17 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 import FormData from "form-data";
-import * as fs from "node:fs";
-import * as path from "node:path";
+// Import fs and path conditionally to support browser environments
+let fs: typeof import("node:fs") | null = null;
+let path: typeof import("node:path") | null = null;
+
+// Only load Node.js modules in Node.js environment
+try {
+	// Use require for compatibility with both test environments and runtime
+	fs = require("node:fs");
+	path = require("node:path");
+} catch (e) {
+	console.error("Node.js file system modules not available", e);
+}
 
 /**
  * TestRail API Response for Project
@@ -258,6 +268,13 @@ export class TestRailClient {
 		filePath: string,
 	): Promise<{ attachment_id: number }> {
 		try {
+			// Check if running in Node.js environment with fs module available
+			if (!fs || !path) {
+				throw new Error(
+					"File system operations are not supported in this environment",
+				);
+			}
+
 			const formData = new FormData();
 			formData.append(
 				"attachment",

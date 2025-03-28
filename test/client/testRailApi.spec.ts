@@ -144,6 +144,524 @@ describe('TestRailClient', () => {
       // Verify axios get was called correctly
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case/999');
     });
+
+    // Additional tests for Test Cases API
+    it('updates an existing test case', async () => {
+      // Mock response
+      const mockCase = { 
+        id: 1, 
+        title: 'Updated Test Case', 
+        section_id: 1,
+        template_id: 1,
+        type_id: 2,
+        priority_id: 3,
+        created_by: 1,
+        created_on: 1609459200,
+        updated_by: 1,
+        updated_on: 1609459400,
+        suite_id: 1
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
+      
+      // Test data
+      const caseData = {
+        title: 'Updated Test Case',
+        type_id: 2,
+        priority_id: 3
+      };
+      
+      // Test method
+      const result = await client.updateCase(1, caseData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_case/1', caseData);
+      
+      // Verify result
+      expect(result).toEqual(mockCase);
+    });
+
+    it('handles errors when updating a test case', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Test case not found' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.updateCase(999, { title: 'Updated Test Case' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_case/999', { title: 'Updated Test Case' });
+    });
+
+    it('deletes a test case', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deleteCase(1);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_case/1', {});
+    });
+
+    it('handles errors when deleting a test case', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Test case not found' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.deleteCase(999)).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_case/999', {});
+    });
+
+    it('retrieves all test cases for a project', async () => {
+      // Mock response
+      const mockCases = [
+        { 
+          id: 1, 
+          title: 'Test Case 1', 
+          section_id: 1,
+          template_id: 1,
+          type_id: 1,
+          priority_id: 2,
+          created_by: 1,
+          created_on: 1609459200,
+          updated_by: 1,
+          updated_on: 1609459300,
+          suite_id: 1
+        },
+        { 
+          id: 2, 
+          title: 'Test Case 2', 
+          section_id: 1,
+          template_id: 1,
+          type_id: 1,
+          priority_id: 3,
+          created_by: 1,
+          created_on: 1609459200,
+          updated_by: 1,
+          updated_on: 1609459300,
+          suite_id: 1
+        }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockCases });
+      
+      // Test method
+      const result = await client.getCases(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_cases/1', { params: undefined });
+      
+      // Verify result
+      expect(result).toEqual(mockCases);
+    });
+
+    it('retrieves test cases with filter parameters', async () => {
+      // Mock response
+      const mockCases = [
+        { 
+          id: 1, 
+          title: 'Test Case 1', 
+          section_id: 1,
+          template_id: 1,
+          type_id: 1,
+          priority_id: 2,
+          created_by: 1,
+          created_on: 1609459200,
+          updated_by: 1,
+          updated_on: 1609459300,
+          suite_id: 1
+        }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockCases });
+      
+      // Test params
+      const params = {
+        suite_id: 1,
+        section_id: 1,
+        priority_id: 2
+      };
+      
+      // Test method
+      const result = await client.getCases(1, params);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_cases/1', { params });
+      
+      // Verify result
+      expect(result).toEqual(mockCases);
+    });
+
+    it('handles errors when retrieving test cases', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid project' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getCases(999)).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_cases/999', { params: undefined });
+    });
+  });
+
+  // 新しいテストセクションを追加します
+  describe('Case History API', () => {
+    it('retrieves test case history', async () => {
+      // Mock response
+      const mockHistory = [
+        {
+          id: 1,
+          case_id: 1,
+          user_id: 1,
+          timestamp: 1609459200,
+          changes: [
+            {
+              field: 'title',
+              old_value: 'Old Title',
+              new_value: 'New Title'
+            }
+          ]
+        },
+        {
+          id: 2,
+          case_id: 1,
+          user_id: 1,
+          timestamp: 1609459300,
+          changes: [
+            {
+              field: 'priority_id',
+              old_value: '1',
+              new_value: '2'
+            }
+          ]
+        }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockHistory });
+      
+      // Test method
+      const result = await client.getCaseHistory(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_history_for_case/1');
+      
+      // Verify result
+      expect(result).toEqual(mockHistory);
+    });
+
+    it('handles errors when retrieving test case history', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Test case not found' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getCaseHistory(999)).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_history_for_case/999');
+    });
+  });
+
+  describe('Case Types API', () => {
+    it('retrieves case types', async () => {
+      // Mock response
+      const mockCaseTypes = [
+        { id: 1, name: 'Functional', is_default: true },
+        { id: 2, name: 'Automation', is_default: false },
+        { id: 3, name: 'Performance', is_default: false }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockCaseTypes });
+      
+      // Test method
+      const result = await client.getCaseTypes();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case_types');
+      
+      // Verify result
+      expect(result).toEqual(mockCaseTypes);
+    });
+
+    it('handles errors when retrieving case types', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 500,
+          data: { error: 'Server error' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getCaseTypes()).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case_types');
+    });
+  });
+
+  describe('Case Fields API', () => {
+    it('retrieves case fields', async () => {
+      // Mock response
+      const mockCaseFields = [
+        { 
+          id: 1, 
+          type_id: 1, 
+          name: 'steps', 
+          system_name: 'custom_steps',
+          label: 'Steps',
+          description: 'Test steps',
+          configs: [
+            {
+              id: 'steps_config',
+              context: {
+                is_global: true,
+                project_ids: []
+              },
+              options: {
+                default_value: '',
+                format: 'text',
+                is_required: false,
+                rows: '5',
+                items: ''
+              }
+            }
+          ],
+          display_order: 1,
+          include_all: true,
+          template_ids: [1, 2],
+          is_active: true,
+          status_id: 1
+        }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockCaseFields });
+      
+      // Test method
+      const result = await client.getCaseFields();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case_fields');
+      
+      // Verify result
+      expect(result).toEqual(mockCaseFields);
+    });
+
+    it('handles errors when retrieving case fields', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 500,
+          data: { error: 'Server error' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getCaseFields()).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case_fields');
+    });
+  });
+
+  describe('Case Operations API', () => {
+    it('copies test cases to another section', async () => {
+      // Mock response
+      const mockCopiedCases = [
+        { 
+          id: 11, 
+          title: 'Copy of Test Case 1', 
+          section_id: 2,
+          template_id: 1,
+          type_id: 1,
+          priority_id: 2,
+          created_by: 1,
+          created_on: 1609459400,
+          updated_by: 1,
+          updated_on: 1609459400,
+          suite_id: 1
+        },
+        { 
+          id: 12, 
+          title: 'Copy of Test Case 2', 
+          section_id: 2,
+          template_id: 1,
+          type_id: 1,
+          priority_id: 3,
+          created_by: 1,
+          created_on: 1609459400,
+          updated_by: 1,
+          updated_on: 1609459400,
+          suite_id: 1
+        }
+      ];
+      mockAxiosInstance.post.mockResolvedValue({ data: mockCopiedCases });
+      
+      // Test method
+      const result = await client.copyCasesToSection(2, [1, 2]);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/copy_cases_to_section/2', { case_ids: [1, 2] });
+      
+      // Verify result
+      expect(result).toEqual(mockCopiedCases);
+    });
+
+    it('handles errors when copying test cases', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid section' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.copyCasesToSection(999, [1, 2])).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/copy_cases_to_section/999', { case_ids: [1, 2] });
+    });
+
+    it('moves test cases to another section', async () => {
+      // Mock successful move (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.moveCasesToSection(2, [1, 2]);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/move_cases_to_section/2', { case_ids: [1, 2] });
+    });
+
+    it('handles errors when moving test cases', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid section' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.moveCasesToSection(999, [1, 2])).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/move_cases_to_section/999', { case_ids: [1, 2] });
+    });
+
+    it('updates multiple test cases', async () => {
+      // Mock successful update (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test data
+      const updateData = {
+        priority_id: 3,
+        type_id: 2
+      };
+      
+      // Test method
+      await client.updateCases(1, 2, updateData, [1, 2]);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_cases/1&suite_id=2', { ...updateData, case_ids: [1, 2] });
+    });
+
+    it('updates multiple test cases without suite_id', async () => {
+      // Mock successful update (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test data
+      const updateData = {
+        priority_id: 3,
+        type_id: 2
+      };
+      
+      // Test method
+      await client.updateCases(1, null, updateData, [1, 2]);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_cases/1', { ...updateData, case_ids: [1, 2] });
+    });
+
+    it('handles errors when updating multiple test cases', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid project' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.updateCases(999, null, { priority_id: 3 }, [1, 2])).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_cases/999', { priority_id: 3, case_ids: [1, 2] });
+    });
+
+    it('deletes multiple test cases', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deleteCases(1, 2, [1, 2]);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_cases/1&suite_id=2', { case_ids: [1, 2] });
+    });
+
+    it('deletes multiple test cases without suite_id', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deleteCases(1, null, [1, 2]);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_cases/1', { case_ids: [1, 2] });
+    });
+
+    it('handles errors when deleting multiple test cases', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid project' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.deleteCases(999, null, [1, 2])).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_cases/999', { case_ids: [1, 2] });
+    });
   });
   
   describe('Projects API', () => {

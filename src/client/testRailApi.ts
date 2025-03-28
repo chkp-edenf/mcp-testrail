@@ -111,6 +111,51 @@ interface TestRailCase {
 	custom_goals?: string;
 }
 
+/**
+ * TestRail API Response for Case Type
+ */
+export interface TestRailCaseType {
+	id: number;
+	name: string;
+	is_default: boolean;
+}
+
+/**
+ * TestRail API Response for Case Field
+ */
+export interface TestRailCaseField {
+	id: number;
+	type_id: number;
+	name: string;
+	system_name: string;
+	label: string;
+	description: string;
+	configs: TestRailCaseFieldConfig[];
+	display_order: number;
+	include_all: boolean;
+	template_ids: number[];
+	is_active: boolean;
+	status_id: number;
+}
+
+/**
+ * TestRail API Response for Case Field Config
+ */
+export interface TestRailCaseFieldConfig {
+	id: string;
+	context: {
+		is_global: boolean;
+		project_ids: number[];
+	};
+	options: {
+		default_value: string;
+		format: string;
+		is_required: boolean;
+		rows: string;
+		items: string;
+	};
+}
+
 interface TestRailStep {
 	content: string;
 	expected: string;
@@ -281,6 +326,21 @@ function handleApiError(message: string, error: unknown): void {
 	throw error;
 }
 
+/**
+ * TestRail API Response for Case History
+ */
+export interface TestRailCaseHistory {
+	id: number;
+	case_id: number;
+	user_id: number;
+	timestamp: number;
+	changes: Array<{
+		field: string;
+		old_value: string | null;
+		new_value: string | null;
+	}>;
+}
+
 export class TestRailClient {
 	private client: AxiosInstance;
 
@@ -345,6 +405,182 @@ export class TestRailClient {
 			return response.data;
 		} catch (error) {
 			handleApiError(`Failed to add case to section ${sectionId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Update an existing test case
+	 */
+	async updateCase(
+		caseId: number,
+		data: Record<string, unknown>,
+	): Promise<TestRailCase> {
+		try {
+			console.log(`Updating test case ${caseId}`);
+			const response = await this.client.post<TestRailCase>(
+				`/api/v2/update_case/${caseId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to update test case ${caseId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete an existing test case
+	 */
+	async deleteCase(caseId: number): Promise<void> {
+		try {
+			console.log(`Deleting test case ${caseId}`);
+			await this.client.post(`/api/v2/delete_case/${caseId}`, {});
+		} catch (error) {
+			handleApiError(`Failed to delete test case ${caseId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Get test case history for a specific case
+	 */
+	async getCaseHistory(caseId: number): Promise<TestRailCaseHistory[]> {
+		try {
+			console.log(`Getting history for test case ${caseId}`);
+			const response = await this.client.get<TestRailCaseHistory[]>(
+				`/api/v2/get_history_for_case/${caseId}`,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get history for test case ${caseId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Get a list of case types
+	 */
+	async getCaseTypes(): Promise<TestRailCaseType[]> {
+		try {
+			console.log("Getting test case types");
+			const response = await this.client.get<TestRailCaseType[]>(
+				"/api/v2/get_case_types",
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError("Failed to get test case types", error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Get a list of case fields
+	 */
+	async getCaseFields(): Promise<TestRailCaseField[]> {
+		try {
+			console.log("Getting test case fields");
+			const response = await this.client.get<TestRailCaseField[]>(
+				"/api/v2/get_case_fields",
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError("Failed to get test case fields", error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Copy test cases to a different section
+	 */
+	async copyCasesToSection(
+		sectionId: number,
+		caseIds: number[],
+	): Promise<TestRailCase[]> {
+		try {
+			console.log(`Copying test cases to section ${sectionId}`);
+			const response = await this.client.post<TestRailCase[]>(
+				`/api/v2/copy_cases_to_section/${sectionId}`,
+				{ case_ids: caseIds },
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(
+				`Failed to copy test cases to section ${sectionId}`,
+				error,
+			);
+			throw error;
+		}
+	}
+
+	/**
+	 * Move test cases to a different section
+	 */
+	async moveCasesToSection(
+		sectionId: number,
+		caseIds: number[],
+	): Promise<void> {
+		try {
+			console.log(`Moving test cases to section ${sectionId}`);
+			await this.client.post(`/api/v2/move_cases_to_section/${sectionId}`, {
+				case_ids: caseIds,
+			});
+		} catch (error) {
+			handleApiError(
+				`Failed to move test cases to section ${sectionId}`,
+				error,
+			);
+			throw error;
+		}
+	}
+
+	/**
+	 * Update multiple test cases with the same values
+	 */
+	async updateCases(
+		projectId: number,
+		suiteId: number | null,
+		data: Record<string, unknown>,
+		caseIds?: number[],
+	): Promise<void> {
+		try {
+			console.log(`Updating multiple test cases in project ${projectId}`);
+			const url = suiteId
+				? `/api/v2/update_cases/${projectId}&suite_id=${suiteId}`
+				: `/api/v2/update_cases/${projectId}`;
+
+			const payload = caseIds ? { ...data, case_ids: caseIds } : data;
+
+			await this.client.post(url, payload);
+		} catch (error) {
+			handleApiError(
+				`Failed to update test cases in project ${projectId}`,
+				error,
+			);
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete multiple test cases
+	 */
+	async deleteCases(
+		projectId: number,
+		suiteId: number | null,
+		caseIds: number[],
+	): Promise<void> {
+		try {
+			console.log(`Deleting multiple test cases in project ${projectId}`);
+			const url = suiteId
+				? `/api/v2/delete_cases/${projectId}&suite_id=${suiteId}`
+				: `/api/v2/delete_cases/${projectId}`;
+
+			await this.client.post(url, { case_ids: caseIds });
+		} catch (error) {
+			handleApiError(
+				`Failed to delete test cases in project ${projectId}`,
+				error,
+			);
 			throw error;
 		}
 	}

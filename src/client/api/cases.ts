@@ -7,6 +7,16 @@ import {
 	TestRailCaseType,
 } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetTestCaseInputType,
+	GetTestCasesInputType,
+	AddTestCaseInputType,
+	UpdateTestCaseInputType,
+	DeleteTestCaseInputType,
+	CopyTestCasesToSectionInputType,
+	MoveTestCasesToSectionInputType,
+	GetTestCaseHistoryInputType,
+} from "../../shared/schemas/cases.js";
 
 export class CasesClient extends BaseTestRailClient {
 	/**
@@ -14,7 +24,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param caseId The ID of the test case
 	 * @returns Promise with test case details
 	 */
-	async getCase(caseId: number): Promise<TestRailCase> {
+	async getCase(caseId: GetTestCaseInputType["caseId"]): Promise<TestRailCase> {
 		try {
 			const response: AxiosResponse<TestRailCase> = await this.client.get(
 				`/api/v2/get_case/${caseId}`,
@@ -32,7 +42,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with array of test cases
 	 */
 	async getCases(
-		projectId: number,
+		projectId: GetTestCasesInputType["projectId"],
 		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailCase[]> {
 		try {
@@ -56,7 +66,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with created test case
 	 */
 	async addCase(
-		sectionId: number,
+		sectionId: AddTestCaseInputType["sectionId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailCase> {
 		try {
@@ -80,7 +90,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with updated test case
 	 */
 	async updateCase(
-		caseId: number,
+		caseId: UpdateTestCaseInputType["caseId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailCase> {
 		try {
@@ -98,7 +108,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * Deletes an existing test case
 	 * @param caseId The ID of the test case
 	 */
-	async deleteCase(caseId: number): Promise<void> {
+	async deleteCase(caseId: DeleteTestCaseInputType["caseId"]): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_case/${caseId}`, {});
 		} catch (error) {
@@ -111,7 +121,9 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param caseId The ID of the test case
 	 * @returns Promise with test case history
 	 */
-	async getCaseHistory(caseId: number): Promise<TestRailCaseHistory[]> {
+	async getCaseHistory(
+		caseId: GetTestCaseHistoryInputType["caseId"],
+	): Promise<TestRailCaseHistory[]> {
 		try {
 			const response: AxiosResponse<TestRailCaseHistory[]> =
 				await this.client.get(`/api/v2/get_history_for_case/${caseId}`);
@@ -157,8 +169,8 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with status
 	 */
 	async copyToSection(
-		caseIds: number[],
-		sectionId: number,
+		caseIds: CopyTestCasesToSectionInputType["caseIds"],
+		sectionId: CopyTestCasesToSectionInputType["sectionId"],
 	): Promise<{ status: boolean }> {
 		try {
 			const data = {
@@ -185,8 +197,8 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with status
 	 */
 	async moveToSection(
-		caseIds: number[],
-		sectionId: number,
+		caseIds: MoveTestCasesToSectionInputType["caseIds"],
+		sectionId: MoveTestCasesToSectionInputType["sectionId"],
 	): Promise<{ status: boolean }> {
 		try {
 			const data = {
@@ -214,10 +226,10 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param caseIds Array of test case IDs to update
 	 */
 	async updateCases(
-		projectId: number,
+		projectId: GetTestCasesInputType["projectId"],
 		suiteId: number | null,
 		data: Record<string, unknown>,
-		caseIds: number[],
+		caseIds: UpdateTestCaseInputType["caseId"][],
 	): Promise<void> {
 		try {
 			const endpoint = suiteId
@@ -237,9 +249,9 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param caseIds Array of test case IDs to delete
 	 */
 	async deleteCases(
-		projectId: number,
+		projectId: GetTestCasesInputType["projectId"],
 		suiteId: number | null,
-		caseIds: number[],
+		caseIds: DeleteTestCaseInputType["caseId"][],
 	): Promise<void> {
 		try {
 			const endpoint = suiteId

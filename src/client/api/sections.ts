@@ -1,12 +1,22 @@
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailSection } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetSectionInputType,
+	GetSectionsInputType,
+	AddSectionInputType,
+	MoveSectionInputType,
+	UpdateSectionInputType,
+	DeleteSectionInputType,
+} from "../../shared/schemas/sections.js";
 
 export class SectionsClient extends BaseTestRailClient {
 	/**
 	 * Get a specific section
 	 */
-	async getSection(sectionId: number): Promise<TestRailSection> {
+	async getSection(
+		sectionId: GetSectionInputType["sectionId"],
+	): Promise<TestRailSection> {
 		try {
 			console.log(`Getting section ${sectionId}`);
 			const response = await this.client.get<TestRailSection>(
@@ -22,8 +32,8 @@ export class SectionsClient extends BaseTestRailClient {
 	 * Get all sections for a project
 	 */
 	async getSections(
-		projectId: number,
-		suiteId?: number,
+		projectId: GetSectionsInputType["projectId"],
+		suiteId?: GetSectionsInputType["suiteId"],
 		params?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailSection[]> {
 		try {
@@ -47,12 +57,12 @@ export class SectionsClient extends BaseTestRailClient {
 	 * Add a new section
 	 */
 	async addSection(
-		projectId: number,
+		projectId: AddSectionInputType["projectId"],
 		data: {
-			name: string;
-			description?: string;
-			suite_id?: number;
-			parent_id?: number;
+			name: AddSectionInputType["name"];
+			description?: AddSectionInputType["description"];
+			suite_id?: AddSectionInputType["suiteId"];
+			parent_id?: AddSectionInputType["parentId"];
 		},
 	): Promise<TestRailSection> {
 		try {
@@ -74,10 +84,10 @@ export class SectionsClient extends BaseTestRailClient {
 	 * Move a section to a different parent or position
 	 */
 	async moveSection(
-		sectionId: number,
+		sectionId: MoveSectionInputType["sectionId"],
 		data: {
-			parent_id?: number | null;
-			after_id?: number | null;
+			parent_id?: MoveSectionInputType["parentId"];
+			after_id?: MoveSectionInputType["afterId"];
 		},
 	): Promise<TestRailSection> {
 		try {
@@ -96,10 +106,10 @@ export class SectionsClient extends BaseTestRailClient {
 	 * Update an existing section
 	 */
 	async updateSection(
-		sectionId: number,
+		sectionId: UpdateSectionInputType["sectionId"],
 		data: {
-			name?: string;
-			description?: string;
+			name?: UpdateSectionInputType["name"];
+			description?: UpdateSectionInputType["description"];
 		},
 	): Promise<TestRailSection> {
 		try {
@@ -117,7 +127,10 @@ export class SectionsClient extends BaseTestRailClient {
 	/**
 	 * Delete an existing section
 	 */
-	async deleteSection(sectionId: number, soft?: boolean): Promise<void> {
+	async deleteSection(
+		sectionId: DeleteSectionInputType["sectionId"],
+		soft?: DeleteSectionInputType["soft"],
+	): Promise<void> {
 		try {
 			console.log(`Deleting section ${sectionId}`);
 			const url = soft

@@ -2,6 +2,10 @@ import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailUser } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetUserInputType,
+	GetUserByEmailInputType,
+} from "../../shared/schemas/users.js";
 
 export class UsersClient extends BaseTestRailClient {
 	/**
@@ -9,7 +13,7 @@ export class UsersClient extends BaseTestRailClient {
 	 * @param userId The ID of the user
 	 * @returns Promise with user details
 	 */
-	async getUser(userId: number): Promise<TestRailUser> {
+	async getUser(userId: GetUserInputType["userId"]): Promise<TestRailUser> {
 		try {
 			const response: AxiosResponse<TestRailUser> = await this.client.get(
 				`/api/v2/get_user/${userId}`,
@@ -25,7 +29,9 @@ export class UsersClient extends BaseTestRailClient {
 	 * @param email The email address of the user
 	 * @returns Promise with user details
 	 */
-	async getUserByEmail(email: string): Promise<TestRailUser> {
+	async getUserByEmail(
+		email: GetUserByEmailInputType["email"],
+	): Promise<TestRailUser> {
 		try {
 			const response: AxiosResponse<TestRailUser> = await this.client.get(
 				`/api/v2/get_user_by_email?email=${encodeURIComponent(email)}`,

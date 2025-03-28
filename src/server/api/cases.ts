@@ -1,7 +1,18 @@
-import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
+import {
+	getTestCaseSchema,
+	getTestCasesSchema,
+	addTestCaseSchema,
+	updateTestCaseSchema,
+	deleteTestCaseSchema,
+	getTestCaseTypesSchema,
+	getTestCaseFieldsSchema,
+	copyTestCasesToSectionSchema,
+	moveTestCasesToSectionSchema,
+	getTestCaseHistorySchema,
+} from "../../shared/schemas/cases.js";
 
 /**
  * テストケース関連のAPIツールを登録する関数
@@ -13,92 +24,66 @@ export function registerCaseTools(
 	testRailClient: TestRailClient,
 ): void {
 	// テストケース取得
-	server.tool(
-		"getTestCase",
-		{
-			caseId: z.number().describe("TestRail Test Case ID"),
-		},
-		async ({ caseId }) => {
-			try {
-				const testCase = await testRailClient.getCase(caseId);
-				const successResponse = createSuccessResponse(
-					"Test case retrieved successfully",
-					{
-						testCase,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching test case ${caseId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getTestCase", getTestCaseSchema, async ({ caseId }) => {
+		try {
+			const testCase = await testRailClient.getCase(caseId);
+			const successResponse = createSuccessResponse(
+				"Test case retrieved successfully",
+				{
+					testCase,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching test case ${caseId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// プロジェクトのテストケース一覧取得
-	server.tool(
-		"getTestCases",
-		{
-			projectId: z.number().describe("TestRail Project ID"),
-		},
-		async ({ projectId }) => {
-			try {
-				const testCases = await testRailClient.getCases(projectId);
-				const successResponse = createSuccessResponse(
-					"Test cases retrieved successfully",
-					{
-						offset: 0,
-						limit: 250,
-						size: testCases.length,
-						_links: {
-							next: null,
-							prev: null,
-						},
-						testCases,
+	server.tool("getTestCases", getTestCasesSchema, async ({ projectId }) => {
+		try {
+			const testCases = await testRailClient.getCases(projectId);
+			const successResponse = createSuccessResponse(
+				"Test cases retrieved successfully",
+				{
+					offset: 0,
+					limit: 250,
+					size: testCases.length,
+					_links: {
+						next: null,
+						prev: null,
 					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching test cases for project ${projectId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+					testCases,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching test cases for project ${projectId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// テストケース作成
 	server.tool(
 		"addTestCase",
-		{
-			sectionId: z.number().describe("TestRail Section ID"),
-			title: z.string().describe("Test case title"),
-			typeId: z.number().optional().describe("Test case type ID"),
-			priorityId: z.number().optional().describe("Test case priority ID"),
-			estimate: z
-				.string()
-				.optional()
-				.describe("Time estimate (e.g., '30s', '1m 45s', '3h')"),
-			milestoneId: z.number().optional().describe("Milestone ID"),
-			refs: z.string().optional().describe("Reference/requirement IDs"),
-			customSteps: z.string().optional().describe("Test case steps"),
-			customExpected: z.string().optional().describe("Expected results"),
-			customPrerequisites: z.string().optional().describe("Prerequisites"),
-		},
+		addTestCaseSchema,
 		async ({
 			sectionId,
 			title,
@@ -149,21 +134,7 @@ export function registerCaseTools(
 	// テストケース更新
 	server.tool(
 		"updateTestCase",
-		{
-			caseId: z.number().describe("TestRail Test Case ID"),
-			title: z.string().optional().describe("Test case title"),
-			typeId: z.number().optional().describe("Test case type ID"),
-			priorityId: z.number().optional().describe("Test case priority ID"),
-			estimate: z
-				.string()
-				.optional()
-				.describe("Time estimate (e.g., '30s', '1m 45s', '3h')"),
-			milestoneId: z.number().optional().describe("Milestone ID"),
-			refs: z.string().optional().describe("Reference/requirement IDs"),
-			customSteps: z.string().optional().describe("Test case steps"),
-			customExpected: z.string().optional().describe("Expected results"),
-			customPrerequisites: z.string().optional().describe("Prerequisites"),
-		},
+		updateTestCaseSchema,
 		async ({
 			caseId,
 			title,
@@ -213,35 +184,29 @@ export function registerCaseTools(
 	);
 
 	// テストケース削除
-	server.tool(
-		"deleteTestCase",
-		{
-			caseId: z.number().describe("TestRail Test Case ID"),
-		},
-		async ({ caseId }) => {
-			try {
-				await testRailClient.deleteCase(caseId);
-				const successResponse = createSuccessResponse(
-					"Test case deleted successfully",
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error deleting test case ${caseId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("deleteTestCase", deleteTestCaseSchema, async ({ caseId }) => {
+		try {
+			await testRailClient.deleteCase(caseId);
+			const successResponse = createSuccessResponse(
+				"Test case deleted successfully",
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error deleting test case ${caseId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// テストケースタイプ取得
-	server.tool("getTestCaseTypes", {}, async () => {
+	server.tool("getTestCaseTypes", getTestCaseTypesSchema, async () => {
 		try {
 			const caseTypes = await testRailClient.getCaseTypes();
 			const successResponse = createSuccessResponse(
@@ -266,7 +231,7 @@ export function registerCaseTools(
 	});
 
 	// テストケースフィールド取得
-	server.tool("getTestCaseFields", {}, async () => {
+	server.tool("getTestCaseFields", getTestCaseFieldsSchema, async () => {
 		try {
 			const caseFields = await testRailClient.getCaseFields();
 			const successResponse = createSuccessResponse(
@@ -290,23 +255,21 @@ export function registerCaseTools(
 		}
 	});
 
-	// テストケースコピー
+	// テストケースをセクションにコピー
 	server.tool(
 		"copyTestCasesToSection",
-		{
-			sectionId: z.number().describe("Target TestRail Section ID"),
-			caseIds: z.array(z.number()).describe("Array of Test Case IDs to copy"),
-		},
+		copyTestCasesToSectionSchema,
 		async ({ sectionId, caseIds }) => {
 			try {
-				const result = await testRailClient.copyCasesToSection(
+				// TestRail APIでは配列をカンマ区切りの文字列として送信
+				const cases = await testRailClient.copyCasesToSection(
 					sectionId,
 					caseIds,
 				);
 				const successResponse = createSuccessResponse(
 					"Test cases copied successfully",
 					{
-						result,
+						cases,
 					},
 				);
 				return {
@@ -314,7 +277,7 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					"Error copying test cases",
+					`Error copying test cases to section ${sectionId}`,
 					error,
 				);
 				return {
@@ -325,23 +288,20 @@ export function registerCaseTools(
 		},
 	);
 
-	// テストケース移動
+	// テストケースをセクションに移動
 	server.tool(
 		"moveTestCasesToSection",
-		{
-			sectionId: z.number().describe("Target TestRail Section ID"),
-			caseIds: z.array(z.number()).describe("Array of Test Case IDs to move"),
-		},
+		moveTestCasesToSectionSchema,
 		async ({ sectionId, caseIds }) => {
 			try {
-				const result = await testRailClient.moveCasesToSection(
+				const cases = await testRailClient.moveCasesToSection(
 					sectionId,
 					caseIds,
 				);
 				const successResponse = createSuccessResponse(
 					"Test cases moved successfully",
 					{
-						result,
+						cases,
 					},
 				);
 				return {
@@ -349,7 +309,7 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					"Error moving test cases",
+					`Error moving test cases to section ${sectionId}`,
 					error,
 				);
 				return {
@@ -363,9 +323,7 @@ export function registerCaseTools(
 	// テストケース履歴取得
 	server.tool(
 		"getTestCaseHistory",
-		{
-			caseId: z.number().describe("TestRail Test Case ID"),
-		},
+		getTestCaseHistorySchema,
 		async ({ caseId }) => {
 			try {
 				const history = await testRailClient.getCaseHistory(caseId);
@@ -380,7 +338,7 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error fetching test case history for ${caseId}`,
+					`Error fetching history for test case ${caseId}`,
 					error,
 				);
 				return {

@@ -2,6 +2,14 @@ import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailRun, TestRailResult } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetRunInputType,
+	GetRunsInputType,
+	AddRunInputType,
+	UpdateRunInputType,
+	CloseRunInputType,
+	DeleteRunInputType,
+} from "../../shared/schemas/runs.js";
 
 export class RunsClient extends BaseTestRailClient {
 	/**
@@ -9,7 +17,7 @@ export class RunsClient extends BaseTestRailClient {
 	 * @param runId The ID of the test run
 	 * @returns Promise with test run details
 	 */
-	async getRun(runId: number): Promise<TestRailRun> {
+	async getRun(runId: GetRunInputType["runId"]): Promise<TestRailRun> {
 		try {
 			const response: AxiosResponse<TestRailRun> = await this.client.get(
 				`/api/v2/get_run/${runId}`,
@@ -27,7 +35,7 @@ export class RunsClient extends BaseTestRailClient {
 	 * @returns Promise with array of test runs
 	 */
 	async getRuns(
-		projectId: number,
+		projectId: GetRunsInputType["projectId"],
 		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailRun[]> {
 		try {
@@ -51,7 +59,7 @@ export class RunsClient extends BaseTestRailClient {
 	 * @returns Promise with created test run
 	 */
 	async addRun(
-		projectId: number,
+		projectId: AddRunInputType["projectId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailRun> {
 		try {
@@ -75,7 +83,7 @@ export class RunsClient extends BaseTestRailClient {
 	 * @returns Promise with updated test run
 	 */
 	async updateRun(
-		runId: number,
+		runId: UpdateRunInputType["runId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailRun> {
 		try {
@@ -94,7 +102,7 @@ export class RunsClient extends BaseTestRailClient {
 	 * @param runId The ID of the test run
 	 * @returns Promise with closed test run
 	 */
-	async closeRun(runId: number): Promise<TestRailRun> {
+	async closeRun(runId: CloseRunInputType["runId"]): Promise<TestRailRun> {
 		try {
 			const response: AxiosResponse<TestRailRun> = await this.client.post(
 				`/api/v2/close_run/${runId}`,
@@ -110,7 +118,7 @@ export class RunsClient extends BaseTestRailClient {
 	 * Deletes a test run
 	 * @param runId The ID of the test run
 	 */
-	async deleteRun(runId: number): Promise<void> {
+	async deleteRun(runId: DeleteRunInputType["runId"]): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_run/${runId}`, {});
 		} catch (error) {

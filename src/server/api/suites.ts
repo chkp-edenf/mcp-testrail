@@ -1,7 +1,13 @@
-import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
+import {
+	getSuitesSchema,
+	getSuiteSchema,
+	addSuiteSchema,
+	updateSuiteSchema,
+	deleteSuiteSchema,
+} from "../../shared/schemas/suites.js";
 
 /**
  * Function to register test suite-related API tools
@@ -13,75 +19,59 @@ export function registerSuiteTools(
 	testRailClient: TestRailClient,
 ): void {
 	// Get all test suites for a project
-	server.tool(
-		"getSuites",
-		{
-			projectId: z.number().describe("TestRail Project ID"),
-		},
-		async ({ projectId }) => {
-			try {
-				const suites = await testRailClient.getSuites(projectId);
-				const successResponse = createSuccessResponse(
-					"Test suites retrieved successfully",
-					{
-						suites,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching test suites for project ${projectId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getSuites", getSuitesSchema, async ({ projectId }) => {
+		try {
+			const suites = await testRailClient.getSuites(projectId);
+			const successResponse = createSuccessResponse(
+				"Test suites retrieved successfully",
+				{
+					suites,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching test suites for project ${projectId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// Get a specific test suite
-	server.tool(
-		"getSuite",
-		{
-			suiteId: z.number().describe("TestRail Suite ID"),
-		},
-		async ({ suiteId }) => {
-			try {
-				const suite = await testRailClient.getSuite(suiteId);
-				const successResponse = createSuccessResponse(
-					"Test suite retrieved successfully",
-					{
-						suite,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching test suite ${suiteId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getSuite", getSuiteSchema, async ({ suiteId }) => {
+		try {
+			const suite = await testRailClient.getSuite(suiteId);
+			const successResponse = createSuccessResponse(
+				"Test suite retrieved successfully",
+				{
+					suite,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching test suite ${suiteId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// Create a new test suite
 	server.tool(
 		"addSuite",
-		{
-			projectId: z.number().describe("TestRail Project ID"),
-			name: z.string().describe("Test suite name (required)"),
-			description: z.string().optional().describe("Test suite description"),
-		},
+		addSuiteSchema,
 		async ({ projectId, name, description }) => {
 			try {
 				const suiteData = {
@@ -114,11 +104,7 @@ export function registerSuiteTools(
 	// Update an existing test suite
 	server.tool(
 		"updateSuite",
-		{
-			suiteId: z.number().describe("TestRail Suite ID"),
-			name: z.string().optional().describe("Test suite name"),
-			description: z.string().optional().describe("Test suite description"),
-		},
+		updateSuiteSchema,
 		async ({ suiteId, name, description }) => {
 			try {
 				const data: Record<string, unknown> = {};
@@ -149,30 +135,27 @@ export function registerSuiteTools(
 	);
 
 	// Delete a test suite
-	server.tool(
-		"deleteSuite",
-		{
-			suiteId: z.number().describe("TestRail Suite ID"),
-		},
-		async ({ suiteId }) => {
-			try {
-				await testRailClient.deleteSuite(suiteId);
-				const successResponse = createSuccessResponse(
-					`Test suite ${suiteId} deleted successfully`,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error deleting test suite ${suiteId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("deleteSuite", deleteSuiteSchema, async ({ suiteId }) => {
+		try {
+			await testRailClient.deleteSuite(suiteId);
+			const successResponse = createSuccessResponse(
+				"Test suite deleted successfully",
+				{
+					suiteId,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error deleting test suite ${suiteId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 }

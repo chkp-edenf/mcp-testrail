@@ -187,11 +187,36 @@ export class TestRailClient extends NewTestRailClient {
 	}
 
 	addMilestone(projectId: number, data: Record<string, unknown>) {
-		return this.milestones.addMilestone(projectId, data);
+		// 必須項目nameが存在するか確認
+		if (!data.name || typeof data.name !== "string") {
+			throw new Error(
+				"Milestone data must include a name property of type string",
+			);
+		}
+
+		return this.milestones.addMilestone(projectId, {
+			name: data.name as string,
+			description: data.description as string | undefined,
+			due_on: data.due_on as number | undefined,
+			start_on: data.start_on as number | undefined,
+			parent_id: data.parent_id as number | undefined,
+			refs: data.refs as string | undefined,
+			is_completed: data.is_completed as boolean | undefined,
+			is_started: data.is_started as boolean | undefined,
+		});
 	}
 
 	updateMilestone(milestoneId: number, data: Record<string, unknown>) {
-		return this.milestones.updateMilestone(milestoneId, data);
+		return this.milestones.updateMilestone(milestoneId, {
+			name: data.name as string | undefined,
+			description: data.description as string | undefined,
+			due_on: data.due_on as number | undefined,
+			start_on: data.start_on as number | undefined,
+			parent_id: data.parent_id as number | undefined,
+			refs: data.refs as string | undefined,
+			is_completed: data.is_completed as boolean | undefined,
+			is_started: data.is_started as boolean | undefined,
+		});
 	}
 
 	deleteMilestone(milestoneId: number) {
@@ -208,11 +233,22 @@ export class TestRailClient extends NewTestRailClient {
 	}
 
 	addSuite(projectId: number, data: Record<string, unknown>) {
-		return this.suites.addSuite(projectId, data);
+		// dataオブジェクトにnameプロパティが存在することを確認
+		if (!data.name || typeof data.name !== "string") {
+			throw new Error("Suite data must include a name property of type string");
+		}
+
+		return this.suites.addSuite(projectId, {
+			name: data.name as string,
+			description: data.description as string | undefined,
+		});
 	}
 
 	updateSuite(suiteId: number, data: Record<string, unknown>) {
-		return this.suites.updateSuite(suiteId, data);
+		return this.suites.updateSuite(suiteId, {
+			name: data.name as string | undefined,
+			description: data.description as string | undefined,
+		});
 	}
 
 	deleteSuite(suiteId: number) {
@@ -305,15 +341,60 @@ export class TestRailClient extends NewTestRailClient {
 	}
 
 	addPlan(projectId: number, data: Record<string, unknown>) {
-		return this.plans.addPlan(projectId, data);
+		// 必須項目nameが存在するか確認
+		if (!data.name || typeof data.name !== "string") {
+			throw new Error("Plan data must include a name property of type string");
+		}
+
+		const planData = {
+			name: data.name as string,
+			description: data.description as string | undefined,
+			milestone_id: data.milestone_id as number | undefined,
+			entries: Array.isArray(data.entries)
+				? data.entries.map((entry) => ({
+						suite_id: entry.suite_id as number,
+						name: entry.name as string | undefined,
+						description: entry.description as string | undefined,
+						include_all: entry.include_all as boolean | undefined,
+						case_ids: entry.case_ids as number[] | undefined,
+						config_ids: entry.config_ids as number[] | undefined,
+						refs: entry.refs as string | undefined,
+					}))
+				: undefined,
+		};
+
+		return this.plans.addPlan(projectId, planData);
 	}
 
 	addPlanEntry(planId: number, data: Record<string, unknown>) {
-		return this.plans.addPlanEntry(planId, data);
+		// 必須項目suite_idが存在するか確認
+		if (!data.suite_id || typeof data.suite_id !== "number") {
+			throw new Error(
+				"Plan entry data must include a suite_id property of type number",
+			);
+		}
+
+		const entryData = {
+			suite_id: data.suite_id as number,
+			name: data.name as string | undefined,
+			description: data.description as string | undefined,
+			include_all: data.include_all as boolean | undefined,
+			case_ids: data.case_ids as number[] | undefined,
+			config_ids: data.config_ids as number[] | undefined,
+			refs: data.refs as string | undefined,
+		};
+
+		return this.plans.addPlanEntry(planId, entryData);
 	}
 
 	updatePlan(planId: number, data: Record<string, unknown>) {
-		return this.plans.updatePlan(planId, data);
+		const planData = {
+			name: data.name as string | undefined,
+			description: data.description as string | undefined,
+			milestone_id: data.milestone_id as number | undefined,
+		};
+
+		return this.plans.updatePlan(planId, planData);
 	}
 
 	updatePlanEntry(
@@ -321,7 +402,16 @@ export class TestRailClient extends NewTestRailClient {
 		entryId: string,
 		data: Record<string, unknown>,
 	) {
-		return this.plans.updatePlanEntry(planId, entryId, data);
+		const entryData = {
+			name: data.name as string | undefined,
+			description: data.description as string | undefined,
+			include_all: data.include_all as boolean | undefined,
+			case_ids: data.case_ids as number[] | undefined,
+			config_ids: data.config_ids as number[] | undefined,
+			refs: data.refs as string | undefined,
+		};
+
+		return this.plans.updatePlanEntry(planId, entryId, entryData);
 	}
 
 	closePlan(planId: number) {

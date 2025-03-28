@@ -3,6 +3,12 @@ import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailResult } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetResultsInputType,
+	GetResultsForCaseInputType,
+	GetResultsForRunInputType,
+	AddResultForCaseInputType,
+} from "../../shared/schemas/results.js";
 
 export class ResultsClient extends BaseTestRailClient {
 	/**
@@ -12,7 +18,7 @@ export class ResultsClient extends BaseTestRailClient {
 	 * @returns テスト結果のリスト
 	 */
 	async getResults(
-		testId: number,
+		testId: GetResultsInputType["testId"],
 		params?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailResult[]> {
 		try {
@@ -34,8 +40,8 @@ export class ResultsClient extends BaseTestRailClient {
 	 * @returns テスト結果のリスト
 	 */
 	async getResultsForCase(
-		runId: number,
-		caseId: number,
+		runId: GetResultsForCaseInputType["runId"],
+		caseId: GetResultsForCaseInputType["caseId"],
 		params?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailResult[]> {
 		try {
@@ -59,7 +65,7 @@ export class ResultsClient extends BaseTestRailClient {
 	 * @returns テスト結果のリスト
 	 */
 	async getResultsForRun(
-		runId: number,
+		runId: GetResultsForRunInputType["runId"],
 		params?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailResult[]> {
 		try {
@@ -81,9 +87,9 @@ export class ResultsClient extends BaseTestRailClient {
 	 * @returns 追加されたテスト結果
 	 */
 	async addResultForCase(
-		runId: number,
-		caseId: number,
-		data: Record<string, unknown>,
+		runId: AddResultForCaseInputType["runId"],
+		caseId: AddResultForCaseInputType["caseId"],
+		data: Partial<Omit<AddResultForCaseInputType, "runId" | "caseId">>,
 	): Promise<TestRailResult> {
 		try {
 			// デバッグログを追加

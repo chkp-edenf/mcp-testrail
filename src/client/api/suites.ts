@@ -2,6 +2,13 @@ import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailSuite } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetSuiteInputType,
+	GetSuitesInputType,
+	AddSuiteInputType,
+	UpdateSuiteInputType,
+	DeleteSuiteInputType,
+} from "../../shared/schemas/suites.js";
 
 export class SuitesClient extends BaseTestRailClient {
 	/**
@@ -9,7 +16,9 @@ export class SuitesClient extends BaseTestRailClient {
 	 * @param suiteId The ID of the test suite
 	 * @returns Promise with test suite details
 	 */
-	async getSuite(suiteId: number): Promise<TestRailSuite> {
+	async getSuite(
+		suiteId: GetSuiteInputType["suiteId"],
+	): Promise<TestRailSuite> {
 		try {
 			const response: AxiosResponse<TestRailSuite> = await this.client.get(
 				`/api/v2/get_suite/${suiteId}`,
@@ -25,7 +34,9 @@ export class SuitesClient extends BaseTestRailClient {
 	 * @param projectId The ID of the project
 	 * @returns Promise with array of test suites
 	 */
-	async getSuites(projectId: number): Promise<TestRailSuite[]> {
+	async getSuites(
+		projectId: GetSuitesInputType["projectId"],
+	): Promise<TestRailSuite[]> {
 		try {
 			const response: AxiosResponse<TestRailSuite[]> = await this.client.get(
 				`/api/v2/get_suites/${projectId}`,
@@ -46,8 +57,11 @@ export class SuitesClient extends BaseTestRailClient {
 	 * @returns Promise with created test suite
 	 */
 	async addSuite(
-		projectId: number,
-		data: Record<string, unknown>,
+		projectId: AddSuiteInputType["projectId"],
+		data: {
+			name: AddSuiteInputType["name"];
+			description?: AddSuiteInputType["description"];
+		},
 	): Promise<TestRailSuite> {
 		try {
 			const response: AxiosResponse<TestRailSuite> = await this.client.post(
@@ -70,8 +84,11 @@ export class SuitesClient extends BaseTestRailClient {
 	 * @returns Promise with updated test suite
 	 */
 	async updateSuite(
-		suiteId: number,
-		data: Record<string, unknown>,
+		suiteId: UpdateSuiteInputType["suiteId"],
+		data: {
+			name?: UpdateSuiteInputType["name"];
+			description?: UpdateSuiteInputType["description"];
+		},
 	): Promise<TestRailSuite> {
 		try {
 			const response: AxiosResponse<TestRailSuite> = await this.client.post(
@@ -88,7 +105,7 @@ export class SuitesClient extends BaseTestRailClient {
 	 * Deletes a test suite
 	 * @param suiteId The ID of the test suite
 	 */
-	async deleteSuite(suiteId: number): Promise<void> {
+	async deleteSuite(suiteId: DeleteSuiteInputType["suiteId"]): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_suite/${suiteId}`, {});
 		} catch (error) {

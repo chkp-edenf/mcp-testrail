@@ -1,7 +1,11 @@
-import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
+import {
+	getUsersSchema,
+	getUserSchema,
+	getUserByEmailSchema,
+} from "../../shared/schemas/users.js";
 
 /**
  * Function to register user-related API tools
@@ -13,7 +17,7 @@ export function registerUserTools(
 	testRailClient: TestRailClient,
 ): void {
 	// Get all users
-	server.tool("getUsers", {}, async () => {
+	server.tool("getUsers", getUsersSchema, async () => {
 		try {
 			const users = await testRailClient.getUsers();
 			const successResponse = createSuccessResponse(
@@ -35,64 +39,52 @@ export function registerUserTools(
 	});
 
 	// Get user by ID
-	server.tool(
-		"getUser",
-		{
-			userId: z.number().describe("TestRail User ID"),
-		},
-		async ({ userId }) => {
-			try {
-				const user = await testRailClient.getUser(userId);
-				const successResponse = createSuccessResponse(
-					"User retrieved successfully",
-					{
-						user,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching user ${userId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getUser", getUserSchema, async ({ userId }) => {
+		try {
+			const user = await testRailClient.getUser(userId);
+			const successResponse = createSuccessResponse(
+				"User retrieved successfully",
+				{
+					user,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching user ${userId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// Get user by email
-	server.tool(
-		"getUserByEmail",
-		{
-			email: z.string().email().describe("Email address of the user"),
-		},
-		async ({ email }) => {
-			try {
-				const user = await testRailClient.getUserByEmail(email);
-				const successResponse = createSuccessResponse(
-					"User retrieved successfully",
-					{
-						user,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching user with email ${email}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getUserByEmail", getUserByEmailSchema, async ({ email }) => {
+		try {
+			const user = await testRailClient.getUserByEmail(email);
+			const successResponse = createSuccessResponse(
+				"User retrieved successfully",
+				{
+					user,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching user with email ${email}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 }

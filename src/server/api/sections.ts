@@ -1,7 +1,14 @@
-import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
+import {
+	getSectionSchema,
+	getSectionsSchema,
+	addSectionSchema,
+	moveSectionSchema,
+	updateSectionSchema,
+	deleteSectionSchema,
+} from "../../shared/schemas/sections.js";
 
 /**
  * セクション関連のAPIツールを登録する関数
@@ -13,46 +20,34 @@ export function registerSectionTools(
 	testRailClient: TestRailClient,
 ): void {
 	// セクション取得
-	server.tool(
-		"getSection",
-		{
-			sectionId: z.number().describe("TestRail Section ID"),
-		},
-		async ({ sectionId }) => {
-			try {
-				const section = await testRailClient.getSection(sectionId);
-				const successResponse = createSuccessResponse(
-					"Section retrieved successfully",
-					{
-						section,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error getting section ${sectionId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getSection", getSectionSchema, async ({ sectionId }) => {
+		try {
+			const section = await testRailClient.getSection(sectionId);
+			const successResponse = createSuccessResponse(
+				"Section retrieved successfully",
+				{
+					section,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error getting section ${sectionId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// プロジェクトのセクション一覧取得
 	server.tool(
 		"getSections",
-		{
-			projectId: z.number().describe("TestRail Project ID"),
-			suiteId: z
-				.number()
-				.optional()
-				.describe("TestRail Suite ID (optional for single suite projects)"),
-		},
+		getSectionsSchema,
 		async ({ projectId, suiteId }) => {
 			try {
 				const sections = await testRailClient.getSections(projectId, suiteId);
@@ -81,16 +76,7 @@ export function registerSectionTools(
 	// セクション作成
 	server.tool(
 		"addSection",
-		{
-			projectId: z.number().describe("TestRail Project ID"),
-			name: z.string().describe("Section name (required)"),
-			description: z.string().optional().describe("Section description"),
-			suiteId: z
-				.number()
-				.optional()
-				.describe("Test Suite ID (required for multi-suite projects)"),
-			parentId: z.number().optional().describe("Parent section ID"),
-		},
+		addSectionSchema,
 		async ({ projectId, name, description, suiteId, parentId }) => {
 			try {
 				const sectionData = {
@@ -124,19 +110,7 @@ export function registerSectionTools(
 	// セクション移動
 	server.tool(
 		"moveSection",
-		{
-			sectionId: z.number().describe("TestRail Section ID"),
-			parentId: z
-				.number()
-				.nullable()
-				.optional()
-				.describe("Parent section ID (null for root)"),
-			afterId: z
-				.number()
-				.nullable()
-				.optional()
-				.describe("ID of the section to position after"),
-		},
+		moveSectionSchema,
 		async ({ sectionId, parentId, afterId }) => {
 			try {
 				const data: Record<string, unknown> = {};
@@ -167,11 +141,7 @@ export function registerSectionTools(
 	// セクション更新
 	server.tool(
 		"updateSection",
-		{
-			sectionId: z.number().describe("TestRail Section ID"),
-			name: z.string().optional().describe("Section name"),
-			description: z.string().optional().describe("Section description"),
-		},
+		updateSectionSchema,
 		async ({ sectionId, name, description }) => {
 			try {
 				const data: Record<string, unknown> = {};
@@ -204,13 +174,7 @@ export function registerSectionTools(
 	// セクション削除
 	server.tool(
 		"deleteSection",
-		{
-			sectionId: z.number().describe("TestRail Section ID"),
-			soft: z
-				.boolean()
-				.optional()
-				.describe("True for soft delete (preview only)"),
-		},
+		deleteSectionSchema,
 		async ({ sectionId, soft }) => {
 			try {
 				await testRailClient.deleteSection(sectionId, soft);

@@ -2,6 +2,13 @@ import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailMilestone } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetMilestoneInputType,
+	GetMilestonesInputType,
+	AddMilestoneInputType,
+	UpdateMilestoneInputType,
+	DeleteMilestoneInputType,
+} from "../../shared/schemas/milestones.js";
 
 export class MilestonesClient extends BaseTestRailClient {
 	/**
@@ -9,7 +16,9 @@ export class MilestonesClient extends BaseTestRailClient {
 	 * @param milestoneId The ID of the milestone
 	 * @returns Promise with milestone details
 	 */
-	async getMilestone(milestoneId: number): Promise<TestRailMilestone> {
+	async getMilestone(
+		milestoneId: GetMilestoneInputType["milestoneId"],
+	): Promise<TestRailMilestone> {
 		try {
 			const response: AxiosResponse<TestRailMilestone> = await this.client.get(
 				`/api/v2/get_milestone/${milestoneId}`,
@@ -27,7 +36,7 @@ export class MilestonesClient extends BaseTestRailClient {
 	 * @returns Promise with array of milestones
 	 */
 	async getMilestones(
-		projectId: number,
+		projectId: GetMilestonesInputType["projectId"],
 		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailMilestone[]> {
 		try {
@@ -51,8 +60,8 @@ export class MilestonesClient extends BaseTestRailClient {
 	 * @returns Promise with created milestone
 	 */
 	async addMilestone(
-		projectId: number,
-		data: Record<string, unknown>,
+		projectId: AddMilestoneInputType["projectId"],
+		data: Omit<AddMilestoneInputType, "projectId">,
 	): Promise<TestRailMilestone> {
 		try {
 			const response: AxiosResponse<TestRailMilestone> = await this.client.post(
@@ -75,8 +84,8 @@ export class MilestonesClient extends BaseTestRailClient {
 	 * @returns Promise with updated milestone
 	 */
 	async updateMilestone(
-		milestoneId: number,
-		data: Record<string, unknown>,
+		milestoneId: UpdateMilestoneInputType["milestoneId"],
+		data: Omit<UpdateMilestoneInputType, "milestoneId">,
 	): Promise<TestRailMilestone> {
 		try {
 			const response: AxiosResponse<TestRailMilestone> = await this.client.post(
@@ -93,7 +102,9 @@ export class MilestonesClient extends BaseTestRailClient {
 	 * Deletes a milestone
 	 * @param milestoneId The ID of the milestone
 	 */
-	async deleteMilestone(milestoneId: number): Promise<void> {
+	async deleteMilestone(
+		milestoneId: DeleteMilestoneInputType["milestoneId"],
+	): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_milestone/${milestoneId}`, {});
 		} catch (error) {

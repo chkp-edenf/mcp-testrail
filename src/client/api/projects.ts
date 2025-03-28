@@ -1,12 +1,20 @@
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailProject } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetProjectInputType,
+	AddProjectInputType,
+	UpdateProjectInputType,
+	DeleteProjectInputType,
+} from "../../shared/schemas/projects.js";
 
 export class ProjectsClient extends BaseTestRailClient {
 	/**
 	 * Get a specific project
 	 */
-	async getProject(projectId: number): Promise<TestRailProject> {
+	async getProject(
+		projectId: GetProjectInputType["projectId"],
+	): Promise<TestRailProject> {
 		try {
 			const response = await this.client.get<TestRailProject>(
 				`/api/v2/get_project/${projectId}`,
@@ -42,12 +50,9 @@ export class ProjectsClient extends BaseTestRailClient {
 	/**
 	 * Create a new project
 	 */
-	async addProject(data: {
-		name: string;
-		announcement?: string;
-		show_announcement?: boolean;
-		suite_mode?: number;
-	}): Promise<TestRailProject> {
+	async addProject(
+		data: Omit<AddProjectInputType, "suite_mode"> & { suite_mode?: number },
+	): Promise<TestRailProject> {
 		try {
 			const response = await this.client.post<TestRailProject>(
 				"/api/v2/add_project",
@@ -63,13 +68,8 @@ export class ProjectsClient extends BaseTestRailClient {
 	 * Update an existing project
 	 */
 	async updateProject(
-		projectId: number,
-		data: {
-			name?: string;
-			announcement?: string;
-			show_announcement?: boolean;
-			is_completed?: boolean;
-		},
+		projectId: UpdateProjectInputType["projectId"],
+		data: Omit<UpdateProjectInputType, "projectId">,
 	): Promise<TestRailProject> {
 		try {
 			const response = await this.client.post<TestRailProject>(
@@ -85,7 +85,9 @@ export class ProjectsClient extends BaseTestRailClient {
 	/**
 	 * Delete an existing project
 	 */
-	async deleteProject(projectId: number): Promise<void> {
+	async deleteProject(
+		projectId: DeleteProjectInputType["projectId"],
+	): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_project/${projectId}`, {});
 		} catch (error) {

@@ -1,7 +1,12 @@
-import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
+import {
+	getResultsSchema,
+	getResultsForCaseSchema,
+	getResultsForRunSchema,
+	addResultForCaseSchema,
+} from "../../shared/schemas/results.js";
 
 /**
  * Function to register test result-related API tools
@@ -15,22 +20,7 @@ export function registerResultTools(
 	// Get results for a test
 	server.tool(
 		"getResults",
-		{
-			testId: z.number().describe("TestRail Test ID"),
-			limit: z
-				.number()
-				.optional()
-				.describe("The number of results to return per page"),
-			offset: z
-				.number()
-				.optional()
-				.describe("The offset to start returning results"),
-			statusId: z
-				.string()
-				.optional()
-				.describe("Filter by status IDs (comma-separated)"),
-			defectsFilter: z.string().optional().describe("Filter by defect ID"),
-		},
+		getResultsSchema,
 		async ({ testId, limit, offset, statusId, defectsFilter }) => {
 			try {
 				const params: Record<
@@ -73,23 +63,7 @@ export function registerResultTools(
 	// Get results for a case in a run
 	server.tool(
 		"getResultsForCase",
-		{
-			runId: z.number().describe("TestRail Run ID"),
-			caseId: z.number().describe("TestRail Case ID"),
-			limit: z
-				.number()
-				.optional()
-				.describe("The number of results to return per page"),
-			offset: z
-				.number()
-				.optional()
-				.describe("The offset to start returning results"),
-			statusId: z
-				.string()
-				.optional()
-				.describe("Filter by status IDs (comma-separated)"),
-			defectsFilter: z.string().optional().describe("Filter by defect ID"),
-		},
+		getResultsForCaseSchema,
 		async ({ runId, caseId, limit, offset, statusId, defectsFilter }) => {
 			try {
 				const params: Record<
@@ -138,22 +112,7 @@ export function registerResultTools(
 	// Get results for a run
 	server.tool(
 		"getResultsForRun",
-		{
-			runId: z.number().describe("TestRail Run ID"),
-			limit: z
-				.number()
-				.optional()
-				.describe("The number of results to return per page"),
-			offset: z
-				.number()
-				.optional()
-				.describe("The offset to start returning results"),
-			statusId: z
-				.string()
-				.optional()
-				.describe("Filter by status IDs (comma-separated)"),
-			defectsFilter: z.string().optional().describe("Filter by defect ID"),
-		},
+		getResultsForRunSchema,
 		async ({ runId, limit, offset, statusId, defectsFilter }) => {
 			try {
 				const params: Record<
@@ -199,30 +158,7 @@ export function registerResultTools(
 	// Add a result for a specific test case
 	server.tool(
 		"addResultForCase",
-		{
-			runId: z.number().describe("TestRail Run ID"),
-			caseId: z.number().describe("TestRail Case ID"),
-			statusId: z
-				.number()
-				.optional()
-				.describe(
-					"Status ID (1:Pass, 2:Blocked, 3:Untested, 4:Retest, 5:Fail)",
-				),
-			comment: z.string().optional().describe("Comment for the test result"),
-			defects: z
-				.string()
-				.optional()
-				.describe("Defects linked to the test result"),
-			assignedtoId: z
-				.number()
-				.optional()
-				.describe("User to assign the test to"),
-			version: z.string().optional().describe("Version or build tested"),
-			elapsed: z
-				.string()
-				.optional()
-				.describe("Time spent testing (e.g., '30s', '2m 30s')"),
-		},
+		addResultForCaseSchema,
 		async ({
 			runId,
 			caseId,

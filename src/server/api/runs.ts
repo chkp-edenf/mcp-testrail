@@ -1,7 +1,14 @@
-import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/testRailApi.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
+import {
+	getRunsSchema,
+	getRunSchema,
+	addRunSchema,
+	updateRunSchema,
+	closeRunSchema,
+	deleteRunSchema,
+} from "../../shared/schemas/runs.js";
 
 /**
  * Function to register test run-related API tools
@@ -15,37 +22,7 @@ export function registerRunTools(
 	// Get all test runs for a project
 	server.tool(
 		"getRuns",
-		{
-			projectId: z.number().describe("TestRail Project ID"),
-			createdAfter: z
-				.number()
-				.optional()
-				.describe("Only return runs created after this timestamp"),
-			createdBefore: z
-				.number()
-				.optional()
-				.describe("Only return runs created before this timestamp"),
-			createdBy: z
-				.array(z.number())
-				.optional()
-				.describe("Only return runs created by these user IDs"),
-			milestoneId: z
-				.number()
-				.optional()
-				.describe("Only return runs for this milestone"),
-			suiteId: z
-				.number()
-				.optional()
-				.describe("Only return runs for this test suite"),
-			limit: z
-				.number()
-				.optional()
-				.describe("The number of runs to return per page"),
-			offset: z
-				.number()
-				.optional()
-				.describe("The offset to start returning runs"),
-		},
+		getRunsSchema,
 		async ({ projectId, createdBy, ...filters }) => {
 			try {
 				// Convert createdBy to string format
@@ -84,63 +61,34 @@ export function registerRunTools(
 	);
 
 	// Get a specific test run
-	server.tool(
-		"getRun",
-		{
-			runId: z.number().describe("TestRail Run ID"),
-		},
-		async ({ runId }) => {
-			try {
-				const run = await testRailClient.getRun(runId);
-				const successResponse = createSuccessResponse(
-					"Test run retrieved successfully",
-					{
-						run,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching test run ${runId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getRun", getRunSchema, async ({ runId }) => {
+		try {
+			const run = await testRailClient.getRun(runId);
+			const successResponse = createSuccessResponse(
+				"Test run retrieved successfully",
+				{
+					run,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching test run ${runId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// Create a new test run
 	server.tool(
 		"addRun",
-		{
-			projectId: z.number().describe("TestRail Project ID"),
-			suiteId: z
-				.number()
-				.optional()
-				.describe("Suite ID (required for multi-suite projects)"),
-			name: z.string().describe("Test run name"),
-			description: z.string().optional().describe("Test run description"),
-			milestoneId: z.number().optional().describe("Milestone ID"),
-			assignedtoId: z.number().optional().describe("User ID to assign to"),
-			includeAll: z
-				.boolean()
-				.optional()
-				.describe("Include all test cases from the suite"),
-			caseIds: z
-				.array(z.number())
-				.optional()
-				.describe("Specific case IDs to include"),
-			configIds: z
-				.array(z.number())
-				.optional()
-				.describe("Configuration IDs to use"),
-			refs: z.string().optional().describe("Reference/requirement IDs"),
-		},
+		addRunSchema,
 		async ({
 			projectId,
 			suiteId,
@@ -193,22 +141,7 @@ export function registerRunTools(
 	// Update an existing test run
 	server.tool(
 		"updateRun",
-		{
-			runId: z.number().describe("TestRail Run ID"),
-			name: z.string().optional().describe("Test run name"),
-			description: z.string().optional().describe("Test run description"),
-			milestoneId: z.number().optional().describe("Milestone ID"),
-			assignedtoId: z.number().optional().describe("User ID to assign to"),
-			includeAll: z
-				.boolean()
-				.optional()
-				.describe("Include all test cases from the suite"),
-			caseIds: z
-				.array(z.number())
-				.optional()
-				.describe("Specific case IDs to include"),
-			refs: z.string().optional().describe("Reference/requirement IDs"),
-		},
+		updateRunSchema,
 		async ({
 			runId,
 			name,
@@ -254,58 +187,52 @@ export function registerRunTools(
 	);
 
 	// Close a test run
-	server.tool(
-		"closeRun",
-		{
-			runId: z.number().describe("TestRail Run ID"),
-		},
-		async ({ runId }) => {
-			try {
-				await testRailClient.closeRun(runId);
-				const successResponse = createSuccessResponse(
-					`Test run ${runId} closed successfully`,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error closing test run ${runId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("closeRun", closeRunSchema, async ({ runId }) => {
+		try {
+			const run = await testRailClient.closeRun(runId);
+			const successResponse = createSuccessResponse(
+				"Test run closed successfully",
+				{
+					run,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error closing test run ${runId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// Delete a test run
-	server.tool(
-		"deleteRun",
-		{
-			runId: z.number().describe("TestRail Run ID"),
-		},
-		async ({ runId }) => {
-			try {
-				await testRailClient.deleteRun(runId);
-				const successResponse = createSuccessResponse(
-					`Test run ${runId} deleted successfully`,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error deleting test run ${runId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("deleteRun", deleteRunSchema, async ({ runId }) => {
+		try {
+			await testRailClient.deleteRun(runId);
+			const successResponse = createSuccessResponse(
+				"Test run deleted successfully",
+				{
+					runId,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error deleting test run ${runId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 }

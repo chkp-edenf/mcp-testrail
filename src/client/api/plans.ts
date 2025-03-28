@@ -2,6 +2,17 @@ import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailPlan, TestRailPlanEntry } from "./types.js";
 import { handleApiError } from "./utils.js";
+import {
+	GetPlanInputType,
+	GetPlansInputType,
+	AddPlanInputType,
+	AddPlanEntryInputType,
+	UpdatePlanInputType,
+	UpdatePlanEntryInputType,
+	ClosePlanInputType,
+	DeletePlanInputType,
+	DeletePlanEntryInputType,
+} from "../../shared/schemas/plans.js";
 
 export class PlansClient extends BaseTestRailClient {
 	/**
@@ -9,7 +20,7 @@ export class PlansClient extends BaseTestRailClient {
 	 * @param planId The ID of the test plan
 	 * @returns Promise with test plan details
 	 */
-	async getPlan(planId: number): Promise<TestRailPlan> {
+	async getPlan(planId: GetPlanInputType["planId"]): Promise<TestRailPlan> {
 		try {
 			const response: AxiosResponse<TestRailPlan> = await this.client.get(
 				`/api/v2/get_plan/${planId}`,
@@ -27,7 +38,7 @@ export class PlansClient extends BaseTestRailClient {
 	 * @returns Promise with array of test plans
 	 */
 	async getPlans(
-		projectId: number,
+		projectId: GetPlansInputType["projectId"],
 		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailPlan[]> {
 		try {
@@ -51,8 +62,8 @@ export class PlansClient extends BaseTestRailClient {
 	 * @returns Promise with created test plan
 	 */
 	async addPlan(
-		projectId: number,
-		data: Record<string, unknown>,
+		projectId: AddPlanInputType["projectId"],
+		data: Omit<AddPlanInputType, "projectId">,
 	): Promise<TestRailPlan> {
 		try {
 			const response: AxiosResponse<TestRailPlan> = await this.client.post(
@@ -75,8 +86,8 @@ export class PlansClient extends BaseTestRailClient {
 	 * @returns Promise with created plan entry
 	 */
 	async addPlanEntry(
-		planId: number,
-		data: Record<string, unknown>,
+		planId: AddPlanEntryInputType["planId"],
+		data: Omit<AddPlanEntryInputType, "planId">,
 	): Promise<TestRailPlanEntry> {
 		try {
 			const response: AxiosResponse<TestRailPlanEntry> = await this.client.post(
@@ -96,8 +107,8 @@ export class PlansClient extends BaseTestRailClient {
 	 * @returns Promise with updated test plan
 	 */
 	async updatePlan(
-		planId: number,
-		data: Record<string, unknown>,
+		planId: UpdatePlanInputType["planId"],
+		data: Omit<UpdatePlanInputType, "planId">,
 	): Promise<TestRailPlan> {
 		try {
 			const response: AxiosResponse<TestRailPlan> = await this.client.post(
@@ -118,9 +129,9 @@ export class PlansClient extends BaseTestRailClient {
 	 * @returns Promise with updated plan entry
 	 */
 	async updatePlanEntry(
-		planId: number,
-		entryId: string,
-		data: Record<string, unknown>,
+		planId: UpdatePlanEntryInputType["planId"],
+		entryId: UpdatePlanEntryInputType["entryId"],
+		data: Omit<UpdatePlanEntryInputType, "planId" | "entryId">,
 	): Promise<TestRailPlanEntry> {
 		try {
 			const response: AxiosResponse<TestRailPlanEntry> = await this.client.post(
@@ -141,7 +152,7 @@ export class PlansClient extends BaseTestRailClient {
 	 * @param planId The ID of the test plan
 	 * @returns Promise with closed test plan
 	 */
-	async closePlan(planId: number): Promise<TestRailPlan> {
+	async closePlan(planId: ClosePlanInputType["planId"]): Promise<TestRailPlan> {
 		try {
 			const response: AxiosResponse<TestRailPlan> = await this.client.post(
 				`/api/v2/close_plan/${planId}`,
@@ -157,7 +168,7 @@ export class PlansClient extends BaseTestRailClient {
 	 * Deletes a test plan
 	 * @param planId The ID of the test plan
 	 */
-	async deletePlan(planId: number): Promise<void> {
+	async deletePlan(planId: DeletePlanInputType["planId"]): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_plan/${planId}`, {});
 		} catch (error) {
@@ -170,7 +181,10 @@ export class PlansClient extends BaseTestRailClient {
 	 * @param planId The ID of the test plan
 	 * @param entryId The ID of the entry
 	 */
-	async deletePlanEntry(planId: number, entryId: string): Promise<void> {
+	async deletePlanEntry(
+		planId: DeletePlanEntryInputType["planId"],
+		entryId: DeletePlanEntryInputType["entryId"],
+	): Promise<void> {
 		try {
 			await this.client.post(
 				`/api/v2/delete_plan_entry/${planId}/${entryId}`,

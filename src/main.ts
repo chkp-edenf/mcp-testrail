@@ -8,7 +8,7 @@ import { TestRailClient, TestRailClientConfig } from "./client/testRailApi.js";
 import * as fs from "node:fs";
 import { z } from "zod";
 
-// TestRailの型定義
+// TestRail type definitions
 interface TestRailProject {
 	id: number;
 	name: string;
@@ -21,12 +21,31 @@ interface TestRailCase {
 	[key: string]: unknown;
 }
 
-// Initialize TestRail client
+// Validate TestRail settings
+if (
+	!process.env.TESTRAIL_URL ||
+	!process.env.TESTRAIL_USERNAME ||
+	!process.env.TESTRAIL_API_KEY
+) {
+	throw new Error(
+		"TESTRAIL_URL, TESTRAIL_USERNAME, and TESTRAIL_API_KEY must be set",
+	);
+}
+
+// Fix URL format: https://example.testrail.com/index.php?/
+const url = process.env.TESTRAIL_URL;
+const baseURL = url.endsWith("/index.php?/")
+	? url
+	: url.endsWith("/")
+		? `${url}index.php?`
+		: `${url}/index.php?`;
+
+// TestRail client configuration
 const testRailConfig: TestRailClientConfig = {
-	baseURL: process.env.TESTRAIL_URL || "https://your-instance.testrail.io",
+	baseURL: baseURL,
 	auth: {
-		username: process.env.TESTRAIL_USERNAME || "your-email@example.com",
-		password: process.env.TESTRAIL_API_KEY || "your-api-key",
+		username: process.env.TESTRAIL_USERNAME,
+		password: process.env.TESTRAIL_API_KEY,
 	},
 };
 
@@ -36,13 +55,13 @@ console.error(`TestRail Username: ${testRailConfig.auth.username}`);
 
 const testRailClient = new TestRailClient(testRailConfig);
 
-// Create an MCP server
+// Create MCP server
 const server = new McpServer({
 	name: "TestRail MCP Server",
 	version: "1.0.0",
 });
 
-// Add a tool to get TestRail projects
+// Tool to get all TestRail projects
 server.tool("getProjects", {}, async () => {
 	try {
 		const projects = await testRailClient.getProjects();
@@ -50,7 +69,7 @@ server.tool("getProjects", {}, async () => {
 			content: [
 				{
 					type: "text",
-					text: `Found ${projects.length} projects: \n${projects.map((p) => `- ${p.id}: ${p.name}`).join("\n")}`,
+					text: `TestRail Projects: ${JSON.stringify(projects, null, 2)}`,
 				},
 			],
 		};
@@ -64,7 +83,7 @@ server.tool("getProjects", {}, async () => {
 	}
 });
 
-// Add a tool to get test cases for a project
+// Tool to get test cases for a specific project
 server.tool(
 	"getTestCases",
 	{ projectId: z.number() },
@@ -75,7 +94,7 @@ server.tool(
 				content: [
 					{
 						type: "text",
-						text: `Found ${cases.length} test cases for project ${projectId}: \n${cases.map((c) => `- ${c.id}: ${c.title}`).join("\n")}`,
+						text: `Test cases for project ${projectId}: ${JSON.stringify(cases, null, 2)}`,
 					},
 				],
 			};
@@ -84,14 +103,17 @@ server.tool(
 				error instanceof Error ? error.message : String(error);
 			return {
 				content: [
-					{ type: "text", text: `Error fetching test cases: ${errorMessage}` },
+					{
+						type: "text",
+						text: `Error fetching test cases for project ${projectId}: ${errorMessage}`,
+					},
 				],
 			};
 		}
 	},
 );
 
-// Add a tool to add a test result
+// Tool to add a test result
 server.tool(
 	"addTestResult",
 	{
@@ -126,7 +148,7 @@ server.tool(
 	},
 );
 
-// Add a tool to upload an attachment to a test case
+// Tool to upload an attachment to a test case
 server.tool(
 	"uploadAttachment",
 	{
@@ -163,7 +185,7 @@ server.tool(
 	},
 );
 
-// Add a dynamic resource for test case details
+// Resource template for test case details
 server.resource(
 	"testcase",
 	new ResourceTemplate("testcase://{caseId}", { list: undefined }),
@@ -202,8 +224,9 @@ server.resource(
 	},
 );
 
-// Start receiving messages on stdin and sending messages on stdout
+// Start the server with StdioServerTransport
 const transport = new StdioServerTransport();
 
 console.error("Starting TestRail MCP Server...");
 await server.connect(transport);
+console.error("Server started successfully.");

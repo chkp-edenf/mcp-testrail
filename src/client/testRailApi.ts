@@ -271,7 +271,7 @@ export class TestRailClient {
 			const response = await this.client.post<{ attachment_id: number }>(
 				`/api/v2/add_attachment_to_case/${caseId}`,
 				formData,
-				{ headers }
+				{ headers },
 			);
 
 			return response.data;
@@ -309,7 +309,9 @@ export class TestRailClient {
 
 	async getCase(caseId: number): Promise<TestRailCase> {
 		try {
-			const response = await this.client.get<TestRailCase>(`/api/v2/get_case/${caseId}`);
+			const response = await this.client.get<TestRailCase>(
+				`/api/v2/get_case/${caseId}`,
+			);
 			return response.data;
 		} catch (error) {
 			handleApiError(`Failed to get case ${caseId}`, error);
@@ -324,7 +326,7 @@ export class TestRailClient {
 		try {
 			const response = await this.client.get<TestRailCase[]>(
 				`/api/v2/get_cases/${projectId}`,
-				{ params }
+				{ params },
 			);
 			return response.data;
 		} catch (error) {
@@ -333,11 +335,14 @@ export class TestRailClient {
 		}
 	}
 
-	async addCase(sectionId: number, data: Record<string, unknown>): Promise<TestRailCase> {
+	async addCase(
+		sectionId: number,
+		data: Record<string, unknown>,
+	): Promise<TestRailCase> {
 		try {
 			const response = await this.client.post<TestRailCase>(
 				`/api/v2/add_case/${sectionId}`,
-				data
+				data,
 			);
 			return response.data;
 		} catch (error) {
@@ -350,7 +355,9 @@ export class TestRailClient {
 
 	async getProject(projectId: number): Promise<TestRailProject> {
 		try {
-			const response = await this.client.get<TestRailProject>(`/api/v2/get_project/${projectId}`);
+			const response = await this.client.get<TestRailProject>(
+				`/api/v2/get_project/${projectId}`,
+			);
 			return response.data;
 		} catch (error) {
 			handleApiError(`Failed to get project ${projectId}`, error);
@@ -358,11 +365,13 @@ export class TestRailClient {
 		}
 	}
 
-	async getProjects(params?: Record<string, string | number | boolean | null | undefined>): Promise<TestRailProject[]> {
+	async getProjects(
+		params?: Record<string, string | number | boolean | null | undefined>,
+	): Promise<TestRailProject[]> {
 		try {
 			const response = await this.client.get<TestRailProject[]>(
 				"/api/v2/get_projects",
-				{ params }
+				{ params },
 			);
 			return response.data;
 		} catch (error) {
@@ -373,11 +382,14 @@ export class TestRailClient {
 
 	// Results API
 
-	async addResult(testId: number, data: Record<string, unknown>): Promise<TestRailResult> {
+	async addResult(
+		testId: number,
+		data: Record<string, unknown>,
+	): Promise<TestRailResult> {
 		try {
 			const response = await this.client.post<TestRailResult>(
 				`/api/v2/add_result/${testId}`,
-				data
+				data,
 			);
 			return response.data;
 		} catch (error) {
@@ -394,23 +406,26 @@ export class TestRailClient {
 		try {
 			const response = await this.client.post<TestRailResult>(
 				`/api/v2/add_result_for_case/${runId}/${caseId}`,
-				data
+				data,
 			);
 			return response.data;
 		} catch (error) {
-			// 400エラーの場合は、ログを出力してスキップ（ユーザーのTestID指定ミスの可能性）
+			// For 400 errors, log and skip (possible user error in TestID specification)
 			if (axios.isAxiosError(error) && error.response?.status === 400) {
 				console.error(
-					`Skipping result for case ${caseId} in run ${runId} due to 400 Bad Request`
+					`Skipping result for case ${caseId} in run ${runId} due to 400 Bad Request`,
 				);
 				if (error.response?.data) {
 					console.error(
 						"Response:",
-						JSON.stringify(error.response.data, null, 2)
+						JSON.stringify(error.response.data, null, 2),
 					);
 				}
 			}
-			handleApiError(`Failed to add result for case ${caseId} in run ${runId}`, error);
+			handleApiError(
+				`Failed to add result for case ${caseId} in run ${runId}`,
+				error,
+			);
 			throw error;
 		}
 	}
@@ -419,7 +434,9 @@ export class TestRailClient {
 
 	async getRun(runId: number): Promise<TestRailRun> {
 		try {
-			const response = await this.client.get<TestRailRun>(`/api/v2/get_run/${runId}`);
+			const response = await this.client.get<TestRailRun>(
+				`/api/v2/get_run/${runId}`,
+			);
 			return response.data;
 		} catch (error) {
 			handleApiError(`Failed to get run ${runId}`, error);
@@ -429,7 +446,10 @@ export class TestRailClient {
 
 	async addRun(projectId: number, data: AddRunPayload): Promise<TestRailRun> {
 		try {
-			const response = await this.client.post<TestRailRun>(`/api/v2/add_run/${projectId}`, data);
+			const response = await this.client.post<TestRailRun>(
+				`/api/v2/add_run/${projectId}`,
+				data,
+			);
 			return response.data;
 		} catch (error) {
 			handleApiError(`Failed to add run to project ${projectId}`, error);
@@ -442,7 +462,7 @@ export class TestRailClient {
 	async getUserByEmail(email: string): Promise<TestRailUser> {
 		try {
 			const response = await this.client.get<TestRailUser>(
-				`/api/v2/get_user_by_email?email=${encodeURIComponent(email)}`
+				`/api/v2/get_user_by_email?email=${encodeURIComponent(email)}`,
 			);
 			return response.data;
 		} catch (error) {

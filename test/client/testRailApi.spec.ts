@@ -950,4 +950,404 @@ describe('TestRailClient', () => {
       expect(result).toEqual(mockUser);
     });
   });
+  
+  describe('Plans API', () => {
+    it('retrieves a specific test plan', async () => {
+      // Mock response
+      const mockPlan = {
+        id: 1,
+        name: 'Test Plan',
+        description: 'This is a test plan',
+        milestone_id: 1,
+        assignedto_id: 1,
+        project_id: 1,
+        created_on: 1609459200,
+        created_by: 1,
+        completed_on: null,
+        is_completed: false,
+        passed_count: 5,
+        blocked_count: 2,
+        untested_count: 3,
+        retest_count: 0,
+        failed_count: 1,
+        entries: [
+          {
+            id: 'abc123',
+            suite_id: 1,
+            name: 'Test Entry',
+            description: 'Test entry description',
+            include_all: true,
+            runs: [
+              {
+                id: 101,
+                suite_id: 1,
+                name: 'Test Run',
+                description: '',
+                milestone_id: 1,
+                assignedto_id: 1,
+                include_all: true,
+                is_completed: false,
+                completed_on: null,
+                config: null,
+                config_ids: [],
+                passed_count: 5,
+                blocked_count: 2,
+                untested_count: 3,
+                retest_count: 0,
+                failed_count: 1,
+                custom_status_count: {},
+                created_on: 1609459200,
+                created_by: 1,
+                plan_id: 1,
+                url: 'http://example.com/run/101',
+                refs: ''
+              }
+            ],
+            refs: 'REF-1'
+          }
+        ],
+        url: 'http://example.com/plan/1'
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockPlan });
+      
+      // Test method
+      const result = await client.getPlan(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_plan/1');
+      
+      // Verify result
+      expect(result).toEqual(mockPlan);
+    });
+    
+    it('retrieves all test plans for a project', async () => {
+      // Mock response
+      const mockPlans = [
+        {
+          id: 1,
+          name: 'Test Plan 1',
+          description: 'This is test plan 1',
+          milestone_id: 1,
+          assignedto_id: 1,
+          project_id: 1,
+          created_on: 1609459200,
+          created_by: 1,
+          completed_on: null,
+          is_completed: false,
+          passed_count: 5,
+          blocked_count: 2,
+          untested_count: 3,
+          retest_count: 0,
+          failed_count: 1,
+          entries: [],
+          url: 'http://example.com/plan/1'
+        },
+        {
+          id: 2,
+          name: 'Test Plan 2',
+          description: 'This is test plan 2',
+          milestone_id: 2,
+          assignedto_id: 1,
+          project_id: 1,
+          created_on: 1609559200,
+          created_by: 1,
+          completed_on: null,
+          is_completed: false,
+          passed_count: 10,
+          blocked_count: 0,
+          untested_count: 5,
+          retest_count: 0,
+          failed_count: 0,
+          entries: [],
+          url: 'http://example.com/plan/2'
+        }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockPlans });
+      
+      // Test method
+      const result = await client.getPlans(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_plans/1', expect.anything());
+      
+      // Verify result
+      expect(result).toEqual(mockPlans);
+    });
+    
+    it('creates a new test plan', async () => {
+      // Mock response
+      const mockPlan = {
+        id: 3,
+        name: 'New Test Plan',
+        description: 'This is a new test plan',
+        milestone_id: 1,
+        assignedto_id: null,
+        project_id: 1,
+        created_on: 1609659200,
+        created_by: 1,
+        completed_on: null,
+        is_completed: false,
+        passed_count: 0,
+        blocked_count: 0,
+        untested_count: 10,
+        retest_count: 0,
+        failed_count: 0,
+        entries: [
+          {
+            id: 'xyz789',
+            suite_id: 1,
+            name: 'Test Suite Run',
+            description: null,
+            include_all: true,
+            runs: [],
+            refs: null
+          }
+        ],
+        url: 'http://example.com/plan/3'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockPlan });
+      
+      // Test data
+      const planData = {
+        name: 'New Test Plan',
+        description: 'This is a new test plan',
+        milestone_id: 1,
+        entries: [
+          {
+            suite_id: 1,
+            name: 'Test Suite Run',
+            include_all: true
+          }
+        ]
+      };
+      
+      // Test method
+      const result = await client.addPlan(1, planData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_plan/1', planData);
+      
+      // Verify result
+      expect(result).toEqual(mockPlan);
+    });
+    
+    it('adds an entry to an existing test plan', async () => {
+      // Mock response
+      const mockEntry = {
+        id: 'def456',
+        suite_id: 2,
+        name: 'New Entry',
+        description: 'This is a new entry',
+        include_all: false,
+        case_ids: [1, 2, 3],
+        runs: [
+          {
+            id: 102,
+            suite_id: 2,
+            name: 'New Entry',
+            description: 'This is a new entry',
+            milestone_id: null,
+            assignedto_id: null,
+            include_all: false,
+            is_completed: false,
+            completed_on: null,
+            config: null,
+            config_ids: [],
+            passed_count: 0,
+            blocked_count: 0,
+            untested_count: 3,
+            retest_count: 0,
+            failed_count: 0,
+            custom_status_count: {},
+            created_on: 1609759200,
+            created_by: 1,
+            plan_id: 1,
+            url: 'http://example.com/run/102',
+            refs: ''
+          }
+        ],
+        refs: null
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockEntry });
+      
+      // Test data
+      const entryData = {
+        suite_id: 2,
+        name: 'New Entry',
+        description: 'This is a new entry',
+        include_all: false,
+        case_ids: [1, 2, 3]
+      };
+      
+      // Test method
+      const result = await client.addPlanEntry(1, entryData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_plan_entry/1', entryData);
+      
+      // Verify result
+      expect(result).toEqual(mockEntry);
+    });
+    
+    it('updates an existing test plan', async () => {
+      // Mock response
+      const mockPlan = {
+        id: 1,
+        name: 'Updated Test Plan',
+        description: 'This test plan has been updated',
+        milestone_id: 2,
+        assignedto_id: 1,
+        project_id: 1,
+        created_on: 1609459200,
+        created_by: 1,
+        completed_on: null,
+        is_completed: false,
+        passed_count: 5,
+        blocked_count: 2,
+        untested_count: 3,
+        retest_count: 0,
+        failed_count: 1,
+        entries: [],
+        url: 'http://example.com/plan/1'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockPlan });
+      
+      // Test data
+      const planData = {
+        name: 'Updated Test Plan',
+        description: 'This test plan has been updated',
+        milestone_id: 2
+      };
+      
+      // Test method
+      const result = await client.updatePlan(1, planData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_plan/1', planData);
+      
+      // Verify result
+      expect(result).toEqual(mockPlan);
+    });
+    
+    it('updates an existing test plan entry', async () => {
+      // Mock response
+      const mockEntry = {
+        id: 'abc123',
+        suite_id: 1,
+        name: 'Updated Entry',
+        description: 'This entry has been updated',
+        include_all: false,
+        case_ids: [4, 5],
+        runs: [],
+        refs: 'REF-1'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockEntry });
+      
+      // Test data
+      const entryData = {
+        name: 'Updated Entry',
+        description: 'This entry has been updated',
+        include_all: false,
+        case_ids: [4, 5]
+      };
+      
+      // Test method
+      const result = await client.updatePlanEntry(1, 'abc123', entryData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_plan_entry/1/abc123', entryData);
+      
+      // Verify result
+      expect(result).toEqual(mockEntry);
+    });
+    
+    it('closes a test plan', async () => {
+      // Mock response
+      const mockPlan = {
+        id: 1,
+        name: 'Test Plan',
+        description: 'This is a test plan',
+        milestone_id: 1,
+        assignedto_id: 1,
+        project_id: 1,
+        created_on: 1609459200,
+        created_by: 1,
+        completed_on: 1619459200,
+        is_completed: true,
+        passed_count: 5,
+        blocked_count: 2,
+        untested_count: 3,
+        retest_count: 0,
+        failed_count: 1,
+        entries: [],
+        url: 'http://example.com/plan/1'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockPlan });
+      
+      // Test method
+      const result = await client.closePlan(1);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/close_plan/1', {});
+      
+      // Verify result
+      expect(result).toEqual(mockPlan);
+    });
+    
+    it('deletes a test plan', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deletePlan(1);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_plan/1', {});
+    });
+    
+    it('deletes an entry from a test plan', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deletePlanEntry(1, 'abc123');
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_plan_entry/1/abc123', {});
+    });
+    
+    it('handles errors when retrieving a test plan', async () => {
+      // Mock error response (404 - test plan not found)
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Test plan not found' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getPlan(999)).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_plan/999');
+    });
+    
+    it('handles errors when creating a test plan', async () => {
+      // Mock error response (400 - invalid request)
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid project' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.addPlan(999, { name: 'Test Plan' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_plan/999', { name: 'Test Plan' });
+    });
+  });
 });

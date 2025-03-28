@@ -15,6 +15,42 @@ export interface TestRailProject {
 }
 
 /**
+ * TestRail API Response for Plan
+ */
+export interface TestRailPlan {
+	id: number;
+	name: string;
+	description?: string;
+	milestone_id?: number | null;
+	assignedto_id?: number | null;
+	project_id: number;
+	created_on: number;
+	created_by: number;
+	completed_on?: number | null;
+	is_completed: boolean;
+	passed_count: number;
+	blocked_count: number;
+	untested_count: number;
+	retest_count: number;
+	failed_count: number;
+	entries: TestRailPlanEntry[];
+	url: string;
+}
+
+/**
+ * TestRail API Response for Plan Entry
+ */
+export interface TestRailPlanEntry {
+	id: string;
+	suite_id: number;
+	name: string;
+	description?: string | null;
+	include_all: boolean;
+	runs: TestRailRun[];
+	refs?: string;
+}
+
+/**
  * TestRail API Response for Milestone
  */
 export interface TestRailMilestone {
@@ -683,6 +719,204 @@ export class TestRailClient {
 			return response.data;
 		} catch (error) {
 			handleApiError(`Failed to add run to project ${projectId}`, error);
+			throw error;
+		}
+	}
+
+	// Plans API
+
+	/**
+	 * Get a specific test plan
+	 */
+	async getPlan(planId: number): Promise<TestRailPlan> {
+		try {
+			console.log(`Getting test plan ${planId}`);
+			const response = await this.client.get<TestRailPlan>(
+				`/api/v2/get_plan/${planId}`,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get test plan ${planId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Get all test plans for a project
+	 */
+	async getPlans(
+		projectId: number,
+		params?: Record<string, string | number | boolean | null | undefined>,
+	): Promise<TestRailPlan[]> {
+		try {
+			console.log(`Getting test plans for project ${projectId}`);
+			const response = await this.client.get<TestRailPlan[]>(
+				`/api/v2/get_plans/${projectId}`,
+				{ params },
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(
+				`Failed to get test plans for project ${projectId}`,
+				error,
+			);
+			throw error;
+		}
+	}
+
+	/**
+	 * Add a new test plan to a project
+	 */
+	async addPlan(
+		projectId: number,
+		data: {
+			name: string;
+			description?: string;
+			milestone_id?: number;
+			entries?: Array<{
+				suite_id: number;
+				name?: string;
+				description?: string;
+				include_all?: boolean;
+				case_ids?: number[];
+				config_ids?: number[];
+				refs?: string;
+			}>;
+		},
+	): Promise<TestRailPlan> {
+		try {
+			console.log(`Adding test plan to project ${projectId}`);
+			const response = await this.client.post<TestRailPlan>(
+				`/api/v2/add_plan/${projectId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add test plan to project ${projectId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Add an entry to an existing test plan
+	 */
+	async addPlanEntry(
+		planId: number,
+		data: {
+			suite_id: number;
+			name?: string;
+			description?: string;
+			include_all?: boolean;
+			case_ids?: number[];
+			config_ids?: number[];
+			refs?: string;
+		},
+	): Promise<TestRailPlanEntry> {
+		try {
+			console.log(`Adding entry to test plan ${planId}`);
+			const response = await this.client.post<TestRailPlanEntry>(
+				`/api/v2/add_plan_entry/${planId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add entry to test plan ${planId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Update an existing test plan
+	 */
+	async updatePlan(
+		planId: number,
+		data: {
+			name?: string;
+			description?: string;
+			milestone_id?: number;
+		},
+	): Promise<TestRailPlan> {
+		try {
+			console.log(`Updating test plan ${planId}`);
+			const response = await this.client.post<TestRailPlan>(
+				`/api/v2/update_plan/${planId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to update test plan ${planId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Update an existing test plan entry
+	 */
+	async updatePlanEntry(
+		planId: number,
+		entryId: string,
+		data: {
+			name?: string;
+			description?: string;
+			include_all?: boolean;
+			case_ids?: number[];
+		},
+	): Promise<TestRailPlanEntry> {
+		try {
+			console.log(`Updating entry ${entryId} in test plan ${planId}`);
+			const response = await this.client.post<TestRailPlanEntry>(
+				`/api/v2/update_plan_entry/${planId}/${entryId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to update entry in test plan ${planId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Close an existing test plan
+	 */
+	async closePlan(planId: number): Promise<TestRailPlan> {
+		try {
+			console.log(`Closing test plan ${planId}`);
+			const response = await this.client.post<TestRailPlan>(
+				`/api/v2/close_plan/${planId}`,
+				{},
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to close test plan ${planId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete an existing test plan
+	 */
+	async deletePlan(planId: number): Promise<void> {
+		try {
+			console.log(`Deleting test plan ${planId}`);
+			await this.client.post(`/api/v2/delete_plan/${planId}`, {});
+		} catch (error) {
+			handleApiError(`Failed to delete test plan ${planId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete an entry from an existing test plan
+	 */
+	async deletePlanEntry(planId: number, entryId: string): Promise<void> {
+		try {
+			console.log(`Deleting entry ${entryId} from test plan ${planId}`);
+			await this.client.post(
+				`/api/v2/delete_plan_entry/${planId}/${entryId}`,
+				{},
+			);
+		} catch (error) {
+			handleApiError(`Failed to delete entry from test plan ${planId}`, error);
 			throw error;
 		}
 	}

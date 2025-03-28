@@ -793,6 +793,450 @@ server.addTool({
 	},
 });
 
+// Add test plan management tools
+server.addTool({
+	name: "getPlans",
+	description: "Get all test plans for a project from TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+	}),
+	execute: async ({ projectId }: { projectId: number }) => {
+		try {
+			console.log(`Fetching test plans for project ${projectId}...`);
+			const plans = await testRailClient.getPlans(projectId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test plans for project ${projectId} retrieved successfully`,
+						plans,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error fetching test plans:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to fetch test plans: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "getPlan",
+	description: "Get a specific test plan from TestRail",
+	parameters: z.object({
+		planId: z.number().describe("TestRail Plan ID"),
+	}),
+	execute: async ({ planId }: { planId: number }) => {
+		try {
+			console.log(`Fetching test plan ${planId}...`);
+			const plan = await testRailClient.getPlan(planId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test plan ${planId} retrieved successfully`,
+						plan,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error fetching test plan:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to fetch test plan: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "addPlan",
+	description: "Create a new test plan in TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+		name: z.string().describe("Test plan name (required)"),
+		description: z.string().optional().describe("Test plan description"),
+		milestone_id: z
+			.number()
+			.optional()
+			.describe("Milestone ID to associate with"),
+		entries: z
+			.array(
+				z.object({
+					suite_id: z.number().describe("Test suite ID"),
+					name: z.string().optional().describe("Name of the test run"),
+					description: z
+						.string()
+						.optional()
+						.describe("Description of the test run"),
+					include_all: z
+						.boolean()
+						.optional()
+						.describe("Include all test cases from the suite"),
+					case_ids: z
+						.array(z.number())
+						.optional()
+						.describe("Specific test case IDs to include"),
+					config_ids: z
+						.array(z.number())
+						.optional()
+						.describe("Configuration IDs to use"),
+					refs: z.string().optional().describe("Reference/requirement IDs"),
+				}),
+			)
+			.optional()
+			.describe("Test suite entries to include in the plan"),
+	}),
+	execute: async (params: {
+		projectId: number;
+		name: string;
+		description?: string;
+		milestone_id?: number;
+		entries?: Array<{
+			suite_id: number;
+			name?: string;
+			description?: string;
+			include_all?: boolean;
+			case_ids?: number[];
+			config_ids?: number[];
+			refs?: string;
+		}>;
+	}) => {
+		try {
+			const { projectId, ...planData } = params;
+			console.log(
+				`Creating test plan '${planData.name}' for project ${projectId}...`,
+			);
+			const plan = await testRailClient.addPlan(projectId, planData);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test plan '${planData.name}' created successfully`,
+						plan,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error creating test plan:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to create test plan: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "addPlanEntry",
+	description: "Add an entry to an existing test plan in TestRail",
+	parameters: z.object({
+		planId: z.number().describe("TestRail Plan ID"),
+		suite_id: z.number().describe("Test suite ID"),
+		name: z.string().optional().describe("Name of the test run"),
+		description: z.string().optional().describe("Description of the test run"),
+		include_all: z
+			.boolean()
+			.optional()
+			.describe("Include all test cases from the suite"),
+		case_ids: z
+			.array(z.number())
+			.optional()
+			.describe("Specific test case IDs to include"),
+		config_ids: z
+			.array(z.number())
+			.optional()
+			.describe("Configuration IDs to use"),
+		refs: z.string().optional().describe("Reference/requirement IDs"),
+	}),
+	execute: async (params: {
+		planId: number;
+		suite_id: number;
+		name?: string;
+		description?: string;
+		include_all?: boolean;
+		case_ids?: number[];
+		config_ids?: number[];
+		refs?: string;
+	}) => {
+		try {
+			const { planId, ...entryData } = params;
+			console.log(`Adding entry to test plan ${planId}...`);
+			const entry = await testRailClient.addPlanEntry(planId, entryData);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Entry added to test plan ${planId} successfully`,
+						entry,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error adding plan entry:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to add plan entry: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "updatePlan",
+	description: "Update an existing test plan in TestRail",
+	parameters: z.object({
+		planId: z.number().describe("TestRail Plan ID"),
+		name: z.string().optional().describe("Test plan name"),
+		description: z.string().optional().describe("Test plan description"),
+		milestone_id: z
+			.number()
+			.optional()
+			.describe("Milestone ID to associate with"),
+	}),
+	execute: async (params: {
+		planId: number;
+		name?: string;
+		description?: string;
+		milestone_id?: number;
+	}) => {
+		try {
+			const { planId, ...planData } = params;
+			console.log(`Updating test plan ${planId}...`);
+			const plan = await testRailClient.updatePlan(planId, planData);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test plan ${planId} updated successfully`,
+						plan,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error updating test plan:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to update test plan: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "updatePlanEntry",
+	description: "Update an entry in an existing test plan in TestRail",
+	parameters: z.object({
+		planId: z.number().describe("TestRail Plan ID"),
+		entryId: z.string().describe("TestRail Plan Entry ID"),
+		name: z.string().optional().describe("Name of the test run"),
+		description: z.string().optional().describe("Description of the test run"),
+		include_all: z
+			.boolean()
+			.optional()
+			.describe("Include all test cases from the suite"),
+		case_ids: z
+			.array(z.number())
+			.optional()
+			.describe("Specific test case IDs to include"),
+	}),
+	execute: async (params: {
+		planId: number;
+		entryId: string;
+		name?: string;
+		description?: string;
+		include_all?: boolean;
+		case_ids?: number[];
+	}) => {
+		try {
+			const { planId, entryId, ...entryData } = params;
+			console.log(`Updating entry ${entryId} in test plan ${planId}...`);
+			const entry = await testRailClient.updatePlanEntry(
+				planId,
+				entryId,
+				entryData,
+			);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Entry ${entryId} in test plan ${planId} updated successfully`,
+						entry,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error updating plan entry:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to update plan entry: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "closePlan",
+	description: "Close a test plan in TestRail",
+	parameters: z.object({
+		planId: z.number().describe("TestRail Plan ID"),
+	}),
+	execute: async ({ planId }: { planId: number }) => {
+		try {
+			console.log(`Closing test plan ${planId}...`);
+			const plan = await testRailClient.closePlan(planId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test plan ${planId} closed successfully`,
+						plan,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error closing test plan:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to close test plan: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "deletePlan",
+	description: "Delete a test plan from TestRail",
+	parameters: z.object({
+		planId: z.number().describe("TestRail Plan ID"),
+	}),
+	execute: async ({ planId }: { planId: number }) => {
+		try {
+			console.log(`Deleting test plan ${planId}...`);
+			await testRailClient.deletePlan(planId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test plan ${planId} deleted successfully`,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error deleting test plan:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to delete test plan: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "deletePlanEntry",
+	description: "Delete an entry from a test plan in TestRail",
+	parameters: z.object({
+		planId: z.number().describe("TestRail Plan ID"),
+		entryId: z.string().describe("TestRail Plan Entry ID"),
+	}),
+	execute: async (params: { planId: number; entryId: string }) => {
+		try {
+			const { planId, entryId } = params;
+			console.log(`Deleting entry ${entryId} from test plan ${planId}...`);
+			await testRailClient.deletePlanEntry(planId, entryId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Entry ${entryId} deleted from test plan ${planId} successfully`,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error deleting plan entry:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to delete plan entry: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
 // Server startup configuration
 export const startServer = async () => {
 	console.error("Starting TestRail MCP Server...");

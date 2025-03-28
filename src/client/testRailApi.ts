@@ -247,16 +247,36 @@ export class TestRailClient extends NewTestRailClient {
 		return this.runs.deleteRun(runId);
 	}
 
-	addResult(testId: number, data: Record<string, unknown>) {
-		return this.runs.addResult(testId, data);
-	}
-
+	// テスト結果の追加
 	addResultForCase(
 		runId: number,
 		caseId: number,
 		data: Record<string, unknown>,
 	) {
-		return this.runs.addResultForCase(runId, caseId, data);
+		return this.results.addResultForCase(runId, caseId, data);
+	}
+
+	// Results API
+	getResults(
+		testId: number,
+		params?: Record<string, string | number | boolean | null | undefined>,
+	) {
+		return this.results.getResults(testId, params);
+	}
+
+	getResultsForCase(
+		runId: number,
+		caseId: number,
+		params?: Record<string, string | number | boolean | null | undefined>,
+	) {
+		return this.results.getResultsForCase(runId, caseId, params);
+	}
+
+	getResultsForRun(
+		runId: number,
+		params?: Record<string, string | number | boolean | null | undefined>,
+	) {
+		return this.results.getResultsForRun(runId, params);
 	}
 
 	// Users API

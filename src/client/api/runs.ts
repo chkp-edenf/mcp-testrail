@@ -138,30 +138,4 @@ export class RunsClient extends BaseTestRailClient {
 			throw handleApiError(error, `Failed to add result for test ${testId}`);
 		}
 	}
-
-	/**
-	 * Adds a result for a test case in a test run
-	 * @param runId The ID of the test run
-	 * @param caseId The ID of the test case
-	 * @param data The result data
-	 * @returns Promise with the created result
-	 */
-	async addResultForCase(
-		runId: number,
-		caseId: number,
-		data: Record<string, unknown>,
-	): Promise<TestRailResult> {
-		try {
-			const response: AxiosResponse<TestRailResult> = await this.client.post(
-				`/api/v2/add_result_for_case/${runId}/${caseId}`,
-				data,
-			);
-			return response.data;
-		} catch (error) {
-			throw handleApiError(
-				error,
-				`Failed to add result for case ${caseId} in run ${runId}`,
-			);
-		}
-	}
 }

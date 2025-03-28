@@ -171,6 +171,23 @@ describe('TestRailClient', () => {
       expect(result).toEqual(mockProject);
     });
     
+    it('handles errors when retrieving a specific project', async () => {
+      // Mock error response (404 - project not found)
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Project not found' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getProject(999)).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_project/999');
+    });
+    
     it('retrieves all projects', async () => {
       // Mock response
       const mockProjects = [
@@ -189,6 +206,81 @@ describe('TestRailClient', () => {
       expect(result).toEqual(mockProjects);
     });
     
+    it('creates a new project', async () => {
+      // Mock response
+      const mockProject = {
+        id: 3,
+        name: 'New Project',
+        announcement: 'Project announcement',
+        show_announcement: true,
+        is_completed: false,
+        completed_on: null,
+        suite_mode: 3,
+        url: 'http://example.com/project/3'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockProject });
+      
+      // Test data
+      const projectData = {
+        name: 'New Project',
+        announcement: 'Project announcement',
+        show_announcement: true,
+        suite_mode: 3
+      };
+      
+      // Test method
+      const result = await client.addProject(projectData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_project', projectData);
+      
+      // Verify result
+      expect(result).toEqual(mockProject);
+    });
+    
+    it('updates an existing project', async () => {
+      // Mock response
+      const mockProject = {
+        id: 1,
+        name: 'Updated Project',
+        announcement: 'Updated announcement',
+        show_announcement: true,
+        is_completed: true,
+        completed_on: 1609459200,
+        suite_mode: 1,
+        url: 'http://example.com/project/1'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockProject });
+      
+      // Test data
+      const projectData = {
+        name: 'Updated Project',
+        announcement: 'Updated announcement',
+        show_announcement: true,
+        is_completed: true
+      };
+      
+      // Test method
+      const result = await client.updateProject(1, projectData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_project/1', projectData);
+      
+      // Verify result
+      expect(result).toEqual(mockProject);
+    });
+    
+    it('deletes a project', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deleteProject(1);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_project/1', {});
+    });
+    
     it('handles errors when retrieving projects', async () => {
       // Mock error response
       const mockError = {
@@ -204,6 +296,57 @@ describe('TestRailClient', () => {
       
       // Verify axios get was called correctly
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_projects', expect.anything());
+    });
+    
+    it('handles errors when creating a project', async () => {
+      // Mock error response (403 - no admin rights)
+      const mockError = {
+        response: {
+          status: 403,
+          data: { error: 'No admin rights' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.addProject({ name: 'Test Project' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_project', { name: 'Test Project' });
+    });
+    
+    it('handles errors when updating a project', async () => {
+      // Mock error response (400 - invalid project ID)
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid project ID' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.updateProject(999, { name: 'Updated Project' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_project/999', { name: 'Updated Project' });
+    });
+    
+    it('handles errors when deleting a project', async () => {
+      // Mock error response (403 - no admin rights)
+      const mockError = {
+        response: {
+          status: 403,
+          data: { error: 'No permission to delete project' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.deleteProject(1)).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_project/1', {});
     });
   });
   

@@ -46,9 +46,20 @@ server.addTool({
 	parameters: z.object({}),
 	execute: async () => {
 		try {
-			const response = await testRailClient.getProjects();
-			// Return as JSON string to check the response structure
-			return `TestRail Projects: ${JSON.stringify(response, null, 2)}`;
+			const projects = await testRailClient.getProjects();
+
+			// Return TestRail API response directly with minimal wrapping
+			return {
+				type: "text",
+				text: JSON.stringify(
+					{
+						message: "Projects retrieved successfully",
+						data: projects,
+					},
+					null,
+					2,
+				),
+			};
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
@@ -66,9 +77,24 @@ server.addTool({
 	}),
 	execute: async ({ projectId }) => {
 		try {
-			const response = await testRailClient.getCases(projectId);
-			// Return as JSON string to check the response structure
-			return `Test cases for project ${projectId}: ${JSON.stringify(response, null, 2)}`;
+			const testCases = await testRailClient.getCases(projectId);
+			return {
+				type: "text",
+				text: JSON.stringify(
+					{
+						offset: 0,
+						limit: 250,
+						size: testCases.length,
+						_links: {
+							next: null,
+							prev: null,
+						},
+						testCases: testCases,
+					},
+					null,
+					2,
+				),
+			};
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
@@ -96,11 +122,181 @@ server.addTool({
 				status_id: statusId,
 				comment: comment,
 			});
-			return `Successfully added result for test ${testId} with status ${statusId}`;
+
+			return {
+				type: "text",
+				text: JSON.stringify(
+					{
+						message: "Test result added successfully",
+						result: result,
+					},
+					null,
+					2,
+				),
+			};
 		} catch (error) {
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
 			throw new Error(`Error adding test result: ${errorMessage}`);
+		}
+	},
+});
+
+// Tool to create a new project
+server.addTool({
+	name: "addProject",
+	description: "Create a new project in TestRail",
+	parameters: z.object({
+		name: z.string().describe("Project name (required)"),
+		announcement: z
+			.string()
+			.optional()
+			.describe("Project description/announcement"),
+		show_announcement: z
+			.boolean()
+			.optional()
+			.describe("Show announcement on project overview page"),
+		suite_mode: z
+			.number()
+			.optional()
+			.describe(
+				"Suite mode (1: single suite, 2: single + baselines, 3: multiple suites)",
+			),
+	}),
+	execute: async ({ name, announcement, show_announcement, suite_mode }) => {
+		try {
+			const project = await testRailClient.addProject({
+				name,
+				announcement,
+				show_announcement,
+				suite_mode,
+			});
+
+			return {
+				type: "text",
+				text: JSON.stringify(
+					{
+						message: "Project created successfully",
+						project: project,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			throw new Error(`Error creating project: ${errorMessage}`);
+		}
+	},
+});
+
+// Tool to update an existing project
+server.addTool({
+	name: "updateProject",
+	description: "Update an existing project in TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+		name: z.string().optional().describe("Project name"),
+		announcement: z
+			.string()
+			.optional()
+			.describe("Project description/announcement"),
+		show_announcement: z
+			.boolean()
+			.optional()
+			.describe("Show announcement on project overview page"),
+		is_completed: z.boolean().optional().describe("Mark project as completed"),
+	}),
+	execute: async ({
+		projectId,
+		name,
+		announcement,
+		show_announcement,
+		is_completed,
+	}) => {
+		try {
+			const project = await testRailClient.updateProject(projectId, {
+				name,
+				announcement,
+				show_announcement,
+				is_completed,
+			});
+
+			return {
+				type: "text",
+				text: JSON.stringify(
+					{
+						message: "Project updated successfully",
+						project: project,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			throw new Error(`Error updating project ${projectId}: ${errorMessage}`);
+		}
+	},
+});
+
+// Tool to get a specific project
+server.addTool({
+	name: "getProject",
+	description: "Get details of a specific project from TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+	}),
+	execute: async ({ projectId }) => {
+		try {
+			const project = await testRailClient.getProject(projectId);
+
+			return {
+				type: "text",
+				text: JSON.stringify(
+					{
+						message: "Project retrieved successfully",
+						project: project,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			throw new Error(`Error fetching project ${projectId}: ${errorMessage}`);
+		}
+	},
+});
+
+// Tool to delete a project
+server.addTool({
+	name: "deleteProject",
+	description: "Delete an existing project in TestRail (cannot be undone)",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+	}),
+	execute: async ({ projectId }) => {
+		try {
+			await testRailClient.deleteProject(projectId);
+
+			return {
+				type: "text",
+				text: JSON.stringify(
+					{
+						message: `Project ${projectId} deleted successfully`,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			throw new Error(`Error deleting project ${projectId}: ${errorMessage}`);
 		}
 	},
 });

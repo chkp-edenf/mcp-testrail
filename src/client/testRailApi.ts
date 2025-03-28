@@ -301,9 +301,71 @@ export class TestRailClient {
 				"/api/v2/get_projects",
 				{ params },
 			);
+			// For debugging
+			console.error(
+				"TestRail API getProjects raw response:",
+				JSON.stringify(response.data),
+			);
 			return response.data;
 		} catch (error) {
 			handleApiError("Failed to get projects", error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Create a new project
+	 */
+	async addProject(data: {
+		name: string;
+		announcement?: string;
+		show_announcement?: boolean;
+		suite_mode?: number;
+	}): Promise<TestRailProject> {
+		try {
+			const response = await this.client.post<TestRailProject>(
+				"/api/v2/add_project",
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError("Failed to create project", error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Update an existing project
+	 */
+	async updateProject(
+		projectId: number,
+		data: {
+			name?: string;
+			announcement?: string;
+			show_announcement?: boolean;
+			is_completed?: boolean;
+		},
+	): Promise<TestRailProject> {
+		try {
+			const response = await this.client.post<TestRailProject>(
+				`/api/v2/update_project/${projectId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to update project ${projectId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete an existing project
+	 */
+	async deleteProject(projectId: number): Promise<void> {
+		try {
+			await this.client.post(`/api/v2/delete_project/${projectId}`, {});
+		} catch (error) {
+			handleApiError(`Failed to delete project ${projectId}`, error);
 			throw error;
 		}
 	}

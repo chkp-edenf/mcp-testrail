@@ -5,30 +5,44 @@ import { registerCaseTools } from "./cases.js";
 import { registerSectionTools } from "./sections.js";
 import { registerSharedStepTools } from "./sharedSteps.js";
 import { registerMilestoneTools } from "./milestones.js";
+import { registerSuiteTools } from "./suites.js";
+import { registerPlanTools } from "./plans.js";
+import { registerRunTools } from "./runs.js";
+import { registerResultTools } from "./results.js";
+import { registerUserTools } from "./users.js";
 
 /**
- * すべてのAPIツールをサーバーに登録する関数
- * @param server FastMCPサーバーインスタンス
- * @param testRailClient TestRailクライアントインスタンス
+ * Function to register all API tools to the server
+ * @param server FastMCP server instance
+ * @param testRailClient TestRail client instance
  */
 export function registerAllTools(
 	server: FastMCP,
 	testRailClient: TestRailClient,
 ): void {
-	// 各リソース別のツールを登録
+	// Register tools for each resource type
 	registerProjectTools(server, testRailClient);
 	registerCaseTools(server, testRailClient);
 	registerSectionTools(server, testRailClient);
 	registerSharedStepTools(server, testRailClient);
 	registerMilestoneTools(server, testRailClient);
+	registerSuiteTools(server, testRailClient);
+	registerPlanTools(server, testRailClient);
+	registerRunTools(server, testRailClient);
+	registerResultTools(server, testRailClient);
+	registerUserTools(server, testRailClient);
 
-	// 今後、他のリソース（テストスイート、テスト計画、実行結果など）の
-	// ツールを追加する場合は、ここに追加登録します
+	// Additional resource tools can be registered here in the future
 }
 
-// すべてのツールモジュールをエクスポート
+// Export all tool modules
 export * from "./projects.js";
 export * from "./cases.js";
 export * from "./sections.js";
 export * from "./sharedSteps.js";
 export * from "./milestones.js";
+export * from "./suites.js";
+export * from "./plans.js";
+export * from "./runs.js";
+export * from "./results.js";
+export * from "./users.js";

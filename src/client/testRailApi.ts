@@ -1,17 +1,4 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
-import FormData from "form-data";
-// Import fs and path conditionally to support browser environments
-let fs: typeof import("node:fs") | null = null;
-let path: typeof import("node:path") | null = null;
-
-// Only load Node.js modules in Node.js environment
-try {
-	// Use require for compatibility with both test environments and runtime
-	fs = require("node:fs");
-	path = require("node:path");
-} catch (e) {
-	console.error("Node.js file system modules not available", e);
-}
 
 /**
  * TestRail API Response for Project
@@ -110,21 +97,6 @@ interface TestRailStepResult {
 	content: string;
 	expected: string;
 	actual: string;
-}
-
-/**
- * TestRail API Response for Attachment
- */
-interface TestRailAttachment {
-	attachment_id: number;
-	name: string;
-	filename: string;
-	size: number;
-	created_on: number;
-	created_by: number;
-	project_id: number;
-	case_id?: number;
-	result_id?: number;
 }
 
 /**

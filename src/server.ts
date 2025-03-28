@@ -2,7 +2,6 @@ import { FastMCP } from "fastmcp";
 import { z } from "zod";
 import "dotenv/config";
 import { TestRailClient, TestRailClientConfig } from "./client/testRailApi.js";
-import * as fs from "node:fs";
 
 // Validate TestRail settings
 if (
@@ -102,30 +101,6 @@ server.addTool({
 			const errorMessage =
 				error instanceof Error ? error.message : String(error);
 			throw new Error(`Error adding test result: ${errorMessage}`);
-		}
-	},
-});
-
-// Tool to upload an attachment to a test case
-server.addTool({
-	name: "uploadAttachment",
-	description: "Upload a file attachment to a test case",
-	parameters: z.object({
-		caseId: z.number().describe("TestRail Case ID"),
-		filePath: z.string().describe("Path to the file to attach"),
-	}),
-	execute: async ({ caseId, filePath }) => {
-		try {
-			if (!fs.existsSync(filePath)) {
-				throw new Error(`File not found: ${filePath}`);
-			}
-
-			const result = await testRailClient.addAttachmentToCase(caseId, filePath);
-			return `Successfully uploaded attachment to case ${caseId}, attachment ID: ${result.attachment_id}`;
-		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : String(error);
-			throw new Error(`Error uploading attachment: ${errorMessage}`);
 		}
 	},
 });

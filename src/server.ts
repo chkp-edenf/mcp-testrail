@@ -592,6 +592,207 @@ server.addTool({
 	},
 });
 
+// Add test suite management tools
+server.addTool({
+	name: "getSuites",
+	description: "Get all test suites for a project from TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+	}),
+	execute: async ({ projectId }: { projectId: number }) => {
+		try {
+			console.log(`Fetching test suites for project ${projectId}...`);
+			const suites = await testRailClient.getSuites(projectId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test suites for project ${projectId} retrieved successfully`,
+						suites,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error fetching test suites:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to fetch test suites: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "getSuite",
+	description: "Get a specific test suite from TestRail",
+	parameters: z.object({
+		suiteId: z.number().describe("TestRail Suite ID"),
+	}),
+	execute: async ({ suiteId }: { suiteId: number }) => {
+		try {
+			console.log(`Fetching test suite ${suiteId}...`);
+			const suite = await testRailClient.getSuite(suiteId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test suite ${suiteId} retrieved successfully`,
+						suite,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error fetching test suite:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to fetch test suite: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "addSuite",
+	description: "Create a new test suite in TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+		name: z.string().describe("Test suite name (required)"),
+		description: z.string().optional().describe("Test suite description"),
+	}),
+	execute: async (params: {
+		projectId: number;
+		name: string;
+		description?: string;
+	}) => {
+		try {
+			const { projectId, ...suiteData } = params;
+			console.log(
+				`Creating test suite '${suiteData.name}' for project ${projectId}...`,
+			);
+			const suite = await testRailClient.addSuite(projectId, suiteData);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test suite '${suiteData.name}' created successfully`,
+						suite,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error creating test suite:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to create test suite: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "updateSuite",
+	description: "Update an existing test suite in TestRail",
+	parameters: z.object({
+		suiteId: z.number().describe("TestRail Suite ID"),
+		name: z.string().optional().describe("Test suite name"),
+		description: z.string().optional().describe("Test suite description"),
+	}),
+	execute: async (params: {
+		suiteId: number;
+		name?: string;
+		description?: string;
+	}) => {
+		try {
+			const { suiteId, ...suiteData } = params;
+			console.log(`Updating test suite ${suiteId}...`);
+			const suite = await testRailClient.updateSuite(suiteId, suiteData);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test suite ${suiteId} updated successfully`,
+						suite,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error updating test suite:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to update test suite: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "deleteSuite",
+	description: "Delete a test suite from TestRail",
+	parameters: z.object({
+		suiteId: z.number().describe("TestRail Suite ID"),
+	}),
+	execute: async ({ suiteId }: { suiteId: number }) => {
+		try {
+			console.log(`Deleting test suite ${suiteId}...`);
+			await testRailClient.deleteSuite(suiteId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Test suite ${suiteId} deleted successfully`,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error deleting test suite:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to delete test suite: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
 // Server startup configuration
 export const startServer = async () => {
 	console.error("Starting TestRail MCP Server...");

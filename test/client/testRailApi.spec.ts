@@ -566,6 +566,195 @@ describe('TestRailClient', () => {
     });
   });
   
+  describe('Suites API', () => {
+    it('retrieves a specific test suite', async () => {
+      // Mock response
+      const mockSuite = {
+        id: 1,
+        name: 'Test Suite 1',
+        description: 'This is a test suite',
+        project_id: 1,
+        is_baseline: false,
+        is_completed: false,
+        is_master: true,
+        completed_on: null,
+        url: 'http://example.com/suite/1'
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockSuite });
+      
+      // Test method
+      const result = await client.getSuite(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_suite/1');
+      
+      // Verify result
+      expect(result).toEqual(mockSuite);
+    });
+    
+    it('retrieves all test suites for a project', async () => {
+      // Mock response
+      const mockSuites = [
+        {
+          id: 1,
+          name: 'Test Suite 1',
+          description: 'This is test suite 1',
+          project_id: 1,
+          is_baseline: false,
+          is_completed: false,
+          is_master: true,
+          completed_on: null,
+          url: 'http://example.com/suite/1'
+        },
+        {
+          id: 2,
+          name: 'Test Suite 2',
+          description: 'This is test suite 2',
+          project_id: 1,
+          is_baseline: false,
+          is_completed: false,
+          is_master: false,
+          completed_on: null,
+          url: 'http://example.com/suite/2'
+        }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockSuites });
+      
+      // Test method
+      const result = await client.getSuites(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_suites/1');
+      
+      // Verify result
+      expect(result).toEqual(mockSuites);
+    });
+    
+    it('creates a new test suite', async () => {
+      // Mock response
+      const mockSuite = {
+        id: 3,
+        name: 'New Test Suite',
+        description: 'This is a new test suite',
+        project_id: 1,
+        is_baseline: false,
+        is_completed: false,
+        is_master: false,
+        completed_on: null,
+        url: 'http://example.com/suite/3'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockSuite });
+      
+      // Test data
+      const suiteData = {
+        name: 'New Test Suite',
+        description: 'This is a new test suite'
+      };
+      
+      // Test method
+      const result = await client.addSuite(1, suiteData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_suite/1', suiteData);
+      
+      // Verify result
+      expect(result).toEqual(mockSuite);
+    });
+    
+    it('updates an existing test suite', async () => {
+      // Mock response
+      const mockSuite = {
+        id: 1,
+        name: 'Updated Test Suite',
+        description: 'This test suite has been updated',
+        project_id: 1,
+        is_baseline: false,
+        is_completed: false,
+        is_master: true,
+        completed_on: null,
+        url: 'http://example.com/suite/1'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockSuite });
+      
+      // Test data
+      const suiteData = {
+        name: 'Updated Test Suite',
+        description: 'This test suite has been updated'
+      };
+      
+      // Test method
+      const result = await client.updateSuite(1, suiteData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_suite/1', suiteData);
+      
+      // Verify result
+      expect(result).toEqual(mockSuite);
+    });
+    
+    it('deletes a test suite', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deleteSuite(1);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_suite/1', {});
+    });
+    
+    it('handles errors when retrieving a test suite', async () => {
+      // Mock error response (404 - test suite not found)
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Test suite not found' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getSuite(999)).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_suite/999');
+    });
+    
+    it('handles errors when creating a test suite', async () => {
+      // Mock error response (400 - invalid request)
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid project' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.addSuite(999, { name: 'Test Suite' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_suite/999', { name: 'Test Suite' });
+    });
+    
+    it('handles errors when updating a test suite', async () => {
+      // Mock error response (404 - test suite not found)
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Test suite not found' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.updateSuite(999, { name: 'Updated Test Suite' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_suite/999', { name: 'Updated Test Suite' });
+    });
+  });
+  
   describe('Results API', () => {
     it('adds a test result', async () => {
       // Mock response

@@ -34,6 +34,21 @@ export interface TestRailMilestone {
 }
 
 /**
+ * TestRail API Response for Suite
+ */
+export interface TestRailSuite {
+	id: number;
+	name: string;
+	description?: string;
+	project_id: number;
+	is_baseline?: boolean;
+	is_completed?: boolean;
+	is_master?: boolean;
+	completed_on?: number | null;
+	url: string;
+}
+
+/**
  * TestRail API Response for Case
  */
 interface TestRailCase {
@@ -495,6 +510,102 @@ export class TestRailClient {
 			await this.client.post(`/api/v2/delete_milestone/${milestoneId}`, {});
 		} catch (error) {
 			handleApiError(`Failed to delete milestone ${milestoneId}`, error);
+			throw error;
+		}
+	}
+
+	// Suite API
+
+	/**
+	 * Get a specific test suite
+	 */
+	async getSuite(suiteId: number): Promise<TestRailSuite> {
+		try {
+			console.log(`Getting test suite ${suiteId}`);
+			const response = await this.client.get<TestRailSuite>(
+				`/api/v2/get_suite/${suiteId}`,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get test suite ${suiteId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Get all test suites for a project
+	 */
+	async getSuites(projectId: number): Promise<TestRailSuite[]> {
+		try {
+			console.log(`Getting test suites for project ${projectId}`);
+			const response = await this.client.get<TestRailSuite[]>(
+				`/api/v2/get_suites/${projectId}`,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(
+				`Failed to get test suites for project ${projectId}`,
+				error,
+			);
+			throw error;
+		}
+	}
+
+	/**
+	 * Add a new test suite to a project
+	 */
+	async addSuite(
+		projectId: number,
+		data: {
+			name: string;
+			description?: string;
+		},
+	): Promise<TestRailSuite> {
+		try {
+			console.log(`Adding test suite to project ${projectId}`);
+			const response = await this.client.post<TestRailSuite>(
+				`/api/v2/add_suite/${projectId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add test suite to project ${projectId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Update an existing test suite
+	 */
+	async updateSuite(
+		suiteId: number,
+		data: {
+			name?: string;
+			description?: string;
+		},
+	): Promise<TestRailSuite> {
+		try {
+			console.log(`Updating test suite ${suiteId}`);
+			const response = await this.client.post<TestRailSuite>(
+				`/api/v2/update_suite/${suiteId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to update test suite ${suiteId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete an existing test suite
+	 */
+	async deleteSuite(suiteId: number): Promise<void> {
+		try {
+			console.log(`Deleting test suite ${suiteId}`);
+			await this.client.post(`/api/v2/delete_suite/${suiteId}`, {});
+		} catch (error) {
+			handleApiError(`Failed to delete test suite ${suiteId}`, error);
 			throw error;
 		}
 	}

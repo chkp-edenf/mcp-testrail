@@ -24,3 +24,9 @@ export * from "./milestones.js";
 
 // テストスイート関連スキーマ
 export * from "./suites.js";
+
+// ユーザー関連スキーマ
+export * from "./users.js";
+
+// テストプラン関連スキーマ
+export * from "./plans.js";

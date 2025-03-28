@@ -1,11 +1,14 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getResultsSchema,
 	getResultsForCaseSchema,
 	getResultsForRunSchema,
+	addResultSchema,
 	addResultForCaseSchema,
+	addResultsSchema,
+	addResultsForCasesSchema,
 } from "../../shared/schemas/results.js";
 
 /**
@@ -17,29 +20,18 @@ export function registerResultTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// Get results for a test
+	// テスト結果一覧取得
 	server.tool(
 		"getResults",
 		getResultsSchema,
-		async ({ testId, limit, offset, statusId, defectsFilter }) => {
+		async ({ testId, ...filters }) => {
 			try {
-				const params: Record<
-					string,
-					string | number | boolean | null | undefined
-				> = {};
-
-				// デバッグログ
-				console.log(`パラメータ型情報 - testId: ${typeof testId}`);
-				console.log(`パラメータ値 - testId: ${testId}`);
-
-				if (limit !== undefined) params.limit = limit;
-				if (offset !== undefined) params.offset = offset;
-				if (statusId) params.status_id = statusId;
-				if (defectsFilter) params.defects_filter = defectsFilter;
-
-				const results = await testRailClient.results.getResults(testId, params);
+				const results = await testRailClient.results.getResults(
+					testId,
+					filters,
+				);
 				const successResponse = createSuccessResponse(
-					"Test results retrieved successfully",
+					"Results retrieved successfully",
 					{
 						results,
 					},
@@ -49,7 +41,7 @@ export function registerResultTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error retrieving results for test ${testId}`,
+					`Error fetching results for test ${testId}`,
 					error,
 				);
 				return {
@@ -60,35 +52,19 @@ export function registerResultTools(
 		},
 	);
 
-	// Get results for a case in a run
+	// テストケース結果一覧取得
 	server.tool(
 		"getResultsForCase",
 		getResultsForCaseSchema,
-		async ({ runId, caseId, limit, offset, statusId, defectsFilter }) => {
+		async ({ runId, caseId, ...filters }) => {
 			try {
-				const params: Record<
-					string,
-					string | number | boolean | null | undefined
-				> = {};
-
-				// デバッグログ
-				console.log(
-					`パラメータ型情報 - runId: ${typeof runId}, caseId: ${typeof caseId}`,
-				);
-				console.log(`パラメータ値 - runId: ${runId}, caseId: ${caseId}`);
-
-				if (limit !== undefined) params.limit = limit;
-				if (offset !== undefined) params.offset = offset;
-				if (statusId) params.status_id = statusId;
-				if (defectsFilter) params.defects_filter = defectsFilter;
-
 				const results = await testRailClient.results.getResultsForCase(
 					runId,
 					caseId,
-					params,
+					filters,
 				);
 				const successResponse = createSuccessResponse(
-					"Test results retrieved successfully",
+					"Results retrieved successfully",
 					{
 						results,
 					},
@@ -98,7 +74,7 @@ export function registerResultTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error retrieving results for case ${caseId} in run ${runId}`,
+					`Error fetching results for run ${runId} and case ${caseId}`,
 					error,
 				);
 				return {
@@ -109,32 +85,18 @@ export function registerResultTools(
 		},
 	);
 
-	// Get results for a run
+	// テストラン結果一覧取得
 	server.tool(
 		"getResultsForRun",
 		getResultsForRunSchema,
-		async ({ runId, limit, offset, statusId, defectsFilter }) => {
+		async ({ runId, ...filters }) => {
 			try {
-				const params: Record<
-					string,
-					string | number | boolean | null | undefined
-				> = {};
-
-				// デバッグログ
-				console.log(`パラメータ型情報 - runId: ${typeof runId}`);
-				console.log(`パラメータ値 - runId: ${runId}`);
-
-				if (limit !== undefined) params.limit = limit;
-				if (offset !== undefined) params.offset = offset;
-				if (statusId) params.status_id = statusId;
-				if (defectsFilter) params.defects_filter = defectsFilter;
-
 				const results = await testRailClient.results.getResultsForRun(
 					runId,
-					params,
+					filters,
 				);
 				const successResponse = createSuccessResponse(
-					"Test results retrieved successfully",
+					"Results retrieved successfully",
 					{
 						results,
 					},
@@ -144,7 +106,7 @@ export function registerResultTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error retrieving results for run ${runId}`,
+					`Error fetching results for run ${runId}`,
 					error,
 				);
 				return {
@@ -155,70 +117,48 @@ export function registerResultTools(
 		},
 	);
 
-	// Add a result for a specific test case
+	// テスト結果追加
 	server.tool(
-		"addResultForCase",
-		addResultForCaseSchema,
-		async ({
-			runId,
-			caseId,
-			statusId,
-			comment,
-			defects,
-			assignedtoId,
-			version,
-			elapsed,
-		}) => {
+		"addResult",
+		addResultSchema,
+		async ({ testId, ...resultData }) => {
 			try {
-				// MCPツールが厳密に数値型を要求するため、確実に数値型に変換
-				const numericRunId = Number(runId);
-				const numericCaseId = Number(caseId);
-				let numericStatusId = undefined;
-				let numericAssignedtoId = undefined;
-
-				if (statusId !== undefined) {
-					numericStatusId = Number(statusId);
-				}
-
-				if (assignedtoId !== undefined) {
-					numericAssignedtoId = Number(assignedtoId);
-				}
-
-				// デバッグログ
-				console.log(
-					`パラメータ型情報(変換後) - runId: ${typeof numericRunId}, caseId: ${typeof numericCaseId}, statusId: ${typeof numericStatusId}`,
-				);
-				console.log(
-					`パラメータ値(変換後) - runId: ${numericRunId}, caseId: ${numericCaseId}, statusId: ${numericStatusId}`,
-				);
-
-				// データオブジェクトを構築
+				// 結果データを準備
 				const data: Record<string, unknown> = {};
 
-				if (numericStatusId !== undefined) data.status_id = numericStatusId;
-				if (numericAssignedtoId !== undefined)
-					data.assignedto_id = numericAssignedtoId;
-				if (comment) data.comment = comment;
-				if (defects) data.defects = defects;
-				if (version) data.version = version;
-				if (elapsed) data.elapsed = elapsed;
+				// ステータスIDが指定されていれば追加
+				if (resultData.statusId) {
+					data.status_id = resultData.statusId;
+				}
 
-				// デバッグログ
-				console.log(`送信データ: ${JSON.stringify(data)}`);
-				console.log(
-					`Adding result for case ${numericCaseId} in run ${numericRunId} with data:`,
-					data,
-				);
+				// コメントが指定されていれば追加
+				if (resultData.comment) {
+					data.comment = resultData.comment;
+				}
 
-				// クライアントAPIを呼び出し
-				const result = await testRailClient.results.addResultForCase(
-					numericRunId,
-					numericCaseId,
-					data,
-				);
+				// バージョンが指定されていれば追加
+				if (resultData.version) {
+					data.version = resultData.version;
+				}
 
+				// 所要時間が指定されていれば追加
+				if (resultData.elapsed) {
+					data.elapsed = resultData.elapsed;
+				}
+
+				// 欠陥IDが指定されていれば追加
+				if (resultData.defects) {
+					data.defects = resultData.defects;
+				}
+
+				// 担当者IDが指定されていれば追加
+				if (resultData.assignedtoId) {
+					data.assignedto_id = resultData.assignedtoId;
+				}
+
+				const result = await testRailClient.results.addResult(testId, data);
 				const successResponse = createSuccessResponse(
-					"Test result added successfully",
+					"Result added successfully",
 					{
 						result,
 					},
@@ -227,11 +167,213 @@ export function registerResultTools(
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
-				// エラー詳細を出力
-				console.error("テスト結果追加エラー詳細:", error);
-
 				const errorResponse = createErrorResponse(
-					`Error adding result for case ${caseId} in run ${runId}`,
+					`Error adding result for test ${testId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
+
+	// テストケース結果追加
+	server.tool(
+		"addResultForCase",
+		addResultForCaseSchema,
+		async ({ runId, caseId, ...resultData }) => {
+			try {
+				// 結果データを準備
+				const data: Record<string, unknown> = {};
+
+				// ステータスIDが指定されていれば追加
+				if (resultData.statusId) {
+					data.status_id = resultData.statusId;
+				}
+
+				// コメントが指定されていれば追加
+				if (resultData.comment) {
+					data.comment = resultData.comment;
+				}
+
+				// バージョンが指定されていれば追加
+				if (resultData.version) {
+					data.version = resultData.version;
+				}
+
+				// 所要時間が指定されていれば追加
+				if (resultData.elapsed) {
+					data.elapsed = resultData.elapsed;
+				}
+
+				// 欠陥IDが指定されていれば追加
+				if (resultData.defects) {
+					data.defects = resultData.defects;
+				}
+
+				// 担当者IDが指定されていれば追加
+				if (resultData.assignedtoId) {
+					data.assignedto_id = resultData.assignedtoId;
+				}
+
+				const result = await testRailClient.results.addResultForCase(
+					runId,
+					caseId,
+					data,
+				);
+				const successResponse = createSuccessResponse(
+					"Result added successfully",
+					{
+						result,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error adding result for run ${runId} and case ${caseId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
+
+	// 複数テスト結果追加
+	server.tool("addResults", addResultsSchema, async ({ runId, results }) => {
+		try {
+			// APIに送信するデータを準備
+			const data = {
+				results: results.map((result) => {
+					const resultData: Record<string, unknown> = {
+						test_id: result.testId,
+					};
+
+					// ステータスIDが指定されていれば追加
+					if (result.statusId) {
+						resultData.status_id = result.statusId;
+					}
+
+					// コメントが指定されていれば追加
+					if (result.comment) {
+						resultData.comment = result.comment;
+					}
+
+					// バージョンが指定されていれば追加
+					if (result.version) {
+						resultData.version = result.version;
+					}
+
+					// 所要時間が指定されていれば追加
+					if (result.elapsed) {
+						resultData.elapsed = result.elapsed;
+					}
+
+					// 欠陥IDが指定されていれば追加
+					if (result.defects) {
+						resultData.defects = result.defects;
+					}
+
+					// 担当者IDが指定されていれば追加
+					if (result.assignedtoId) {
+						resultData.assignedto_id = result.assignedtoId;
+					}
+
+					return resultData;
+				}),
+			};
+
+			const addedResults = await testRailClient.results.addResults(runId, data);
+			const successResponse = createSuccessResponse(
+				"Results added successfully",
+				{
+					results: addedResults,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error adding results for run ${runId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
+
+	// 複数テストケース結果追加
+	server.tool(
+		"addResultsForCases",
+		addResultsForCasesSchema,
+		async ({ runId, results }) => {
+			try {
+				// APIに送信するデータを準備
+				const data = {
+					results: results.map((result) => {
+						const resultData: Record<string, unknown> = {
+							case_id: result.caseId,
+						};
+
+						// ステータスIDが指定されていれば追加
+						if (result.statusId) {
+							resultData.status_id = result.statusId;
+						}
+
+						// コメントが指定されていれば追加
+						if (result.comment) {
+							resultData.comment = result.comment;
+						}
+
+						// バージョンが指定されていれば追加
+						if (result.version) {
+							resultData.version = result.version;
+						}
+
+						// 所要時間が指定されていれば追加
+						if (result.elapsed) {
+							resultData.elapsed = result.elapsed;
+						}
+
+						// 欠陥IDが指定されていれば追加
+						if (result.defects) {
+							resultData.defects = result.defects;
+						}
+
+						// 担当者IDが指定されていれば追加
+						if (result.assignedtoId) {
+							resultData.assignedto_id = result.assignedtoId;
+						}
+
+						return resultData;
+					}),
+				};
+
+				const addedResults = await testRailClient.results.addResultsForCases(
+					runId,
+					data,
+				);
+				const successResponse = createSuccessResponse(
+					"Results added successfully",
+					{
+						results: addedResults,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error adding results for run ${runId}`,
 					error,
 				);
 				return {

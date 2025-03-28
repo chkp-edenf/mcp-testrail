@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getSuitesSchema,
@@ -21,7 +21,7 @@ export function registerSuiteTools(
 	// Get all test suites for a project
 	server.tool("getSuites", getSuitesSchema, async ({ projectId }) => {
 		try {
-			const suites = await testRailClient.getSuites(projectId);
+			const suites = await testRailClient.suites.getSuites(projectId);
 			const successResponse = createSuccessResponse(
 				"Test suites retrieved successfully",
 				{
@@ -46,7 +46,7 @@ export function registerSuiteTools(
 	// Get a specific test suite
 	server.tool("getSuite", getSuiteSchema, async ({ suiteId }) => {
 		try {
-			const suite = await testRailClient.getSuite(suiteId);
+			const suite = await testRailClient.suites.getSuite(suiteId);
 			const successResponse = createSuccessResponse(
 				"Test suite retrieved successfully",
 				{
@@ -74,11 +74,11 @@ export function registerSuiteTools(
 		addSuiteSchema,
 		async ({ projectId, name, description }) => {
 			try {
-				const suiteData = {
+				const data = {
 					name,
 					description,
 				};
-				const suite = await testRailClient.addSuite(projectId, suiteData);
+				const suite = await testRailClient.suites.addSuite(projectId, data);
 				const successResponse = createSuccessResponse(
 					"Test suite created successfully",
 					{
@@ -107,13 +107,14 @@ export function registerSuiteTools(
 		updateSuiteSchema,
 		async ({ suiteId, name, description }) => {
 			try {
-				const data: Record<string, unknown> = {};
-				if (name) data.name = name;
-				if (description !== undefined) data.description = description;
+				const data = {
+					name,
+					description,
+				};
 
-				const suite = await testRailClient.updateSuite(suiteId, data);
+				const suite = await testRailClient.suites.updateSuite(suiteId, data);
 				const successResponse = createSuccessResponse(
-					"Test suite updated successfully",
+					"Suite updated successfully",
 					{
 						suite,
 					},
@@ -123,7 +124,7 @@ export function registerSuiteTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error updating test suite ${suiteId}`,
+					`Error updating suite ${suiteId}`,
 					error,
 				);
 				return {
@@ -137,19 +138,16 @@ export function registerSuiteTools(
 	// Delete a test suite
 	server.tool("deleteSuite", deleteSuiteSchema, async ({ suiteId }) => {
 		try {
-			await testRailClient.deleteSuite(suiteId);
+			await testRailClient.suites.deleteSuite(suiteId);
 			const successResponse = createSuccessResponse(
-				"Test suite deleted successfully",
-				{
-					suiteId,
-				},
+				`Suite ${suiteId} deleted successfully`,
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
 			};
 		} catch (error) {
 			const errorResponse = createErrorResponse(
-				`Error deleting test suite ${suiteId}`,
+				`Error deleting suite ${suiteId}`,
 				error,
 			);
 			return {

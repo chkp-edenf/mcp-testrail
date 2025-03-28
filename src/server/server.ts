@@ -2,7 +2,7 @@ import express from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import "dotenv/config";
-import { TestRailClient, TestRailClientConfig } from "../client/testRailApi.js";
+import { TestRailClient, TestRailClientConfig } from "../client/api/index.js";
 import { registerAllTools } from "./api/index.js";
 import { registerResourceTemplates } from "./templates.js";
 

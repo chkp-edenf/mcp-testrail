@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getSectionSchema,
@@ -19,10 +19,10 @@ export function registerSectionTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// セクション取得
+	// セクション詳細取得
 	server.tool("getSection", getSectionSchema, async ({ sectionId }) => {
 		try {
-			const section = await testRailClient.getSection(sectionId);
+			const section = await testRailClient.sections.getSection(sectionId);
 			const successResponse = createSuccessResponse(
 				"Section retrieved successfully",
 				{
@@ -34,7 +34,7 @@ export function registerSectionTools(
 			};
 		} catch (error) {
 			const errorResponse = createErrorResponse(
-				`Error getting section ${sectionId}`,
+				`Error fetching section ${sectionId}`,
 				error,
 			);
 			return {
@@ -44,13 +44,16 @@ export function registerSectionTools(
 		}
 	});
 
-	// プロジェクトのセクション一覧取得
+	// プロジェクトまたはスイートのセクション一覧取得
 	server.tool(
 		"getSections",
 		getSectionsSchema,
 		async ({ projectId, suiteId }) => {
 			try {
-				const sections = await testRailClient.getSections(projectId, suiteId);
+				const sections = await testRailClient.sections.getSections(
+					projectId,
+					suiteId,
+				);
 				const successResponse = createSuccessResponse(
 					"Sections retrieved successfully",
 					{
@@ -62,7 +65,7 @@ export function registerSectionTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error getting sections for project ${projectId}`,
+					`Error fetching sections for project ${projectId}`,
 					error,
 				);
 				return {
@@ -79,24 +82,29 @@ export function registerSectionTools(
 		addSectionSchema,
 		async ({ projectId, name, description, suiteId, parentId }) => {
 			try {
-				const sectionData = {
-					name: name,
-					description: description,
+				const data = {
+					name,
+					description,
 					suite_id: suiteId,
 					parent_id: parentId,
 				};
 
-				const section = await testRailClient.addSection(projectId, sectionData);
+				const section = await testRailClient.sections.addSection(
+					projectId,
+					data,
+				);
 				const successResponse = createSuccessResponse(
-					"Section added successfully",
-					{ section },
+					"Section created successfully",
+					{
+						section,
+					},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error adding section to project ${projectId}`,
+					"Error creating section",
 					error,
 				);
 				return {
@@ -113,14 +121,23 @@ export function registerSectionTools(
 		moveSectionSchema,
 		async ({ sectionId, parentId, afterId }) => {
 			try {
-				const data: Record<string, unknown> = {};
-				if (parentId !== undefined) data.parent_id = parentId;
-				if (afterId !== undefined) data.after_id = afterId;
+				const moveData: {
+					parent_id?: number | null;
+					after_id?: number | null;
+				} = {};
 
-				const section = await testRailClient.moveSection(sectionId, data);
+				if (parentId !== undefined) moveData.parent_id = parentId;
+				if (afterId !== undefined) moveData.after_id = afterId;
+
+				const section = await testRailClient.sections.moveSection(
+					sectionId,
+					moveData,
+				);
 				const successResponse = createSuccessResponse(
 					"Section moved successfully",
-					{ section },
+					{
+						section,
+					},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -144,11 +161,14 @@ export function registerSectionTools(
 		updateSectionSchema,
 		async ({ sectionId, name, description }) => {
 			try {
-				const data: Record<string, unknown> = {};
-				if (name) data.name = name;
-				if (description !== undefined) data.description = description;
+				const updateData: { name?: string; description?: string } = {};
+				if (name) updateData.name = name;
+				if (description) updateData.description = description;
 
-				const section = await testRailClient.updateSection(sectionId, data);
+				const section = await testRailClient.sections.updateSection(
+					sectionId,
+					updateData,
+				);
 				const successResponse = createSuccessResponse(
 					"Section updated successfully",
 					{
@@ -177,12 +197,9 @@ export function registerSectionTools(
 		deleteSectionSchema,
 		async ({ sectionId, soft }) => {
 			try {
-				await testRailClient.deleteSection(sectionId, soft);
+				await testRailClient.sections.deleteSection(sectionId, soft);
 				const successResponse = createSuccessResponse(
-					"Section deleted successfully",
-					{
-						sectionId,
-					},
+					`Section ${sectionId} deleted successfully`,
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],

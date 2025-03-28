@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getPlansSchema,
@@ -25,7 +25,7 @@ export function registerPlanTools(
 	// Get all test plans for a project
 	server.tool("getPlans", getPlansSchema, async ({ projectId }) => {
 		try {
-			const plans = await testRailClient.getPlans(projectId);
+			const plans = await testRailClient.plans.getPlans(projectId);
 			const successResponse = createSuccessResponse(
 				"Test plans retrieved successfully",
 				{
@@ -50,7 +50,7 @@ export function registerPlanTools(
 	// Get a specific test plan
 	server.tool("getPlan", getPlanSchema, async ({ planId }) => {
 		try {
-			const plan = await testRailClient.getPlan(planId);
+			const plan = await testRailClient.plans.getPlan(planId);
 			const successResponse = createSuccessResponse(
 				"Test plan retrieved successfully",
 				{
@@ -78,15 +78,14 @@ export function registerPlanTools(
 		addPlanSchema,
 		async ({ projectId, name, description, milestone_id, entries }) => {
 			try {
-				const planData: Record<string, unknown> = {
+				const planData = {
 					name,
+					description,
+					milestone_id,
+					entries,
 				};
 
-				if (description) planData.description = description;
-				if (milestone_id !== undefined) planData.milestone_id = milestone_id;
-				if (entries) planData.entries = entries;
-
-				const plan = await testRailClient.addPlan(projectId, planData);
+				const plan = await testRailClient.plans.addPlan(projectId, planData);
 				const successResponse = createSuccessResponse(
 					"Test plan created successfully",
 					{
@@ -124,18 +123,20 @@ export function registerPlanTools(
 			refs,
 		}) => {
 			try {
-				const entryData: Record<string, unknown> = {
+				const entryData = {
 					suite_id,
+					name,
+					description,
+					include_all,
+					case_ids,
+					config_ids,
+					refs,
 				};
 
-				if (name) entryData.name = name;
-				if (description) entryData.description = description;
-				if (include_all !== undefined) entryData.include_all = include_all;
-				if (case_ids) entryData.case_ids = case_ids;
-				if (config_ids) entryData.config_ids = config_ids;
-				if (refs) entryData.refs = refs;
-
-				const entry = await testRailClient.addPlanEntry(planId, entryData);
+				const entry = await testRailClient.plans.addPlanEntry(
+					planId,
+					entryData,
+				);
 				const successResponse = createSuccessResponse(
 					"Plan entry added successfully",
 					{
@@ -170,7 +171,7 @@ export function registerPlanTools(
 				if (description !== undefined) planData.description = description;
 				if (milestone_id !== undefined) planData.milestone_id = milestone_id;
 
-				const plan = await testRailClient.updatePlan(planId, planData);
+				const plan = await testRailClient.plans.updatePlan(planId, planData);
 				const successResponse = createSuccessResponse(
 					"Test plan updated successfully",
 					{
@@ -217,7 +218,7 @@ export function registerPlanTools(
 				if (config_ids) entryData.config_ids = config_ids;
 				if (refs) entryData.refs = refs;
 
-				const entry = await testRailClient.updatePlanEntry(
+				const entry = await testRailClient.plans.updatePlanEntry(
 					planId,
 					entryId,
 					entryData,
@@ -247,7 +248,7 @@ export function registerPlanTools(
 	// Close a test plan
 	server.tool("closePlan", closePlanSchema, async ({ planId }) => {
 		try {
-			const plan = await testRailClient.closePlan(planId);
+			const plan = await testRailClient.plans.closePlan(planId);
 			const successResponse = createSuccessResponse(
 				"Test plan closed successfully",
 				{
@@ -272,7 +273,7 @@ export function registerPlanTools(
 	// Delete a test plan
 	server.tool("deletePlan", deletePlanSchema, async ({ planId }) => {
 		try {
-			await testRailClient.deletePlan(planId);
+			await testRailClient.plans.deletePlan(planId);
 			const successResponse = createSuccessResponse(
 				"Test plan deleted successfully",
 				{
@@ -300,7 +301,7 @@ export function registerPlanTools(
 		deletePlanEntrySchema,
 		async ({ planId, entryId }) => {
 			try {
-				await testRailClient.deletePlanEntry(planId, entryId);
+				await testRailClient.plans.deletePlanEntry(planId, entryId);
 				const successResponse = createSuccessResponse(
 					"Plan entry deleted successfully",
 					{

@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getRunsSchema,
@@ -37,7 +37,7 @@ export function registerRunTools(
 					params.created_by = createdBy.join(",");
 				}
 
-				const runs = await testRailClient.getRuns(projectId, params);
+				const runs = await testRailClient.runs.getRuns(projectId, params);
 				const successResponse = createSuccessResponse(
 					"Test runs retrieved successfully",
 					{
@@ -63,7 +63,7 @@ export function registerRunTools(
 	// Get a specific test run
 	server.tool("getRun", getRunSchema, async ({ runId }) => {
 		try {
-			const run = await testRailClient.getRun(runId);
+			const run = await testRailClient.runs.getRun(runId);
 			const successResponse = createSuccessResponse(
 				"Test run retrieved successfully",
 				{
@@ -102,20 +102,19 @@ export function registerRunTools(
 			refs,
 		}) => {
 			try {
-				const data: Record<string, unknown> = {
+				const data = {
 					name,
+					suite_id: suiteId,
+					description,
+					milestone_id: milestoneId,
+					assignedto_id: assignedtoId,
+					include_all: includeAll,
+					case_ids: caseIds,
+					config_ids: configIds,
+					refs,
 				};
 
-				if (suiteId) data.suite_id = suiteId;
-				if (description) data.description = description;
-				if (milestoneId) data.milestone_id = milestoneId;
-				if (assignedtoId) data.assignedto_id = assignedtoId;
-				if (includeAll !== undefined) data.include_all = includeAll;
-				if (caseIds) data.case_ids = caseIds;
-				if (configIds) data.config_ids = configIds;
-				if (refs) data.refs = refs;
-
-				const run = await testRailClient.addRun(projectId, data);
+				const run = await testRailClient.runs.addRun(projectId, data);
 				const successResponse = createSuccessResponse(
 					"Test run created successfully",
 					{
@@ -153,17 +152,17 @@ export function registerRunTools(
 			refs,
 		}) => {
 			try {
-				const data: Record<string, unknown> = {};
+				const data = {
+					name,
+					description,
+					milestone_id: milestoneId,
+					assignedto_id: assignedtoId,
+					include_all: includeAll,
+					case_ids: caseIds,
+					refs,
+				};
 
-				if (name) data.name = name;
-				if (description !== undefined) data.description = description;
-				if (milestoneId !== undefined) data.milestone_id = milestoneId;
-				if (assignedtoId !== undefined) data.assignedto_id = assignedtoId;
-				if (includeAll !== undefined) data.include_all = includeAll;
-				if (caseIds) data.case_ids = caseIds;
-				if (refs) data.refs = refs;
-
-				const run = await testRailClient.updateRun(runId, data);
+				const run = await testRailClient.runs.updateRun(runId, data);
 				const successResponse = createSuccessResponse(
 					"Test run updated successfully",
 					{
@@ -189,7 +188,7 @@ export function registerRunTools(
 	// Close a test run
 	server.tool("closeRun", closeRunSchema, async ({ runId }) => {
 		try {
-			const run = await testRailClient.closeRun(runId);
+			const run = await testRailClient.runs.closeRun(runId);
 			const successResponse = createSuccessResponse(
 				"Test run closed successfully",
 				{
@@ -214,7 +213,7 @@ export function registerRunTools(
 	// Delete a test run
 	server.tool("deleteRun", deleteRunSchema, async ({ runId }) => {
 		try {
-			await testRailClient.deleteRun(runId);
+			await testRailClient.runs.deleteRun(runId);
 			const successResponse = createSuccessResponse(
 				"Test run deleted successfully",
 				{

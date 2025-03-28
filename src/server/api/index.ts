@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { registerProjectTools } from "./projects.js";
 import { registerCaseTools } from "./cases.js";
 import { registerSectionTools } from "./sections.js";

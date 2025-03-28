@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getMilestonesSchema,
@@ -18,20 +18,23 @@ export function registerMilestoneTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// プロジェクトのマイルストーン一覧取得
+	// マイルストーン一覧取得
 	server.tool("getMilestones", getMilestonesSchema, async ({ projectId }) => {
 		try {
-			const milestones = await testRailClient.getMilestones(projectId);
+			const milestones =
+				await testRailClient.milestones.getMilestones(projectId);
 			const successResponse = createSuccessResponse(
 				"Milestones retrieved successfully",
-				{ milestones },
+				{
+					milestones,
+				},
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
 			};
 		} catch (error) {
 			const errorResponse = createErrorResponse(
-				"Error fetching milestones",
+				`Error fetching milestones for project ${projectId}`,
 				error,
 			);
 			return {
@@ -41,10 +44,11 @@ export function registerMilestoneTools(
 		}
 	});
 
-	// マイルストーン取得
+	// マイルストーン詳細取得
 	server.tool("getMilestone", getMilestoneSchema, async ({ milestoneId }) => {
 		try {
-			const milestone = await testRailClient.getMilestone(milestoneId);
+			const milestone =
+				await testRailClient.milestones.getMilestone(milestoneId);
 			const successResponse = createSuccessResponse(
 				"Milestone retrieved successfully",
 				{ milestone },
@@ -68,7 +72,7 @@ export function registerMilestoneTools(
 	server.tool("addMilestone", addMilestoneSchema, async (params) => {
 		try {
 			const { projectId, ...milestoneData } = params;
-			const milestone = await testRailClient.addMilestone(
+			const milestone = await testRailClient.milestones.addMilestone(
 				projectId,
 				milestoneData,
 			);
@@ -95,7 +99,7 @@ export function registerMilestoneTools(
 	server.tool("updateMilestone", updateMilestoneSchema, async (params) => {
 		try {
 			const { milestoneId, ...milestoneData } = params;
-			const milestone = await testRailClient.updateMilestone(
+			const milestone = await testRailClient.milestones.updateMilestone(
 				milestoneId,
 				milestoneData,
 			);
@@ -124,7 +128,7 @@ export function registerMilestoneTools(
 		deleteMilestoneSchema,
 		async ({ milestoneId }) => {
 			try {
-				await testRailClient.deleteMilestone(milestoneId);
+				await testRailClient.milestones.deleteMilestone(milestoneId);
 				const successResponse = createSuccessResponse(
 					"Milestone deleted successfully",
 					{ milestoneId },

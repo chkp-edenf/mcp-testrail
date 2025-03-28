@@ -2,7 +2,7 @@ import {
 	McpServer,
 	ResourceTemplate,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../client/testRailApi.js";
+import { TestRailClient } from "../client/api/index.js";
 
 /**
  * リソーステンプレートを登録する関数
@@ -20,7 +20,7 @@ export function registerResourceTemplates(
 		async (uri, { caseId }) => {
 			try {
 				const numericCaseId = Number.parseInt(String(caseId), 10);
-				const testCase = await testRailClient.getCase(numericCaseId);
+				const testCase = await testRailClient.cases.getCase(numericCaseId);
 
 				const content =
 					`# Test Case: ${testCase.title} (ID: ${testCase.id})\n\n` +

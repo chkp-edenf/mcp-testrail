@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getProjectsSchema,
@@ -21,7 +21,7 @@ export function registerProjectTools(
 	// プロジェクト一覧取得
 	server.tool("getProjects", getProjectsSchema, async () => {
 		try {
-			const projects = await testRailClient.getProjects();
+			const projects = await testRailClient.projects.getProjects();
 			const successResponse = createSuccessResponse(
 				"Projects retrieved successfully",
 				{
@@ -46,7 +46,7 @@ export function registerProjectTools(
 	// 特定のプロジェクトの詳細取得
 	server.tool("getProject", getProjectSchema, async ({ projectId }) => {
 		try {
-			const project = await testRailClient.getProject(projectId);
+			const project = await testRailClient.projects.getProject(projectId);
 			const successResponse = createSuccessResponse(
 				"Project retrieved successfully",
 				{
@@ -74,7 +74,7 @@ export function registerProjectTools(
 		addProjectSchema,
 		async ({ name, announcement, show_announcement, suite_mode }) => {
 			try {
-				const project = await testRailClient.addProject({
+				const project = await testRailClient.projects.addProject({
 					name,
 					announcement,
 					show_announcement,
@@ -114,7 +114,7 @@ export function registerProjectTools(
 			is_completed,
 		}) => {
 			try {
-				const project = await testRailClient.updateProject(projectId, {
+				const project = await testRailClient.projects.updateProject(projectId, {
 					name,
 					announcement,
 					show_announcement,
@@ -145,7 +145,7 @@ export function registerProjectTools(
 	// プロジェクト削除
 	server.tool("deleteProject", deleteProjectSchema, async ({ projectId }) => {
 		try {
-			await testRailClient.deleteProject(projectId);
+			await testRailClient.projects.deleteProject(projectId);
 			const successResponse = createSuccessResponse(
 				`Project ${projectId} deleted successfully`,
 			);

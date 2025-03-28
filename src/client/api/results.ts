@@ -7,7 +7,10 @@ import {
 	GetResultsInputType,
 	GetResultsForCaseInputType,
 	GetResultsForRunInputType,
+	AddResultInputType,
 	AddResultForCaseInputType,
+	AddResultsInputType,
+	AddResultsForCasesInputType,
 } from "../../shared/schemas/results.js";
 
 export class ResultsClient extends BaseTestRailClient {
@@ -80,6 +83,27 @@ export class ResultsClient extends BaseTestRailClient {
 	}
 
 	/**
+	 * テストに対して結果を追加します
+	 * @param testId テストのID
+	 * @param data テスト結果のデータ（status_id, comment, version, elapsed, defects, assignedto_id など）
+	 * @returns 追加されたテスト結果
+	 */
+	async addResult(
+		testId: AddResultInputType["testId"],
+		data: Record<string, unknown>,
+	): Promise<TestRailResult> {
+		try {
+			const response: AxiosResponse<TestRailResult> = await this.client.post(
+				`/api/v2/add_result/${testId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			throw handleApiError(error, `Failed to add result for test ${testId}`);
+		}
+	}
+
+	/**
 	 * テストケースとテストランに基づいてテスト結果を追加します
 	 * @param runId テストランのID
 	 * @param caseId テストケースのID
@@ -109,6 +133,51 @@ export class ResultsClient extends BaseTestRailClient {
 			throw handleApiError(
 				error,
 				`Failed to add result for case ${caseId} in run ${runId}`,
+			);
+		}
+	}
+
+	/**
+	 * テストランに対して複数のテスト結果をまとめて追加します
+	 * @param runId テストランのID
+	 * @param data 結果データ（results配列を含む）
+	 * @returns 追加されたテスト結果のリスト
+	 */
+	async addResults(
+		runId: AddResultsInputType["runId"],
+		data: Record<string, unknown>,
+	): Promise<TestRailResult[]> {
+		try {
+			const response: AxiosResponse<TestRailResult[]> = await this.client.post(
+				`/api/v2/add_results/${runId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			throw handleApiError(error, `Failed to add results for run ${runId}`);
+		}
+	}
+
+	/**
+	 * テストランに対して複数のテストケース結果をまとめて追加します
+	 * @param runId テストランのID
+	 * @param data 結果データ（results配列を含む）
+	 * @returns 追加されたテスト結果のリスト
+	 */
+	async addResultsForCases(
+		runId: AddResultsForCasesInputType["runId"],
+		data: Record<string, unknown>,
+	): Promise<TestRailResult[]> {
+		try {
+			const response: AxiosResponse<TestRailResult[]> = await this.client.post(
+				`/api/v2/add_results_for_cases/${runId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			throw handleApiError(
+				error,
+				`Failed to add results for cases in run ${runId}`,
 			);
 		}
 	}

@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getUsersSchema,
@@ -19,7 +19,7 @@ export function registerUserTools(
 	// Get all users
 	server.tool("getUsers", getUsersSchema, async () => {
 		try {
-			const users = await testRailClient.getUsers();
+			const users = await testRailClient.users.getUsers();
 			const successResponse = createSuccessResponse(
 				"Users retrieved successfully",
 				{
@@ -41,7 +41,7 @@ export function registerUserTools(
 	// Get user by ID
 	server.tool("getUser", getUserSchema, async ({ userId }) => {
 		try {
-			const user = await testRailClient.getUser(userId);
+			const user = await testRailClient.users.getUser(userId);
 			const successResponse = createSuccessResponse(
 				"User retrieved successfully",
 				{
@@ -66,7 +66,7 @@ export function registerUserTools(
 	// Get user by email
 	server.tool("getUserByEmail", getUserByEmailSchema, async ({ email }) => {
 		try {
-			const user = await testRailClient.getUserByEmail(email);
+			const user = await testRailClient.users.getUserByEmail(email);
 			const successResponse = createSuccessResponse(
 				"User retrieved successfully",
 				{

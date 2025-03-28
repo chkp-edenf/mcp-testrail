@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { TestRailClient } from "../../client/testRailApi.js";
+import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
 	getTestCaseSchema,
@@ -23,15 +23,13 @@ export function registerCaseTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// テストケース取得
+	// テストケース詳細取得
 	server.tool("getTestCase", getTestCaseSchema, async ({ caseId }) => {
 		try {
-			const testCase = await testRailClient.getCase(caseId);
+			const testCase = await testRailClient.cases.getCase(caseId);
 			const successResponse = createSuccessResponse(
-				"Test case retrieved successfully",
-				{
-					testCase,
-				},
+				`Test case ${caseId} retrieved successfully`,
+				{ testCase },
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -51,19 +49,10 @@ export function registerCaseTools(
 	// プロジェクトのテストケース一覧取得
 	server.tool("getTestCases", getTestCasesSchema, async ({ projectId }) => {
 		try {
-			const testCases = await testRailClient.getCases(projectId);
+			const testCases = await testRailClient.cases.getCases(projectId);
 			const successResponse = createSuccessResponse(
-				"Test cases retrieved successfully",
-				{
-					offset: 0,
-					limit: 250,
-					size: testCases.length,
-					_links: {
-						next: null,
-						prev: null,
-					},
-					testCases,
-				},
+				`Test cases for project ${projectId} retrieved successfully`,
+				{ testCases },
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -80,47 +69,61 @@ export function registerCaseTools(
 		}
 	});
 
-	// テストケース作成
+	// テストケース追加
 	server.tool(
 		"addTestCase",
 		addTestCaseSchema,
 		async ({
 			sectionId,
 			title,
+			customPrerequisites,
+			customSteps,
+			customExpected,
 			typeId,
 			priorityId,
 			estimate,
 			milestoneId,
 			refs,
-			customSteps,
-			customExpected,
-			customPrerequisites,
 		}) => {
 			try {
-				const data: Record<string, unknown> = { title };
+				// テストケースのデータを構築
+				const caseData: Record<string, unknown> = {
+					title,
+					custom_preconds: customPrerequisites,
+					custom_steps: customSteps,
+					custom_expected: customExpected,
+					type_id: typeId,
+					priority_id: priorityId,
+					estimate,
+					milestone_id: milestoneId,
+					refs,
+				};
 
-				if (typeId !== undefined) data.type_id = typeId;
-				if (priorityId !== undefined) data.priority_id = priorityId;
-				if (estimate) data.estimate = estimate;
-				if (milestoneId !== undefined) data.milestone_id = milestoneId;
-				if (refs) data.refs = refs;
-				if (customSteps) data.custom_steps = customSteps;
-				if (customExpected) data.custom_expected = customExpected;
-				if (customPrerequisites) data.custom_preconds = customPrerequisites;
+				// 空または未定義のフィールドを削除
+				for (const key of Object.keys(caseData)) {
+					if (
+						caseData[key] === undefined ||
+						caseData[key] === null ||
+						caseData[key] === ""
+					) {
+						delete caseData[key];
+					}
+				}
 
-				const testCase = await testRailClient.addCase(sectionId, data);
+				const testCase = await testRailClient.cases.addCase(
+					sectionId,
+					caseData,
+				);
 				const successResponse = createSuccessResponse(
-					"Test case added successfully",
-					{
-						testCase,
-					},
+					"Test case created successfully",
+					{ testCase },
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error adding test case to section ${sectionId}`,
+					"Error creating test case",
 					error,
 				);
 				return {
@@ -138,34 +141,38 @@ export function registerCaseTools(
 		async ({
 			caseId,
 			title,
+			customPrerequisites,
+			customSteps,
+			customExpected,
 			typeId,
 			priorityId,
 			estimate,
 			milestoneId,
 			refs,
-			customSteps,
-			customExpected,
-			customPrerequisites,
 		}) => {
 			try {
-				const data: Record<string, unknown> = {};
+				// 更新データの構築
+				const caseData: Record<string, unknown> = {};
 
-				if (title) data.title = title;
-				if (typeId !== undefined) data.type_id = typeId;
-				if (priorityId !== undefined) data.priority_id = priorityId;
-				if (estimate) data.estimate = estimate;
-				if (milestoneId !== undefined) data.milestone_id = milestoneId;
-				if (refs) data.refs = refs;
-				if (customSteps) data.custom_steps = customSteps;
-				if (customExpected) data.custom_expected = customExpected;
-				if (customPrerequisites) data.custom_preconds = customPrerequisites;
+				if (title !== undefined) caseData.title = title;
+				if (customPrerequisites !== undefined)
+					caseData.custom_preconds = customPrerequisites;
+				if (customSteps !== undefined) caseData.custom_steps = customSteps;
+				if (customExpected !== undefined)
+					caseData.custom_expected = customExpected;
+				if (typeId !== undefined) caseData.type_id = typeId;
+				if (priorityId !== undefined) caseData.priority_id = priorityId;
+				if (estimate !== undefined) caseData.estimate = estimate;
+				if (milestoneId !== undefined) caseData.milestone_id = milestoneId;
+				if (refs !== undefined) caseData.refs = refs;
 
-				const testCase = await testRailClient.updateCase(caseId, data);
+				const testCase = await testRailClient.cases.updateCase(
+					caseId,
+					caseData,
+				);
 				const successResponse = createSuccessResponse(
-					"Test case updated successfully",
-					{
-						testCase,
-					},
+					`Test case ${caseId} updated successfully`,
+					{ testCase },
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -186,9 +193,9 @@ export function registerCaseTools(
 	// テストケース削除
 	server.tool("deleteTestCase", deleteTestCaseSchema, async ({ caseId }) => {
 		try {
-			await testRailClient.deleteCase(caseId);
+			await testRailClient.cases.deleteCase(caseId);
 			const successResponse = createSuccessResponse(
-				"Test case deleted successfully",
+				`Test case ${caseId} deleted successfully`,
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -205,15 +212,13 @@ export function registerCaseTools(
 		}
 	});
 
-	// テストケースタイプ取得
+	// テストケースタイプ一覧取得
 	server.tool("getTestCaseTypes", getTestCaseTypesSchema, async () => {
 		try {
-			const caseTypes = await testRailClient.getCaseTypes();
+			const caseTypes = await testRailClient.cases.getCaseTypes();
 			const successResponse = createSuccessResponse(
 				"Test case types retrieved successfully",
-				{
-					caseTypes,
-				},
+				{ caseTypes },
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -230,15 +235,13 @@ export function registerCaseTools(
 		}
 	});
 
-	// テストケースフィールド取得
+	// テストケースフィールド一覧取得
 	server.tool("getTestCaseFields", getTestCaseFieldsSchema, async () => {
 		try {
-			const caseFields = await testRailClient.getCaseFields();
+			const caseFields = await testRailClient.cases.getCaseFields();
 			const successResponse = createSuccessResponse(
 				"Test case fields retrieved successfully",
-				{
-					caseFields,
-				},
+				{ caseFields },
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -261,16 +264,17 @@ export function registerCaseTools(
 		copyTestCasesToSectionSchema,
 		async ({ sectionId, caseIds }) => {
 			try {
-				// TestRail APIでは配列をカンマ区切りの文字列として送信
-				const cases = await testRailClient.copyCasesToSection(
-					sectionId,
+				if (!Array.isArray(caseIds) || caseIds.length === 0) {
+					throw new Error("caseIds must be a non-empty array");
+				}
+
+				const result = await testRailClient.cases.copyToSection(
 					caseIds,
+					sectionId,
 				);
 				const successResponse = createSuccessResponse(
-					"Test cases copied successfully",
-					{
-						cases,
-					},
+					`Test cases copied to section ${sectionId} successfully`,
+					{ result },
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -294,15 +298,17 @@ export function registerCaseTools(
 		moveTestCasesToSectionSchema,
 		async ({ sectionId, caseIds }) => {
 			try {
-				const cases = await testRailClient.moveCasesToSection(
-					sectionId,
+				if (!Array.isArray(caseIds) || caseIds.length === 0) {
+					throw new Error("caseIds must be a non-empty array");
+				}
+
+				const result = await testRailClient.cases.moveToSection(
 					caseIds,
+					sectionId,
 				);
 				const successResponse = createSuccessResponse(
-					"Test cases moved successfully",
-					{
-						cases,
-					},
+					`Test cases moved to section ${sectionId} successfully`,
+					{ result },
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -326,19 +332,17 @@ export function registerCaseTools(
 		getTestCaseHistorySchema,
 		async ({ caseId }) => {
 			try {
-				const history = await testRailClient.getCaseHistory(caseId);
+				const history = await testRailClient.cases.getCaseHistory(caseId);
 				const successResponse = createSuccessResponse(
-					"Test case history retrieved successfully",
-					{
-						history,
-					},
+					`Test case ${caseId} history retrieved successfully`,
+					{ history },
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error fetching history for test case ${caseId}`,
+					`Error fetching test case ${caseId} history`,
 					error,
 				);
 				return {

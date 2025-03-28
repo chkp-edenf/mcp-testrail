@@ -1,0 +1,21 @@
+{
+  "name": "mcp-testrail",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "format": "biome format --write ./src",
+    "test": "vitest ./test --reporter=verbose --coverage"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.9"
+  },
+  "dependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@modelcontextprotocol/sdk": "^1.8.0"
+  }
+}

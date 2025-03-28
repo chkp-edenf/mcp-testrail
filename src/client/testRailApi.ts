@@ -3,7 +3,7 @@ import {
 	HttpClientConfig,
 	RequestData,
 	RequestParams,
-} from "./api";
+} from "./api.js";
 import FormData from "form-data";
 import * as fs from "node:fs";
 import * as path from "node:path";

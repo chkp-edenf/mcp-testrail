@@ -261,67 +261,6 @@ export class TestRailClient {
 		this.client.defaults.headers.common[name] = value;
 	}
 
-	// Attachments API
-
-	async addAttachmentToCase(
-		caseId: number,
-		filePath: string,
-	): Promise<{ attachment_id: number }> {
-		try {
-			// Check if running in Node.js environment with fs module available
-			if (!fs || !path) {
-				throw new Error(
-					"File system operations are not supported in this environment",
-				);
-			}
-
-			const formData = new FormData();
-			formData.append(
-				"attachment",
-				fs.createReadStream(filePath),
-				path.basename(filePath),
-			);
-
-			// Set Content-Type header for multipart/form-data
-			const headers = { "Content-Type": "multipart/form-data" };
-
-			const response = await this.client.post<{ attachment_id: number }>(
-				`/api/v2/add_attachment_to_case/${caseId}`,
-				formData,
-				{ headers },
-			);
-
-			return response.data;
-		} catch (error) {
-			handleApiError(`Failed to add attachment to case ${caseId}`, error);
-			throw error;
-		}
-	}
-
-	async getAttachmentsForCase(
-		caseId: number,
-		params?: { limit?: number; offset?: number },
-	): Promise<TestRailAttachment[] | PaginatedResponse<TestRailAttachment>> {
-		try {
-			const response = await this.client.get<
-				TestRailAttachment[] | PaginatedResponse<TestRailAttachment>
-			>(`/api/v2/get_attachments_for_case/${caseId}`, { params });
-			return response.data;
-		} catch (error) {
-			handleApiError(`Failed to get attachments for case ${caseId}`, error);
-			throw error;
-		}
-	}
-
-	async deleteAttachment(attachmentId: number): Promise<void> {
-		try {
-			await this.client.post<void>(`/api/v2/delete_attachment/${attachmentId}`);
-		} catch (error) {
-			handleApiError(`Failed to delete attachment ${attachmentId}`, error);
-			throw error;
-		}
-	}
-
 	// Test Cases API
 
 	async getCase(caseId: number): Promise<TestRailCase> {

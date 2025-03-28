@@ -44,42 +44,24 @@ describe('TestRailClient', () => {
     vi.resetAllMocks();
   });
   
-  describe('Attachments API', () => {
-    it.skip('uploads attachment to case', async () => {
-      // We're skipping this test as it requires complex fs mocking
-      // which is causing issues in the test environment
+  describe('Client Configuration', () => {
+    it('initializes with the correct configuration', () => {
+      expect(axios.create).toHaveBeenCalledWith({
+        baseURL: mockConfig.baseURL,
+        auth: mockConfig.auth,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      });
     });
     
-    it('retrieves attachments for a case', async () => {
-      // Mock response
-      const mockAttachments = [
-        { attachment_id: 1, name: 'File 1', size: 1024, filename: 'file1.jpg', created_on: 1609459200, created_by: 1, project_id: 1, case_id: 1 },
-        { attachment_id: 2, name: 'File 2', size: 2048, filename: 'file2.jpg', created_on: 1609459300, created_by: 1, project_id: 1, case_id: 1 }
-      ];
-      mockAxiosInstance.get.mockResolvedValue({ data: mockAttachments });
+    it('sets custom headers correctly', () => {
+      // Test setting a custom header
+      client.setHeader('X-Custom-Header', 'CustomValue');
       
-      // Test method with params
-      const result = await client.getAttachmentsForCase(1, { limit: 10, offset: 0 });
-      
-      // Verify axios get was called correctly
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_attachments_for_case/1', { params: { limit: 10, offset: 0 } });
-      
-      // Verify result
-      expect(result).toEqual(mockAttachments);
-    });
-    
-    it('removes an attachment', async () => {
-      // Mock response
-      mockAxiosInstance.post.mockResolvedValue({ data: null });
-      
-      // Test method
-      await client.deleteAttachment(1);
-      
-      // Verify axios post was called correctly
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_attachment/1');
-      
-      // Verify post was called exactly once
-      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(1);
+      // Verify header was set
+      expect(mockAxiosInstance.defaults.headers.common['X-Custom-Header']).toBe('CustomValue');
     });
   });
   
@@ -145,9 +127,50 @@ describe('TestRailClient', () => {
       // Verify result
       expect(result).toEqual(mockCase);
     });
+    
+    it('handles errors when retrieving a test case', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Test case not found' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getCase(999)).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case/999');
+    });
   });
   
   describe('Projects API', () => {
+    it('retrieves a specific project', async () => {
+      // Mock response
+      const mockProject = {
+        id: 1,
+        name: 'Project 1',
+        announcement: '',
+        show_announcement: false,
+        is_completed: false,
+        completed_on: null,
+        suite_mode: 1,
+        url: 'http://example.com/project/1'
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockProject });
+      
+      // Test method
+      const result = await client.getProject(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_project/1');
+      
+      // Verify result
+      expect(result).toEqual(mockProject);
+    });
+    
     it('retrieves all projects', async () => {
       // Mock response
       const mockProjects = [
@@ -164,6 +187,23 @@ describe('TestRailClient', () => {
       
       // Verify result
       expect(result).toEqual(mockProjects);
+    });
+    
+    it('handles errors when retrieving projects', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 500,
+          data: { error: 'Server error' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getProjects()).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_projects', expect.anything());
     });
   });
   
@@ -203,6 +243,65 @@ describe('TestRailClient', () => {
       // Verify result
       expect(result).toEqual(mockResult);
     });
+    
+    it('adds a result for a specific test case in a run', async () => {
+      // Mock response
+      const mockResult = {
+        id: 1,
+        test_id: 1,
+        status_id: 1,
+        created_by: 1,
+        created_on: 1609459200,
+        assignedto_id: 1,
+        comment: 'Test passed',
+        version: '1.0',
+        elapsed: '30s',
+        defects: '',
+        custom_step_results: []
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockResult });
+      
+      // Test data
+      const resultData = {
+        status_id: 1,
+        comment: 'Test passed',
+        version: '1.0',
+        elapsed: '30s',
+        defects: ''
+      };
+      
+      // Test method
+      const result = await client.addResultForCase(1, 2, resultData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_result_for_case/1/2', resultData);
+      
+      // Verify result
+      expect(result).toEqual(mockResult);
+    });
+    
+    it('handles 400 errors when adding results for a case', async () => {
+      // Mock error response
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Bad request' }
+        },
+        isAxiosError: true
+      };
+      
+      // Mock implementation for isAxiosError
+      // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
+      (axios.isAxiosError as any).mockReturnValue(true);
+      
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.addResultForCase(1, 2, { status_id: 1 })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_result_for_case/1/2', { status_id: 1 });
+    });
   });
   
   describe('Runs API', () => {
@@ -233,6 +332,48 @@ describe('TestRailClient', () => {
       
       // Verify axios get was called correctly
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_run/1');
+      
+      // Verify result
+      expect(result).toEqual(mockRun);
+    });
+    
+    it('adds a new test run', async () => {
+      // Mock response
+      const mockRun = {
+        id: 1,
+        suite_id: 1,
+        name: 'New Test Run',
+        description: 'Test run description',
+        milestone_id: 1,
+        assignedto_id: 1,
+        include_all: true,
+        is_completed: false,
+        completed_on: null,
+        config: '',
+        config_ids: [],
+        created_by: 1,
+        created_on: 1609459200,
+        plan_id: 1,
+        url: 'http://example.com/run/1',
+        refs: ''
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockRun });
+      
+      // Test data
+      const runData = {
+        name: 'New Test Run',
+        description: 'Test run description',
+        suite_id: 1,
+        milestone_id: 1,
+        assignedto_id: 1,
+        include_all: true
+      };
+      
+      // Test method
+      const result = await client.addRun(1, runData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_run/1', runData);
       
       // Verify result
       expect(result).toEqual(mockRun);

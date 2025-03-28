@@ -11,7 +11,7 @@ export class SharedStepsClient extends BaseTestRailClient {
 	async getSharedStep(sharedStepId: number): Promise<TestRailSharedStep> {
 		try {
 			const response = await this.client.get<TestRailSharedStep>(
-				`/api/v2/get_shared_step/${sharedStepId}`
+				`/api/v2/get_shared_step/${sharedStepId}`,
 			);
 			return response.data;
 		} catch (error) {
@@ -27,16 +27,19 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 */
 	async getSharedSteps(
 		projectId: number,
-		filters?: Record<string, string | number | boolean | null | undefined>
+		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailSharedStepItem[]> {
 		try {
 			const response = await this.client.get<TestRailSharedStepItem[]>(
 				`/api/v2/get_shared_steps/${projectId}`,
-				{ params: filters }
+				{ params: filters },
 			);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to get shared steps for project ${projectId}`);
+			throw handleApiError(
+				error,
+				`Failed to get shared steps for project ${projectId}`,
+			);
 		}
 	}
 
@@ -48,16 +51,19 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 */
 	async addSharedStep(
 		projectId: number,
-		data: Record<string, unknown>
+		data: Record<string, unknown>,
 	): Promise<TestRailSharedStep> {
 		try {
 			const response = await this.client.post<TestRailSharedStep>(
 				`/api/v2/add_shared_step/${projectId}`,
-				data
+				data,
 			);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to add shared step to project ${projectId}`);
+			throw handleApiError(
+				error,
+				`Failed to add shared step to project ${projectId}`,
+			);
 		}
 	}
 
@@ -69,16 +75,19 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 */
 	async updateSharedStep(
 		sharedStepId: number,
-		data: Record<string, unknown>
+		data: Record<string, unknown>,
 	): Promise<TestRailSharedStep> {
 		try {
 			const response = await this.client.post<TestRailSharedStep>(
 				`/api/v2/update_shared_step/${sharedStepId}`,
-				data
+				data,
 			);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to update shared step ${sharedStepId}`);
+			throw handleApiError(
+				error,
+				`Failed to update shared step ${sharedStepId}`,
+			);
 		}
 	}
 
@@ -87,13 +96,19 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 * @param sharedStepId The ID of the shared step
 	 * @param keepInCases Whether to keep the steps in test cases that reference this shared step (default true)
 	 */
-	async deleteSharedStep(sharedStepId: number, keepInCases = true): Promise<void> {
+	async deleteSharedStep(
+		sharedStepId: number,
+		keepInCases = true,
+	): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_shared_step/${sharedStepId}`, {
 				keep_in_cases: keepInCases ? 1 : 0,
 			});
 		} catch (error) {
-			throw handleApiError(error, `Failed to delete shared step ${sharedStepId}`);
+			throw handleApiError(
+				error,
+				`Failed to delete shared step ${sharedStepId}`,
+			);
 		}
 	}
 }

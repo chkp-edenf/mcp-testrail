@@ -36,7 +36,10 @@ export class SectionsClient extends BaseTestRailClient {
 			});
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to get sections for project ${projectId}`);
+			throw handleApiError(
+				error,
+				`Failed to get sections for project ${projectId}`,
+			);
 		}
 	}
 
@@ -60,7 +63,10 @@ export class SectionsClient extends BaseTestRailClient {
 			);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to add section to project ${projectId}`);
+			throw handleApiError(
+				error,
+				`Failed to add section to project ${projectId}`,
+			);
 		}
 	}
 

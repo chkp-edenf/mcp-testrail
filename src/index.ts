@@ -1,4 +1,5 @@
-import { startServer } from "./server.js";
+// TestRail MCP Serverのエントリーポイント
+import { startServer } from "./server/server.js";
 
-// サーバーを起動
-await startServer();
+// サーバー起動
+startServer();

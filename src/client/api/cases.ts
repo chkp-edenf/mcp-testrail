@@ -42,7 +42,10 @@ export class CasesClient extends BaseTestRailClient {
 			);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to get test cases for project ${projectId}`);
+			throw handleApiError(
+				error,
+				`Failed to get test cases for project ${projectId}`,
+			);
 		}
 	}
 
@@ -63,7 +66,10 @@ export class CasesClient extends BaseTestRailClient {
 			);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to add test case to section ${sectionId}`);
+			throw handleApiError(
+				error,
+				`Failed to add test case to section ${sectionId}`,
+			);
 		}
 	}
 
@@ -150,18 +156,25 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param sectionId The ID of the target section
 	 * @returns Promise with status
 	 */
-	async copyToSection(caseIds: number[], sectionId: number): Promise<{ status: boolean }> {
+	async copyToSection(
+		caseIds: number[],
+		sectionId: number,
+	): Promise<{ status: boolean }> {
 		try {
 			const data = {
-				case_ids: caseIds
+				case_ids: caseIds,
 			};
-			const response: AxiosResponse<{ status: boolean }> = await this.client.post(
-				`/api/v2/copy_cases_to_section/${sectionId}`,
-				data
-			);
+			const response: AxiosResponse<{ status: boolean }> =
+				await this.client.post(
+					`/api/v2/copy_cases_to_section/${sectionId}`,
+					data,
+				);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to copy test cases to section ${sectionId}`);
+			throw handleApiError(
+				error,
+				`Failed to copy test cases to section ${sectionId}`,
+			);
 		}
 	}
 
@@ -171,18 +184,25 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param sectionId The ID of the target section
 	 * @returns Promise with status
 	 */
-	async moveToSection(caseIds: number[], sectionId: number): Promise<{ status: boolean }> {
+	async moveToSection(
+		caseIds: number[],
+		sectionId: number,
+	): Promise<{ status: boolean }> {
 		try {
 			const data = {
-				case_ids: caseIds
+				case_ids: caseIds,
 			};
-			const response: AxiosResponse<{ status: boolean }> = await this.client.post(
-				`/api/v2/move_cases_to_section/${sectionId}`,
-				data
-			);
+			const response: AxiosResponse<{ status: boolean }> =
+				await this.client.post(
+					`/api/v2/move_cases_to_section/${sectionId}`,
+					data,
+				);
 			return response.data;
 		} catch (error) {
-			throw handleApiError(error, `Failed to move test cases to section ${sectionId}`);
+			throw handleApiError(
+				error,
+				`Failed to move test cases to section ${sectionId}`,
+			);
 		}
 	}
 

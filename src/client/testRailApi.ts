@@ -28,12 +28,15 @@ export class TestRailClient extends NewTestRailClient {
 		return this.projects.addProject(data);
 	}
 
-	updateProject(projectId: number, data: {
-		name?: string;
-		announcement?: string;
-		show_announcement?: boolean;
-		is_completed?: boolean;
-	}) {
+	updateProject(
+		projectId: number,
+		data: {
+			name?: string;
+			announcement?: string;
+			show_announcement?: boolean;
+			is_completed?: boolean;
+		},
+	) {
 		return this.projects.updateProject(projectId, data);
 	}
 
@@ -54,26 +57,35 @@ export class TestRailClient extends NewTestRailClient {
 		return this.sections.getSections(projectId, suiteId, params);
 	}
 
-	addSection(projectId: number, data: {
-		name: string;
-		description?: string;
-		suite_id?: number;
-		parent_id?: number;
-	}) {
+	addSection(
+		projectId: number,
+		data: {
+			name: string;
+			description?: string;
+			suite_id?: number;
+			parent_id?: number;
+		},
+	) {
 		return this.sections.addSection(projectId, data);
 	}
 
-	moveSection(sectionId: number, data: {
-		parent_id?: number | null;
-		after_id?: number | null;
-	}) {
+	moveSection(
+		sectionId: number,
+		data: {
+			parent_id?: number | null;
+			after_id?: number | null;
+		},
+	) {
 		return this.sections.moveSection(sectionId, data);
 	}
 
-	updateSection(sectionId: number, data: {
-		name?: string;
-		description?: string;
-	}) {
+	updateSection(
+		sectionId: number,
+		data: {
+			name?: string;
+			description?: string;
+		},
+	) {
 		return this.sections.updateSection(sectionId, data);
 	}
 
@@ -86,7 +98,10 @@ export class TestRailClient extends NewTestRailClient {
 		return this.sharedSteps.getSharedStep(sharedStepId);
 	}
 
-	getSharedSteps(projectId: number, filters?: Record<string, string | number | boolean | null | undefined>) {
+	getSharedSteps(
+		projectId: number,
+		filters?: Record<string, string | number | boolean | null | undefined>,
+	) {
 		return this.sharedSteps.getSharedSteps(projectId, filters);
 	}
 
@@ -107,7 +122,10 @@ export class TestRailClient extends NewTestRailClient {
 		return this.cases.getCase(caseId);
 	}
 
-	getCases(projectId: number, filters?: Record<string, string | number | boolean | null | undefined>) {
+	getCases(
+		projectId: number,
+		filters?: Record<string, string | number | boolean | null | undefined>,
+	) {
 		return this.cases.getCases(projectId, filters);
 	}
 
@@ -161,7 +179,10 @@ export class TestRailClient extends NewTestRailClient {
 		return this.milestones.getMilestone(milestoneId);
 	}
 
-	getMilestones(projectId: number, filters?: Record<string, string | number | boolean | null | undefined>) {
+	getMilestones(
+		projectId: number,
+		filters?: Record<string, string | number | boolean | null | undefined>,
+	) {
 		return this.milestones.getMilestones(projectId, filters);
 	}
 
@@ -203,7 +224,10 @@ export class TestRailClient extends NewTestRailClient {
 		return this.runs.getRun(runId);
 	}
 
-	getRuns(projectId: number, filters?: Record<string, string | number | boolean | null | undefined>) {
+	getRuns(
+		projectId: number,
+		filters?: Record<string, string | number | boolean | null | undefined>,
+	) {
 		return this.runs.getRuns(projectId, filters);
 	}
 
@@ -227,7 +251,11 @@ export class TestRailClient extends NewTestRailClient {
 		return this.runs.addResult(testId, data);
 	}
 
-	addResultForCase(runId: number, caseId: number, data: Record<string, unknown>) {
+	addResultForCase(
+		runId: number,
+		caseId: number,
+		data: Record<string, unknown>,
+	) {
 		return this.runs.addResultForCase(runId, caseId, data);
 	}
 
@@ -249,7 +277,10 @@ export class TestRailClient extends NewTestRailClient {
 		return this.plans.getPlan(planId);
 	}
 
-	getPlans(projectId: number, filters?: Record<string, string | number | boolean | null | undefined>) {
+	getPlans(
+		projectId: number,
+		filters?: Record<string, string | number | boolean | null | undefined>,
+	) {
 		return this.plans.getPlans(projectId, filters);
 	}
 
@@ -265,7 +296,11 @@ export class TestRailClient extends NewTestRailClient {
 		return this.plans.updatePlan(planId, data);
 	}
 
-	updatePlanEntry(planId: number, entryId: string, data: Record<string, unknown>) {
+	updatePlanEntry(
+		planId: number,
+		entryId: string,
+		data: Record<string, unknown>,
+	) {
 		return this.plans.updatePlanEntry(planId, entryId, data);
 	}
 

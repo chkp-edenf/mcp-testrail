@@ -1,4 +1,4 @@
-import { AxiosError } from 'axios';
+import { AxiosError } from "axios";
 
 /**
  * Handles API errors with better context
@@ -13,13 +13,15 @@ export function handleApiError(error: unknown, message: string): Error {
 		if (axiosError.response) {
 			const status = axiosError.response.status;
 			const responseData = axiosError.response.data;
-			console.error(`${message}: ${JSON.stringify({ response: { status, data: responseData } })}`);
+			console.error(
+				`${message}: ${JSON.stringify({ response: { status, data: responseData } })}`,
+			);
 		} else {
 			console.error(`${message}: ${error}`);
 		}
 		return error;
 	}
-	
+
 	// For non-Error objects, create a new Error
 	return new Error(`${message}: ${String(error)}`);
 }

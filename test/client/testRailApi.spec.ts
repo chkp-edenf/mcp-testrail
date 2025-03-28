@@ -350,6 +350,222 @@ describe('TestRailClient', () => {
     });
   });
   
+  describe('Milestones API', () => {
+    it('retrieves a specific milestone', async () => {
+      // Mock response
+      const mockMilestone = {
+        id: 1,
+        name: 'Release 1.0',
+        description: 'First release',
+        due_on: 1609459200,
+        start_on: 1608249600,
+        started_on: 1608249600,
+        completed_on: null,
+        project_id: 1,
+        is_completed: false,
+        is_started: true,
+        parent_id: null,
+        refs: 'REF-1',
+        url: 'http://example.com/milestone/1'
+      };
+      mockAxiosInstance.get.mockResolvedValue({ data: mockMilestone });
+      
+      // Test method
+      const result = await client.getMilestone(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_milestone/1');
+      
+      // Verify result
+      expect(result).toEqual(mockMilestone);
+    });
+    
+    it('retrieves all milestones for a project', async () => {
+      // Mock response
+      const mockMilestones = [
+        {
+          id: 1,
+          name: 'Release 1.0',
+          description: 'First release',
+          due_on: 1609459200,
+          start_on: 1608249600,
+          started_on: 1608249600,
+          completed_on: null,
+          project_id: 1,
+          is_completed: false,
+          is_started: true,
+          parent_id: null,
+          refs: 'REF-1',
+          url: 'http://example.com/milestone/1'
+        },
+        {
+          id: 2,
+          name: 'Release 2.0',
+          description: 'Second release',
+          due_on: 1619459200,
+          start_on: 1618249600,
+          started_on: null,
+          completed_on: null,
+          project_id: 1,
+          is_completed: false,
+          is_started: false,
+          parent_id: null,
+          refs: 'REF-2',
+          url: 'http://example.com/milestone/2'
+        }
+      ];
+      mockAxiosInstance.get.mockResolvedValue({ data: mockMilestones });
+      
+      // Test method
+      const result = await client.getMilestones(1);
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_milestones/1', expect.anything());
+      
+      // Verify result
+      expect(result).toEqual(mockMilestones);
+    });
+    
+    it('creates a new milestone', async () => {
+      // Mock response
+      const mockMilestone = {
+        id: 3,
+        name: 'New Milestone',
+        description: 'This is a new milestone',
+        due_on: 1639459200,
+        start_on: 1638249600,
+        started_on: null,
+        completed_on: null,
+        project_id: 1,
+        is_completed: false,
+        is_started: false,
+        parent_id: null,
+        refs: 'REF-3',
+        url: 'http://example.com/milestone/3'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockMilestone });
+      
+      // Test data
+      const milestoneData = {
+        name: 'New Milestone',
+        description: 'This is a new milestone',
+        due_on: 1639459200,
+        start_on: 1638249600,
+        refs: 'REF-3'
+      };
+      
+      // Test method
+      const result = await client.addMilestone(1, milestoneData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_milestone/1', milestoneData);
+      
+      // Verify result
+      expect(result).toEqual(mockMilestone);
+    });
+    
+    it('updates an existing milestone', async () => {
+      // Mock response
+      const mockMilestone = {
+        id: 1,
+        name: 'Updated Milestone',
+        description: 'This milestone has been updated',
+        due_on: 1659459200,
+        start_on: 1658249600,
+        started_on: 1658249600,
+        completed_on: null,
+        project_id: 1,
+        is_completed: false,
+        is_started: true,
+        parent_id: null,
+        refs: 'REF-1-UPDATED',
+        url: 'http://example.com/milestone/1'
+      };
+      mockAxiosInstance.post.mockResolvedValue({ data: mockMilestone });
+      
+      // Test data
+      const milestoneData = {
+        name: 'Updated Milestone',
+        description: 'This milestone has been updated',
+        due_on: 1659459200,
+        start_on: 1658249600,
+        is_started: true,
+        refs: 'REF-1-UPDATED'
+      };
+      
+      // Test method
+      const result = await client.updateMilestone(1, milestoneData);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_milestone/1', milestoneData);
+      
+      // Verify result
+      expect(result).toEqual(mockMilestone);
+    });
+    
+    it('deletes a milestone', async () => {
+      // Mock successful deletion (no response data)
+      mockAxiosInstance.post.mockResolvedValue({ data: {} });
+      
+      // Test method
+      await client.deleteMilestone(1);
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_milestone/1', {});
+    });
+    
+    it('handles errors when retrieving a milestone', async () => {
+      // Mock error response (404 - milestone not found)
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Milestone not found' }
+        }
+      };
+      mockAxiosInstance.get.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.getMilestone(999)).rejects.toThrow();
+      
+      // Verify axios get was called correctly
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_milestone/999');
+    });
+    
+    it('handles errors when creating a milestone', async () => {
+      // Mock error response (400 - invalid request)
+      const mockError = {
+        response: {
+          status: 400,
+          data: { error: 'Invalid project' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.addMilestone(999, { name: 'Test Milestone' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_milestone/999', { name: 'Test Milestone' });
+    });
+    
+    it('handles errors when updating a milestone', async () => {
+      // Mock error response (404 - milestone not found)
+      const mockError = {
+        response: {
+          status: 404,
+          data: { error: 'Milestone not found' }
+        }
+      };
+      mockAxiosInstance.post.mockRejectedValue(mockError);
+      
+      // Test error handling
+      await expect(client.updateMilestone(999, { name: 'Updated Milestone' })).rejects.toThrow();
+      
+      // Verify axios post was called correctly
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_milestone/999', { name: 'Updated Milestone' });
+    });
+  });
+  
   describe('Results API', () => {
     it('adds a test result', async () => {
       // Mock response

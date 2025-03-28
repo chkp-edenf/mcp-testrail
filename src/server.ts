@@ -340,6 +340,258 @@ server.addResourceTemplate({
 	},
 });
 
+// Add project management tools
+// ... existing code ...
+
+// Add milestone management tools
+server.addTool({
+	name: "getMilestones",
+	description: "Get all milestones for a project from TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+	}),
+	execute: async ({ projectId }: { projectId: number }) => {
+		try {
+			console.log(`Fetching milestones for project ${projectId}...`);
+			const milestones = await testRailClient.getMilestones(projectId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Milestones for project ${projectId} retrieved successfully`,
+						milestones,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error fetching milestones:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to fetch milestones: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "getMilestone",
+	description: "Get a specific milestone from TestRail",
+	parameters: z.object({
+		milestoneId: z.number().describe("TestRail Milestone ID"),
+	}),
+	execute: async ({ milestoneId }: { milestoneId: number }) => {
+		try {
+			console.log(`Fetching milestone ${milestoneId}...`);
+			const milestone = await testRailClient.getMilestone(milestoneId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Milestone ${milestoneId} retrieved successfully`,
+						milestone,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error fetching milestone:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to fetch milestone: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "addMilestone",
+	description: "Create a new milestone in TestRail",
+	parameters: z.object({
+		projectId: z.number().describe("TestRail Project ID"),
+		name: z.string().describe("Milestone name (required)"),
+		description: z.string().optional().describe("Milestone description"),
+		due_on: z.number().optional().describe("Due date (timestamp)"),
+		start_on: z.number().optional().describe("Start date (timestamp)"),
+		parent_id: z
+			.number()
+			.optional()
+			.describe("Parent milestone ID (for sub-milestones)"),
+		refs: z.string().optional().describe("Reference information or issue keys"),
+		is_completed: z
+			.boolean()
+			.optional()
+			.describe("Completion status of the milestone"),
+		is_started: z
+			.boolean()
+			.optional()
+			.describe("Started status of the milestone"),
+	}),
+	execute: async (params: {
+		projectId: number;
+		name: string;
+		description?: string;
+		due_on?: number;
+		start_on?: number;
+		parent_id?: number;
+		refs?: string;
+		is_completed?: boolean;
+		is_started?: boolean;
+	}) => {
+		try {
+			const { projectId, ...milestoneData } = params;
+			console.log(
+				`Creating milestone '${milestoneData.name}' for project ${projectId}...`,
+			);
+			const milestone = await testRailClient.addMilestone(
+				projectId,
+				milestoneData,
+			);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Milestone '${milestoneData.name}' created successfully`,
+						milestone,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error creating milestone:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to create milestone: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "updateMilestone",
+	description: "Update an existing milestone in TestRail",
+	parameters: z.object({
+		milestoneId: z.number().describe("TestRail Milestone ID"),
+		name: z.string().optional().describe("Milestone name"),
+		description: z.string().optional().describe("Milestone description"),
+		due_on: z.number().optional().describe("Due date (timestamp)"),
+		start_on: z.number().optional().describe("Start date (timestamp)"),
+		parent_id: z
+			.number()
+			.optional()
+			.describe("Parent milestone ID (for sub-milestones)"),
+		refs: z.string().optional().describe("Reference information or issue keys"),
+		is_completed: z
+			.boolean()
+			.optional()
+			.describe("Completion status of the milestone"),
+		is_started: z
+			.boolean()
+			.optional()
+			.describe("Started status of the milestone"),
+	}),
+	execute: async (params: {
+		milestoneId: number;
+		name?: string;
+		description?: string;
+		due_on?: number;
+		start_on?: number;
+		parent_id?: number;
+		refs?: string;
+		is_completed?: boolean;
+		is_started?: boolean;
+	}) => {
+		try {
+			const { milestoneId, ...milestoneData } = params;
+			console.log(`Updating milestone ${milestoneId}...`);
+			const milestone = await testRailClient.updateMilestone(
+				milestoneId,
+				milestoneData,
+			);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Milestone ${milestoneId} updated successfully`,
+						milestone,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error updating milestone:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to update milestone: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
+server.addTool({
+	name: "deleteMilestone",
+	description: "Delete a milestone from TestRail",
+	parameters: z.object({
+		milestoneId: z.number().describe("TestRail Milestone ID"),
+	}),
+	execute: async ({ milestoneId }: { milestoneId: number }) => {
+		try {
+			console.log(`Deleting milestone ${milestoneId}...`);
+			await testRailClient.deleteMilestone(milestoneId);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						message: `Milestone ${milestoneId} deleted successfully`,
+					},
+					null,
+					2,
+				),
+			};
+		} catch (error) {
+			console.error("Error deleting milestone:", error);
+			return {
+				type: "text" as const,
+				text: JSON.stringify(
+					{
+						error: `Failed to delete milestone: ${error instanceof Error ? error.message : String(error)}`,
+					},
+					null,
+					2,
+				),
+			};
+		}
+	},
+});
+
 // Server startup configuration
 export const startServer = async () => {
 	console.error("Starting TestRail MCP Server...");

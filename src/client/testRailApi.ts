@@ -15,6 +15,25 @@ export interface TestRailProject {
 }
 
 /**
+ * TestRail API Response for Milestone
+ */
+export interface TestRailMilestone {
+	id: number;
+	name: string;
+	description?: string;
+	due_on?: number;
+	start_on?: number;
+	started_on?: number;
+	completed_on?: number | null;
+	project_id: number;
+	is_completed: boolean;
+	is_started?: boolean;
+	parent_id?: number | null;
+	refs?: string;
+	url: string;
+}
+
+/**
  * TestRail API Response for Case
  */
 interface TestRailCase {
@@ -366,6 +385,116 @@ export class TestRailClient {
 			await this.client.post(`/api/v2/delete_project/${projectId}`, {});
 		} catch (error) {
 			handleApiError(`Failed to delete project ${projectId}`, error);
+			throw error;
+		}
+	}
+
+	// Milestone API
+
+	/**
+	 * Get a specific milestone
+	 */
+	async getMilestone(milestoneId: number): Promise<TestRailMilestone> {
+		try {
+			console.log(`Getting milestone ${milestoneId}`);
+			const response = await this.client.get<TestRailMilestone>(
+				`/api/v2/get_milestone/${milestoneId}`,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to get milestone ${milestoneId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Get all milestones for a project
+	 */
+	async getMilestones(
+		projectId: number,
+		params?: Record<string, string | number | boolean | null | undefined>,
+	): Promise<TestRailMilestone[]> {
+		try {
+			console.log(`Getting milestones for project ${projectId}`);
+			const response = await this.client.get<TestRailMilestone[]>(
+				`/api/v2/get_milestones/${projectId}`,
+				{ params },
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(
+				`Failed to get milestones for project ${projectId}`,
+				error,
+			);
+			throw error;
+		}
+	}
+
+	/**
+	 * Add a new milestone to a project
+	 */
+	async addMilestone(
+		projectId: number,
+		data: {
+			name: string;
+			description?: string;
+			due_on?: number;
+			start_on?: number;
+			parent_id?: number;
+			refs?: string;
+		},
+	): Promise<TestRailMilestone> {
+		try {
+			console.log(`Adding milestone to project ${projectId}`);
+			const response = await this.client.post<TestRailMilestone>(
+				`/api/v2/add_milestone/${projectId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to add milestone to project ${projectId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Update an existing milestone
+	 */
+	async updateMilestone(
+		milestoneId: number,
+		data: {
+			name?: string;
+			description?: string;
+			due_on?: number;
+			start_on?: number;
+			is_completed?: boolean;
+			is_started?: boolean;
+			parent_id?: number;
+			refs?: string;
+		},
+	): Promise<TestRailMilestone> {
+		try {
+			console.log(`Updating milestone ${milestoneId}`);
+			const response = await this.client.post<TestRailMilestone>(
+				`/api/v2/update_milestone/${milestoneId}`,
+				data,
+			);
+			return response.data;
+		} catch (error) {
+			handleApiError(`Failed to update milestone ${milestoneId}`, error);
+			throw error;
+		}
+	}
+
+	/**
+	 * Delete an existing milestone
+	 */
+	async deleteMilestone(milestoneId: number): Promise<void> {
+		try {
+			console.log(`Deleting milestone ${milestoneId}`);
+			await this.client.post(`/api/v2/delete_milestone/${milestoneId}`, {});
+		} catch (error) {
+			handleApiError(`Failed to delete milestone ${milestoneId}`, error);
 			throw error;
 		}
 	}

@@ -29,7 +29,7 @@ describe('Sections API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockSection });
     
     // Test method
-    const result = await client.getSection(1);
+    const result = await client.sections.getSection(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_section/1');
@@ -63,7 +63,7 @@ describe('Sections API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockSections });
     
     // Test method
-    const result = await client.getSections(1, 1);
+    const result = await client.sections.getSections(1, 1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_sections/1', { params: { suite_id: 1 } });
@@ -93,7 +93,7 @@ describe('Sections API', () => {
     };
     
     // Test method
-    const result = await client.addSection(1, sectionData);
+    const result = await client.sections.addSection(1, sectionData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_section/1', sectionData);
@@ -121,7 +121,7 @@ describe('Sections API', () => {
     };
     
     // Test method
-    const result = await client.moveSection(2, moveData);
+    const result = await client.sections.moveSection(2, moveData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/move_section/2', moveData);
@@ -150,7 +150,7 @@ describe('Sections API', () => {
     };
     
     // Test method
-    const result = await client.updateSection(1, sectionData);
+    const result = await client.sections.updateSection(1, sectionData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_section/1', sectionData);
@@ -164,7 +164,7 @@ describe('Sections API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteSection(1);
+    await client.sections.deleteSection(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_section/1', {});
@@ -175,7 +175,7 @@ describe('Sections API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteSection(1, true);
+    await client.sections.deleteSection(1, true);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_section/1?soft=1', {});

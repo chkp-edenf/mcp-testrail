@@ -39,7 +39,7 @@ describe('Runs API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockRun });
     
     // Test method
-    const result = await client.getRun(1);
+    const result = await client.runs.getRun(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_run/1');
@@ -59,7 +59,7 @@ describe('Runs API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getRun(999)).rejects.toThrow();
+    await expect(client.runs.getRun(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_run/999');
@@ -74,7 +74,7 @@ describe('Runs API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockRuns });
     
     // Test method
-    const result = await client.getRuns(1);
+    const result = await client.runs.getRuns(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_runs/1', expect.anything());
@@ -92,7 +92,7 @@ describe('Runs API', () => {
     
     // Test method with filters
     const filters = { milestone_id: 5, is_completed: 0 };
-    const result = await client.getRuns(1, filters);
+    const result = await client.runs.getRuns(1, filters);
     
     // Verify axios get was called correctly with query parameters
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_runs/1', {
@@ -133,7 +133,7 @@ describe('Runs API', () => {
     };
     
     // Test method
-    const result = await client.addRun(1, runData);
+    const result = await client.runs.addRun(1, runData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_run/1', runData);
@@ -164,7 +164,7 @@ describe('Runs API', () => {
     };
     
     // Test method
-    const result = await client.updateRun(1, runData);
+    const result = await client.runs.updateRun(1, runData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_run/1', runData);
@@ -185,7 +185,7 @@ describe('Runs API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: mockRun });
     
     // Test method
-    const result = await client.closeRun(1);
+    const result = await client.runs.closeRun(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/close_run/1', {});
@@ -199,7 +199,7 @@ describe('Runs API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteRun(1);
+    await client.runs.deleteRun(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_run/1', {});

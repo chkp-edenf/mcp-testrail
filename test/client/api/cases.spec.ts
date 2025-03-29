@@ -33,7 +33,7 @@ describe('Cases API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockCase });
     
     // Test method
-    const result = await client.getCase(1);
+    const result = await client.cases.getCase(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case/1');
@@ -68,7 +68,7 @@ describe('Cases API', () => {
     };
     
     // Test method
-    const result = await client.addCase(1, caseData);
+    const result = await client.cases.addCase(1, caseData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_case/1', caseData);
@@ -88,7 +88,7 @@ describe('Cases API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getCase(999)).rejects.toThrow();
+    await expect(client.cases.getCase(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_case/999');
@@ -119,7 +119,7 @@ describe('Cases API', () => {
     };
     
     // Test method
-    const result = await client.updateCase(1, caseData);
+    const result = await client.cases.updateCase(1, caseData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_case/1', caseData);
@@ -133,7 +133,7 @@ describe('Cases API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteCase(1);
+    await client.cases.deleteCase(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_case/1', {});
@@ -172,7 +172,7 @@ describe('Cases API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockCases });
     
     // Test method
-    const result = await client.getCases(1);
+    const result = await client.cases.getCases(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_cases/1', { params: undefined });
@@ -201,7 +201,7 @@ describe('Cases API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockHistory });
     
     // Test method
-    const result = await client.getCaseHistory(1);
+    const result = await client.cases.getCaseHistory(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_history_for_case/1');
@@ -210,55 +210,54 @@ describe('Cases API', () => {
     expect(result).toEqual(mockHistory);
   });
 
-  it('copies test cases to another section', async () => {
-    // Mock response - note: API returns the status now
+  it('should copy test cases to section', async () => {
     const mockResponse = { status: true };
-    mockAxiosInstance.post.mockResolvedValue({ data: mockResponse });
-    
-    // Test method
-    const result = await client.copyCasesToSection(2, [1, 2]);
-    
-    // Verify axios post was called correctly
-    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/copy_cases_to_section/2', { case_ids: [1, 2] });
-    
-    // Verify result
+    mockAxiosInstance.post.mockResolvedValueOnce({ data: mockResponse });
+
+    const result = await client.cases.copyToSection([1, 2], 2);
+
     expect(result).toEqual(mockResponse);
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+      "/api/v2/copy_cases_to_section/2",
+      { case_ids: [1, 2] }
+    );
   });
 
-  it('moves test cases to another section', async () => {
-    // Mock successful move (with status)
-    mockAxiosInstance.post.mockResolvedValue({ data: { status: true } });
-    
-    // Test method
-    await client.moveCasesToSection(2, [1, 2]);
-    
-    // Verify axios post was called correctly
-    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/move_cases_to_section/2', { case_ids: [1, 2] });
+  it('should move test cases to section', async () => {
+    const mockResponse = { status: true };
+    mockAxiosInstance.post.mockResolvedValueOnce({ data: mockResponse });
+
+    const result = await client.cases.moveToSection([1, 2], 2);
+
+    expect(result).toEqual(mockResponse);
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+      "/api/v2/move_cases_to_section/2",
+      { case_ids: [1, 2] }
+    );
   });
 
   it('updates multiple test cases', async () => {
-    // Mock successful update (no response data)
+    // Mock successful operation
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
-    // Test data
+    // Update data
     const updateData = {
-      priority_id: 3,
-      type_id: 2
+      priority_id: 4
     };
     
     // Test method
-    await client.updateCases(1, 2, updateData, [1, 2]);
+    await client.cases.updateCases(1, 2, updateData, [1, 2]);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_cases/1?suite_id=2', { ...updateData, case_ids: [1, 2] });
   });
 
   it('deletes multiple test cases', async () => {
-    // Mock successful deletion (no response data)
+    // Mock successful operation
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteCases(1, 2, [1, 2]);
+    await client.cases.deleteCases(1, 2, [1, 2]);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_cases/1?suite_id=2', { case_ids: [1, 2] });

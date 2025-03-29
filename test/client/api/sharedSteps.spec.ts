@@ -44,7 +44,7 @@ describe('Shared Steps API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockSharedStep });
     
     // Test method
-    const result = await client.getSharedStep(1);
+    const result = await client.sharedSteps.getSharedStep(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_shared_step/1');
@@ -102,7 +102,7 @@ describe('Shared Steps API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockSharedSteps });
     
     // Test method
-    const result = await client.getSharedSteps(1);
+    const result = await client.sharedSteps.getSharedSteps(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_shared_steps/1', { params: undefined });
@@ -159,7 +159,7 @@ describe('Shared Steps API', () => {
     };
     
     // Test method
-    const result = await client.addSharedStep(1, sharedStepData);
+    const result = await client.sharedSteps.addSharedStep(1, sharedStepData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_shared_step/1', sharedStepData);
@@ -204,7 +204,7 @@ describe('Shared Steps API', () => {
     };
     
     // Test method
-    const result = await client.updateSharedStep(1, updateData);
+    const result = await client.sharedSteps.updateSharedStep(1, updateData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_shared_step/1', updateData);
@@ -218,7 +218,7 @@ describe('Shared Steps API', () => {
     mockAxiosInstance.post.mockResolvedValue({});
     
     // Test method with default keepInCases=true
-    await client.deleteSharedStep(1);
+    await client.sharedSteps.deleteSharedStep(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_shared_step/1', {
@@ -226,7 +226,7 @@ describe('Shared Steps API', () => {
     });
     
     // Test method with keepInCases=false
-    await client.deleteSharedStep(2, false);
+    await client.sharedSteps.deleteSharedStep(2, false);
     
     // Verify axios post was called correctly for second call
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_shared_step/2', {
@@ -245,7 +245,7 @@ describe('Shared Steps API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getSharedStep(999)).rejects.toThrow();
+    await expect(client.sharedSteps.getSharedStep(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_shared_step/999');
@@ -262,7 +262,7 @@ describe('Shared Steps API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getSharedSteps(999)).rejects.toThrow();
+    await expect(client.sharedSteps.getSharedSteps(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_shared_steps/999', { params: undefined });
@@ -292,7 +292,7 @@ describe('Shared Steps API', () => {
     };
     
     // Test error handling
-    await expect(client.addSharedStep(999, sharedStepData)).rejects.toThrow();
+    await expect(client.sharedSteps.addSharedStep(999, sharedStepData)).rejects.toThrow();
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_shared_step/999', sharedStepData);
@@ -314,7 +314,7 @@ describe('Shared Steps API', () => {
     };
     
     // Test error handling
-    await expect(client.updateSharedStep(999, updateData)).rejects.toThrow();
+    await expect(client.sharedSteps.updateSharedStep(999, updateData)).rejects.toThrow();
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_shared_step/999', updateData);
@@ -331,7 +331,7 @@ describe('Shared Steps API', () => {
     mockAxiosInstance.post.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.deleteSharedStep(999)).rejects.toThrow();
+    await expect(client.sharedSteps.deleteSharedStep(999)).rejects.toThrow();
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_shared_step/999', {

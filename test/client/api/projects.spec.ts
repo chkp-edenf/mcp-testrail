@@ -30,7 +30,7 @@ describe('Projects API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockProject });
     
     // Test method
-    const result = await client.getProject(1);
+    const result = await client.projects.getProject(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_project/1');
@@ -50,7 +50,7 @@ describe('Projects API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getProject(999)).rejects.toThrow();
+    await expect(client.projects.getProject(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_project/999');
@@ -65,7 +65,7 @@ describe('Projects API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockProjects });
     
     // Test method
-    const result = await client.getProjects();
+    const result = await client.projects.getProjects();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_projects', expect.anything());
@@ -97,7 +97,7 @@ describe('Projects API', () => {
     };
     
     // Test method
-    const result = await client.addProject(projectData);
+    const result = await client.projects.addProject(projectData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_project', projectData);
@@ -129,7 +129,7 @@ describe('Projects API', () => {
     };
     
     // Test method
-    const result = await client.updateProject(1, projectData);
+    const result = await client.projects.updateProject(1, projectData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_project/1', projectData);
@@ -143,7 +143,7 @@ describe('Projects API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteProject(1);
+    await client.projects.deleteProject(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_project/1', {});

@@ -28,7 +28,7 @@ describe('Users API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockUser });
     
     // Test method
-    const result = await client.getUser(1);
+    const result = await client.users.getUser(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_user/1');
@@ -48,7 +48,7 @@ describe('Users API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getUser(999)).rejects.toThrow();
+    await expect(client.users.getUser(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_user/999');
@@ -67,7 +67,7 @@ describe('Users API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockUser });
     
     // Test method
-    const result = await client.getUserByEmail('john.doe@example.com');
+    const result = await client.users.getUserByEmail('john.doe@example.com');
     
     // Verify axios get was called correctly - メールアドレスの@は%40にエンコードされる
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_user_by_email?email=john.doe%40example.com');
@@ -87,7 +87,7 @@ describe('Users API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getUserByEmail('nonexistent@example.com')).rejects.toThrow();
+    await expect(client.users.getUserByEmail('nonexistent@example.com')).rejects.toThrow();
     
     // Verify axios get was called correctly - メールアドレスの@は%40にエンコードされる
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_user_by_email?email=nonexistent%40example.com');
@@ -102,7 +102,7 @@ describe('Users API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockUsers });
     
     // Test method
-    const result = await client.getUsers();
+    const result = await client.users.getUsers();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_users');

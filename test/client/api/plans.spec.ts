@@ -31,7 +31,7 @@ describe('Plans API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockPlan });
     
     // Test method
-    const result = await client.getPlan(1);
+    const result = await client.plans.getPlan(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_plan/1');
@@ -51,7 +51,7 @@ describe('Plans API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getPlan(999)).rejects.toThrow();
+    await expect(client.plans.getPlan(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_plan/999');
@@ -66,7 +66,7 @@ describe('Plans API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockPlans });
     
     // Test method
-    const result = await client.getPlans(1);
+    const result = await client.plans.getPlans(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_plans/1', expect.anything());
@@ -98,7 +98,7 @@ describe('Plans API', () => {
     };
     
     // Test method
-    const result = await client.addPlan(1, planData);
+    const result = await client.plans.addPlan(1, planData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_plan/1', planData);
@@ -134,7 +134,7 @@ describe('Plans API', () => {
     };
     
     // Test method
-    const result = await client.addPlanEntry(1, entryData);
+    const result = await client.plans.addPlanEntry(1, entryData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_plan_entry/1', entryData);
@@ -166,7 +166,7 @@ describe('Plans API', () => {
     };
     
     // Test method
-    const result = await client.updatePlan(1, planData);
+    const result = await client.plans.updatePlan(1, planData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_plan/1', planData);
@@ -201,7 +201,7 @@ describe('Plans API', () => {
     };
     
     // Test method
-    const result = await client.updatePlanEntry(1, '1234abc', entryData);
+    const result = await client.plans.updatePlanEntry(1, '1234abc', entryData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_plan_entry/1/1234abc', entryData);
@@ -224,7 +224,7 @@ describe('Plans API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: mockPlan });
     
     // Test method
-    const result = await client.closePlan(1);
+    const result = await client.plans.closePlan(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/close_plan/1', {});
@@ -238,7 +238,7 @@ describe('Plans API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deletePlan(1);
+    await client.plans.deletePlan(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_plan/1', {});
@@ -249,7 +249,7 @@ describe('Plans API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deletePlanEntry(1, '1234abc');
+    await client.plans.deletePlanEntry(1, '1234abc');
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_plan_entry/1/1234abc', {});

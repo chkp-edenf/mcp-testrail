@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import axios from 'axios';
-import { TestRailClient, TestRailClientConfig } from '../../../src/client/testRailApi';
+import { TestRailClient } from '../../../src/client/api/index.js';
+import { TestRailClientConfig } from '../../../src/client/api/baseClient.js';
 
 // Mock axios
 vi.mock('axios');

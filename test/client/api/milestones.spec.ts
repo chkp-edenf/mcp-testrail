@@ -29,7 +29,7 @@ describe('Milestones API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockMilestone });
     
     // Test method
-    const result = await client.getMilestone(1);
+    const result = await client.milestones.getMilestone(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_milestone/1');
@@ -49,7 +49,7 @@ describe('Milestones API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getMilestone(999)).rejects.toThrow();
+    await expect(client.milestones.getMilestone(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_milestone/999');
@@ -64,7 +64,7 @@ describe('Milestones API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockMilestones });
     
     // Test method
-    const result = await client.getMilestones(1);
+    const result = await client.milestones.getMilestones(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_milestones/1', expect.anything());
@@ -94,7 +94,7 @@ describe('Milestones API', () => {
     };
     
     // Test method
-    const result = await client.addMilestone(1, milestoneData);
+    const result = await client.milestones.addMilestone(1, milestoneData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_milestone/1', milestoneData);
@@ -125,7 +125,7 @@ describe('Milestones API', () => {
     };
     
     // Test method
-    const result = await client.updateMilestone(1, milestoneData);
+    const result = await client.milestones.updateMilestone(1, milestoneData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_milestone/1', milestoneData);
@@ -139,7 +139,7 @@ describe('Milestones API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteMilestone(1);
+    await client.milestones.deleteMilestone(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_milestone/1', {});

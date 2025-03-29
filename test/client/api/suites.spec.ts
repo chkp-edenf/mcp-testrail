@@ -27,7 +27,7 @@ describe('Suites API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockSuite });
     
     // Test method
-    const result = await client.getSuite(1);
+    const result = await client.suites.getSuite(1);
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_suite/1');
@@ -47,7 +47,7 @@ describe('Suites API', () => {
     mockAxiosInstance.get.mockRejectedValue(mockError);
     
     // Test error handling
-    await expect(client.getSuite(999)).rejects.toThrow();
+    await expect(client.suites.getSuite(999)).rejects.toThrow();
     
     // Verify axios get was called correctly
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_suite/999');
@@ -62,7 +62,7 @@ describe('Suites API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockSuites });
     
     // Test method
-    const result = await client.getSuites(1);
+    const result = await client.suites.getSuites(1);
     
     // Verify axios get was called correctly - メソッドは単にパスだけを受け取り、paramsを受け取らない
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_suites/1');
@@ -89,7 +89,7 @@ describe('Suites API', () => {
     };
     
     // Test method
-    const result = await client.addSuite(1, suiteData);
+    const result = await client.suites.addSuite(1, suiteData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_suite/1', suiteData);
@@ -116,7 +116,7 @@ describe('Suites API', () => {
     };
     
     // Test method
-    const result = await client.updateSuite(1, suiteData);
+    const result = await client.suites.updateSuite(1, suiteData);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_suite/1', suiteData);
@@ -130,7 +130,7 @@ describe('Suites API', () => {
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
     // Test method
-    await client.deleteSuite(1);
+    await client.suites.deleteSuite(1);
     
     // Verify axios post was called correctly
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_suite/1', {});

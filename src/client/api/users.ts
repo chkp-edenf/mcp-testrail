@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailUser } from "./types.js";
+import { TestRailUser } from "../../shared/schemas/users.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetUserInputType,

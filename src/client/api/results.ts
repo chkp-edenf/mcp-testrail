@@ -1,7 +1,7 @@
 // テスト結果に関するAPIクライアントの実装
 import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailResult } from "./types.js";
+import { TestRailResult } from "../../shared/schemas/results.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetResultsInputType,

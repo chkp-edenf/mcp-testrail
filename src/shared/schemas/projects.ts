@@ -62,3 +62,22 @@ export type GetProjectInputType = z.infer<typeof GetProjectInput>;
 export type AddProjectInputType = z.infer<typeof AddProjectInput>;
 export type UpdateProjectInputType = z.infer<typeof UpdateProjectInput>;
 export type DeleteProjectInputType = z.infer<typeof DeleteProjectInput>;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for Project
+ */
+export const TestRailProjectSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	announcement: z.string(),
+	show_announcement: z.boolean(),
+	is_completed: z.boolean(),
+	completed_on: z.number(),
+	suite_mode: z.number(),
+	url: z.string(),
+});
+export type TestRailProject = z.infer<typeof TestRailProjectSchema>;

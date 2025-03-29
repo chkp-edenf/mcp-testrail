@@ -72,3 +72,27 @@ export type GetMilestoneInputType = z.infer<typeof GetMilestoneInput>;
 export type AddMilestoneInputType = z.infer<typeof AddMilestoneInput>;
 export type UpdateMilestoneInputType = z.infer<typeof UpdateMilestoneInput>;
 export type DeleteMilestoneInputType = z.infer<typeof DeleteMilestoneInput>;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for Milestone
+ */
+export const TestRailMilestoneSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	description: z.string().optional(),
+	due_on: z.number().optional(),
+	start_on: z.number().optional(),
+	started_on: z.number().optional(),
+	completed_on: z.number().nullable().optional(),
+	project_id: z.number(),
+	is_completed: z.boolean(),
+	is_started: z.boolean().optional(),
+	parent_id: z.number().nullable().optional(),
+	refs: z.string().optional(),
+	url: z.string(),
+});
+export type TestRailMilestone = z.infer<typeof TestRailMilestoneSchema>;

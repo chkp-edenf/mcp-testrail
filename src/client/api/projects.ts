@@ -1,5 +1,5 @@
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailProject } from "./types.js";
+import { TestRailProject } from "../../shared/schemas/projects.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetProjectInputType,

@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailMilestone } from "./types.js";
+import { TestRailMilestone } from "../../shared/schemas/milestones.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetMilestoneInputType,

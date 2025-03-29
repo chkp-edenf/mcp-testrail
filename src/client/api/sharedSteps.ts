@@ -1,5 +1,13 @@
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailSharedStep, TestRailSharedStepItem } from "./types.js";
+import { 
+	TestRailSharedStep, 
+	TestRailSharedStepItem,
+	GetSharedStepInputType,
+	GetSharedStepsInputType,
+	AddSharedStepInputType,
+	UpdateSharedStepInputType,
+	DeleteSharedStepInputType
+} from "../../shared/schemas/sharedSteps.js";
 import { handleApiError } from "./utils.js";
 
 export class SharedStepsClient extends BaseTestRailClient {
@@ -8,7 +16,7 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 * @param sharedStepId The ID of the shared step
 	 * @returns Promise with shared step details
 	 */
-	async getSharedStep(sharedStepId: number): Promise<TestRailSharedStep> {
+	async getSharedStep(sharedStepId: GetSharedStepInputType["sharedStepId"]): Promise<TestRailSharedStep> {
 		try {
 			const response = await this.client.get<TestRailSharedStep>(
 				`/api/v2/get_shared_step/${sharedStepId}`,
@@ -26,11 +34,11 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 * @returns Promise with array of shared steps
 	 */
 	async getSharedSteps(
-		projectId: number,
+		projectId: GetSharedStepsInputType["projectId"],
 		filters?: Record<string, string | number | boolean | null | undefined>,
-	): Promise<TestRailSharedStepItem[]> {
+	): Promise<TestRailSharedStep[]> {
 		try {
-			const response = await this.client.get<TestRailSharedStepItem[]>(
+			const response = await this.client.get<TestRailSharedStep[]>(
 				`/api/v2/get_shared_steps/${projectId}`,
 				{ params: filters },
 			);
@@ -50,7 +58,7 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 * @returns Promise with created shared step
 	 */
 	async addSharedStep(
-		projectId: number,
+		projectId: AddSharedStepInputType["projectId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailSharedStep> {
 		try {
@@ -74,7 +82,7 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 * @returns Promise with updated shared step
 	 */
 	async updateSharedStep(
-		sharedStepId: number,
+		sharedStepId: UpdateSharedStepInputType["sharedStepId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailSharedStep> {
 		try {
@@ -97,8 +105,8 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 * @param keepInCases Whether to keep the steps in test cases that reference this shared step (default true)
 	 */
 	async deleteSharedStep(
-		sharedStepId: number,
-		keepInCases = true,
+		sharedStepId: DeleteSharedStepInputType["sharedStepId"],
+		keepInCases: DeleteSharedStepInputType["keepInCases"] = true,
 	): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_shared_step/${sharedStepId}`, {

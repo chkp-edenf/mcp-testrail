@@ -22,3 +22,19 @@ export const GetUserByEmailInput = z.object(getUserByEmailSchema);
 export type GetUsersInputType = z.infer<typeof GetUsersInput>;
 export type GetUserInputType = z.infer<typeof GetUserInput>;
 export type GetUserByEmailInputType = z.infer<typeof GetUserByEmailInput>;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for User
+ */
+export const TestRailUserSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	email: z.string(),
+	is_active: z.boolean(),
+	role_id: z.number(),
+});
+export type TestRailUser = z.infer<typeof TestRailUserSchema>;

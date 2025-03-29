@@ -3,9 +3,9 @@ import { BaseTestRailClient } from "./baseClient.js";
 import {
 	TestRailCase,
 	TestRailCaseField,
-	TestRailCaseHistory,
 	TestRailCaseType,
-} from "./types.js";
+	TestRailCaseHistory
+} from "../../shared/schemas/cases.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetTestCaseInputType,

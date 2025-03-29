@@ -104,3 +104,59 @@ export type AddRunInputType = z.infer<typeof AddRunInput>;
 export type UpdateRunInputType = z.infer<typeof UpdateRunInput>;
 export type CloseRunInputType = z.infer<typeof CloseRunInput>;
 export type DeleteRunInputType = z.infer<typeof DeleteRunInput>;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for Test
+ */
+export const TestRailTestSchema = z.object({
+	id: z.number(),
+	case_id: z.number(),
+	status_id: z.number(),
+	assignedto_id: z.number(),
+	run_id: z.number(),
+	title: z.string(),
+	template_id: z.number(),
+	type_id: z.number(),
+	priority_id: z.number(),
+	milestone_id: z.number(),
+	refs: z.string(),
+	estimate: z.string(),
+	estimate_forecast: z.string(),
+	custom_preconds: z.string(),
+	custom_steps: z.string(),
+	custom_expected: z.string(),
+});
+export type TestRailTest = z.infer<typeof TestRailTestSchema>;
+
+/**
+ * TestRail API Response for Run
+ */
+export const TestRailRunSchema = z.object({
+	id: z.number(),
+	suite_id: z.number(),
+	name: z.string(),
+	description: z.string(),
+	milestone_id: z.number().nullable(),
+	assignedto_id: z.number().nullable(),
+	include_all: z.boolean(),
+	is_completed: z.boolean(),
+	completed_on: z.number().nullable(),
+	config: z.string().nullable(),
+	config_ids: z.array(z.number()),
+	passed_count: z.number(),
+	blocked_count: z.number(),
+	untested_count: z.number(),
+	retest_count: z.number(),
+	failed_count: z.number(),
+	custom_status_count: z.record(z.number()),
+	created_on: z.number(),
+	created_by: z.number(),
+	plan_id: z.number(),
+	url: z.string(),
+	refs: z.string(),
+});
+export type TestRailRun = z.infer<typeof TestRailRunSchema>;

@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailPlan, TestRailPlanEntry } from "./types.js";
+import { TestRailPlan, TestRailPlanEntry } from "../../shared/schemas/plans.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetPlanInputType,

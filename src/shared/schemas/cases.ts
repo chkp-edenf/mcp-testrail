@@ -109,3 +109,108 @@ export type MoveTestCasesToSectionInputType = z.infer<
 export type GetTestCaseHistoryInputType = z.infer<
 	typeof GetTestCaseHistoryInput
 >;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for Step
+ */
+export const TestRailStepSchema = z.object({
+	content: z.string(),
+	expected: z.string(),
+});
+export type TestRailStep = z.infer<typeof TestRailStepSchema>;
+
+/**
+ * TestRail API Response for Case
+ */
+export const TestRailCaseSchema = z.object({
+	id: z.number(),
+	title: z.string(),
+	section_id: z.number(),
+	template_id: z.number(),
+	type_id: z.number(),
+	priority_id: z.number(),
+	milestone_id: z.number().optional(),
+	refs: z.string().optional(),
+	created_by: z.number(),
+	created_on: z.number(),
+	updated_by: z.number(),
+	updated_on: z.number(),
+	estimate: z.string().optional(),
+	estimate_forecast: z.string().optional(),
+	suite_id: z.number(),
+	custom_preconds: z.string().optional(),
+	custom_steps: z.string().optional(),
+	custom_expected: z.string().optional(),
+	custom_steps_separated: z.array(TestRailStepSchema).optional(),
+	custom_mission: z.string().optional(),
+	custom_goals: z.string().optional(),
+});
+export type TestRailCase = z.infer<typeof TestRailCaseSchema>;
+
+/**
+ * TestRail API Response for Case Type
+ */
+export const TestRailCaseTypeSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	is_default: z.boolean(),
+});
+export type TestRailCaseType = z.infer<typeof TestRailCaseTypeSchema>;
+
+/**
+ * TestRail API Response for Case Field Config
+ */
+export const TestRailCaseFieldConfigSchema = z.object({
+	id: z.string(),
+	context: z.object({
+		is_global: z.boolean(),
+		project_ids: z.array(z.number()),
+	}),
+	options: z.object({
+		default_value: z.string(),
+		format: z.string(),
+		is_required: z.boolean(),
+		rows: z.string(),
+		items: z.string(),
+	}),
+});
+export type TestRailCaseFieldConfig = z.infer<typeof TestRailCaseFieldConfigSchema>;
+
+/**
+ * TestRail API Response for Case Field
+ */
+export const TestRailCaseFieldSchema = z.object({
+	id: z.number(),
+	type_id: z.number(),
+	name: z.string(),
+	system_name: z.string(),
+	label: z.string(),
+	description: z.string(),
+	configs: z.array(TestRailCaseFieldConfigSchema),
+	display_order: z.number(),
+	include_all: z.boolean(),
+	template_ids: z.array(z.number()),
+	is_active: z.boolean(),
+	status_id: z.number(),
+});
+export type TestRailCaseField = z.infer<typeof TestRailCaseFieldSchema>;
+
+/**
+ * TestRail API Response for Case History
+ */
+export const TestRailCaseHistorySchema = z.object({
+	id: z.number(),
+	case_id: z.number(),
+	user_id: z.number(),
+	timestamp: z.number(),
+	changes: z.array(z.object({
+		field: z.string(),
+		old_value: z.string().nullable(),
+		new_value: z.string().nullable(),
+	})),
+});
+export type TestRailCaseHistory = z.infer<typeof TestRailCaseHistorySchema>;

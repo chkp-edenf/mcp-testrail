@@ -1,5 +1,5 @@
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailSection } from "./types.js";
+import { TestRailSection } from "../../shared/schemas/sections.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetSectionInputType,

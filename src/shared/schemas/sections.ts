@@ -65,3 +65,21 @@ export type AddSectionInputType = z.infer<typeof AddSectionInput>;
 export type MoveSectionInputType = z.infer<typeof MoveSectionInput>;
 export type UpdateSectionInputType = z.infer<typeof UpdateSectionInput>;
 export type DeleteSectionInputType = z.infer<typeof DeleteSectionInput>;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for Section
+ */
+export const TestRailSectionSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	description: z.string().nullable().optional(),
+	suite_id: z.number(),
+	parent_id: z.number().nullable().optional(),
+	depth: z.number(),
+	display_order: z.number(),
+});
+export type TestRailSection = z.infer<typeof TestRailSectionSchema>;

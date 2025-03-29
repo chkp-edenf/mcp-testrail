@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailSuite } from "./types.js";
+import { TestRailSuite } from "../../shared/schemas/suites.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetSuiteInputType,

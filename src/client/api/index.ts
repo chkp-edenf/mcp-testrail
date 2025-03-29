@@ -52,4 +52,9 @@ export { RunsClient } from "./runs.js";
 export { UsersClient } from "./users.js";
 export { PlansClient } from "./plans.js";
 export { ResultsClient } from "./results.js";
-export * from "./types.js";
+export {
+	TestStatus,
+	AddRunPayload,
+	AddResultPayload,
+	PaginatedResponse
+} from "../../shared/schemas/common.js";

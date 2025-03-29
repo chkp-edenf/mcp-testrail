@@ -1,6 +1,7 @@
 import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailRun, TestRailResult } from "./types.js";
+import { TestRailRun, TestRailTest } from "../../shared/schemas/runs.js";
+import { TestRailResult } from "../../shared/schemas/results.js";
 import { handleApiError } from "./utils.js";
 import {
 	GetRunInputType,

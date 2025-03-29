@@ -173,3 +173,37 @@ export type AddResultsInputType = z.infer<typeof AddResultsInput>;
 export type AddResultsForCasesInputType = z.infer<
 	typeof AddResultsForCasesInput
 >;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for Step Result
+ */
+export const TestRailStepResultSchema = z.object({
+	status_id: z.number(),
+	content: z.string(),
+	expected: z.string(),
+	actual: z.string(),
+});
+export type TestRailStepResult = z.infer<typeof TestRailStepResultSchema>;
+
+/**
+ * TestRail API Response for Result
+ */
+export const TestRailResultSchema = z.object({
+	id: z.number(),
+	test_id: z.number(),
+	status_id: z.number(),
+	created_by: z.number(),
+	created_on: z.number(),
+	assignedto_id: z.number(),
+	comment: z.string(),
+	version: z.string(),
+	elapsed: z.string(),
+	defects: z.string(),
+	custom_step_results: z.array(TestRailStepResultSchema).optional(),
+	custom_fields: z.record(z.unknown()).optional(),
+});
+export type TestRailResult = z.infer<typeof TestRailResultSchema>;

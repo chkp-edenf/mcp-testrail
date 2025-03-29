@@ -87,3 +87,34 @@ export type AddSharedStepInputType = z.infer<typeof AddSharedStepInput>;
 export type UpdateSharedStepInputType = z.infer<typeof UpdateSharedStepInput>;
 export type DeleteSharedStepInputType = z.infer<typeof DeleteSharedStepInput>;
 export type SharedStepItemType = z.infer<typeof sharedStepItemSchema>;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail Shared Step Item
+ */
+export const TestRailSharedStepItemSchema = z.object({
+	content: z.string(),
+	additional_info: z.string().nullable().optional(),
+	expected: z.string().nullable().optional(),
+	refs: z.string().nullable().optional(),
+});
+export type TestRailSharedStepItem = z.infer<typeof TestRailSharedStepItemSchema>;
+
+/**
+ * TestRail API Response for Shared Step
+ */
+export const TestRailSharedStepSchema = z.object({
+	id: z.number(),
+	title: z.string(),
+	project_id: z.number(),
+	created_by: z.number(),
+	created_on: z.number(),
+	updated_by: z.number(),
+	updated_on: z.number(),
+	custom_steps_separated: z.array(TestRailSharedStepItemSchema),
+	case_ids: z.array(z.number()),
+});
+export type TestRailSharedStep = z.infer<typeof TestRailSharedStepSchema>;

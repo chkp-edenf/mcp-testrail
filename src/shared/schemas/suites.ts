@@ -42,3 +42,23 @@ export type GetSuiteInputType = z.infer<typeof GetSuiteInput>;
 export type AddSuiteInputType = z.infer<typeof AddSuiteInput>;
 export type UpdateSuiteInputType = z.infer<typeof UpdateSuiteInput>;
 export type DeleteSuiteInputType = z.infer<typeof DeleteSuiteInput>;
+
+// -----------------------------------------------
+// レスポンススキーマ定義 - types.tsからの移行
+// -----------------------------------------------
+
+/**
+ * TestRail API Response for Suite
+ */
+export const TestRailSuiteSchema = z.object({
+	id: z.number(),
+	name: z.string(),
+	description: z.string().optional(),
+	project_id: z.number(),
+	is_baseline: z.boolean().optional(),
+	is_completed: z.boolean().optional(),
+	is_master: z.boolean().optional(),
+	completed_on: z.number().nullable().optional(),
+	url: z.string(),
+});
+export type TestRailSuite = z.infer<typeof TestRailSuiteSchema>;

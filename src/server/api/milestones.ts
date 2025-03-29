@@ -45,91 +45,68 @@ export function registerMilestoneTools(
 	});
 
 	// Get all milestones for a project
-	server.tool(
-		"getMilestones",
-		getMilestonesSchema,
-		async ({ projectId, isCompleted }) => {
-			try {
-				const milestones = await testRailClient.milestones.getMilestones(
-					projectId,
-					isCompleted,
-				);
-				const successResponse = createSuccessResponse(
-					"Milestones retrieved successfully",
-					{
-						milestones,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error fetching milestones for project ${projectId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+	server.tool("getMilestones", getMilestonesSchema, async ({ projectId }) => {
+		try {
+			const milestones =
+				await testRailClient.milestones.getMilestones(projectId);
+			const successResponse = createSuccessResponse(
+				"Milestones retrieved successfully",
+				{
+					milestones,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				`Error fetching milestones for project ${projectId}`,
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// Add a new milestone
-	server.tool(
-		"addMilestone",
-		addMilestoneSchema,
-		async ({ projectId, name, description, dueOn, startOn, parentId }) => {
-			try {
-				const data: Record<string, unknown> = {
-					name,
-					description,
-				};
+	server.tool("addMilestone", addMilestoneSchema, async (milestoneData) => {
+		try {
+			const { projectId, ...data } = milestoneData;
 
-				if (dueOn) data.due_on = dueOn;
-				if (startOn) data.start_on = startOn;
-				if (parentId) data.parent_id = parentId;
-
-				const milestone = await testRailClient.milestones.addMilestone(
-					projectId,
-					data,
-				);
-				const successResponse = createSuccessResponse(
-					"Milestone created successfully",
-					{
-						milestone,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					"Error creating milestone",
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
+			const milestone = await testRailClient.milestones.addMilestone(
+				projectId,
+				data,
+			);
+			const successResponse = createSuccessResponse(
+				"Milestone created successfully",
+				{
+					milestone,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				"Error creating milestone",
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
 
 	// Update a milestone
 	server.tool(
 		"updateMilestone",
 		updateMilestoneSchema,
-		async ({ milestoneId, name, description, dueOn, startOn, isCompleted }) => {
+		async (milestoneData) => {
 			try {
-				const data: Record<string, unknown> = {};
-
-				if (name) data.name = name;
-				if (description !== undefined) data.description = description;
-				if (dueOn !== undefined) data.due_on = dueOn;
-				if (startOn !== undefined) data.start_on = startOn;
-				if (isCompleted !== undefined) data.is_completed = isCompleted;
+				const { milestoneId, ...data } = milestoneData;
 
 				const milestone = await testRailClient.milestones.updateMilestone(
 					milestoneId,
@@ -146,7 +123,7 @@ export function registerMilestoneTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error updating milestone ${milestoneId}`,
+					`Error updating milestone ${milestoneData.milestoneId}`,
 					error,
 				);
 				return {

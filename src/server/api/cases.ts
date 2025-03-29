@@ -24,40 +24,43 @@ export function registerCaseTools(
 	testRailClient: TestRailClient,
 ): void {
 	// Get a specific test case
-	server.tool("getCase", getTestCaseSchema, async ({ caseId }) => {
-		try {
-			const testCase = await testRailClient.cases.getCase(caseId);
-			const successResponse = createSuccessResponse(
-				"Test case retrieved successfully",
-				{
-					case: testCase,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error fetching test case ${caseId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getCase",
+		{ caseId: getTestCaseSchema.shape.caseId },
+		async (args, extra) => {
+			try {
+				const { caseId } = args;
+				const testCase = await testRailClient.cases.getCase(caseId);
+				const successResponse = createSuccessResponse(
+					"Test case retrieved successfully",
+					{
+						case: testCase,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error fetching test case ${args.caseId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Get all test cases for a project
 	server.tool(
 		"getCases",
-		getTestCasesSchema,
-		async ({ projectId, ...filters }) => {
+		{ projectId: getTestCasesSchema.shape.projectId },
+		async (args, extra) => {
 			try {
-				const testCases = await testRailClient.cases.getCases(
-					projectId,
-					filters,
-				);
+				const { projectId } = args;
+				const testCases = await testRailClient.cases.getCases(projectId, {});
 				const successResponse = createSuccessResponse(
 					"Test cases retrieved successfully",
 					{
@@ -69,7 +72,7 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error fetching test cases for project ${projectId}`,
+					`Error fetching test cases for project ${args.projectId}`,
 					error,
 				);
 				return {
@@ -83,49 +86,72 @@ export function registerCaseTools(
 	// Add a new test case
 	server.tool(
 		"addCase",
-		addTestCaseSchema,
-		async ({ sectionId, ...caseData }) => {
+		{
+			sectionId: addTestCaseSchema.shape.sectionId,
+			title: addTestCaseSchema.shape.title,
+			typeId: addTestCaseSchema.shape.typeId,
+			priorityId: addTestCaseSchema.shape.priorityId,
+			estimate: addTestCaseSchema.shape.estimate,
+			milestoneId: addTestCaseSchema.shape.milestoneId,
+			refs: addTestCaseSchema.shape.refs,
+			customPrerequisites: addTestCaseSchema.shape.customPrerequisites,
+			customSteps: addTestCaseSchema.shape.customSteps,
+			customExpected: addTestCaseSchema.shape.customExpected,
+		},
+		async (args, extra) => {
 			try {
+				const {
+					sectionId,
+					title,
+					typeId,
+					priorityId,
+					estimate,
+					milestoneId,
+					refs,
+					customPrerequisites,
+					customSteps,
+					customExpected,
+				} = args;
 				// Build test case data
 				const data: Record<string, unknown> = {};
 
 				// Add title if specified
-				if (caseData.title) {
-					data.title = caseData.title;
+				if (title) {
+					data.title = title;
 				}
 
 				// Add type ID if specified
-				if (caseData.typeId) {
-					data.type_id = caseData.typeId;
+				if (typeId) {
+					data.type_id = typeId;
 				}
 
 				// Add priority ID if specified
-				if (caseData.priorityId) {
-					data.priority_id = caseData.priorityId;
+				if (priorityId) {
+					data.priority_id = priorityId;
 				}
 
 				// Add estimate if specified
-				if (caseData.estimate) {
-					data.estimate = caseData.estimate;
+				if (estimate) {
+					data.estimate = estimate;
 				}
 
 				// Add milestone ID if specified
-				if (caseData.milestoneId) {
-					data.milestone_id = caseData.milestoneId;
+				if (milestoneId) {
+					data.milestone_id = milestoneId;
 				}
 
 				// Add references if specified
-				if (caseData.refs) {
-					data.refs = caseData.refs;
+				if (refs) {
+					data.refs = refs;
 				}
 
 				// Remove empty or undefined fields
-				Object.keys(data).forEach((key) => {
+				for (const key of Object.keys(data)) {
 					const value = data[key];
 					if (value === undefined || value === null || value === "") {
 						delete data[key];
 					}
-				});
+				}
 
 				const testCase = await testRailClient.cases.addCase(sectionId, data);
 				const successResponse = createSuccessResponse(
@@ -139,7 +165,7 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error adding test case to section ${sectionId}`,
+					`Error creating test case in section ${args.sectionId}`,
 					error,
 				);
 				return {
@@ -150,43 +176,66 @@ export function registerCaseTools(
 		},
 	);
 
-	// Update a test case
+	// Update an existing test case
 	server.tool(
 		"updateCase",
-		updateTestCaseSchema,
-		async ({ caseId, ...caseData }) => {
+		{
+			caseId: updateTestCaseSchema.shape.caseId,
+			title: updateTestCaseSchema.shape.title,
+			typeId: updateTestCaseSchema.shape.typeId,
+			priorityId: updateTestCaseSchema.shape.priorityId,
+			estimate: updateTestCaseSchema.shape.estimate,
+			milestoneId: updateTestCaseSchema.shape.milestoneId,
+			refs: updateTestCaseSchema.shape.refs,
+			customPrerequisites: updateTestCaseSchema.shape.customPrerequisites,
+			customSteps: updateTestCaseSchema.shape.customSteps,
+			customExpected: updateTestCaseSchema.shape.customExpected,
+		},
+		async (args, extra) => {
 			try {
+				const {
+					caseId,
+					title,
+					typeId,
+					priorityId,
+					estimate,
+					milestoneId,
+					refs,
+					customPrerequisites,
+					customSteps,
+					customExpected,
+				} = args;
 				// Build update data
 				const data: Record<string, unknown> = {};
 
 				// Add title if specified
-				if (caseData.title) {
-					data.title = caseData.title;
+				if (title) {
+					data.title = title;
 				}
 
 				// Add type ID if specified
-				if (caseData.typeId) {
-					data.type_id = caseData.typeId;
+				if (typeId) {
+					data.type_id = typeId;
 				}
 
 				// Add priority ID if specified
-				if (caseData.priorityId) {
-					data.priority_id = caseData.priorityId;
+				if (priorityId) {
+					data.priority_id = priorityId;
 				}
 
 				// Add estimate if specified
-				if (caseData.estimate) {
-					data.estimate = caseData.estimate;
+				if (estimate) {
+					data.estimate = estimate;
 				}
 
 				// Add milestone ID if specified
-				if (caseData.milestoneId) {
-					data.milestone_id = caseData.milestoneId;
+				if (milestoneId) {
+					data.milestone_id = milestoneId;
 				}
 
 				// Add references if specified
-				if (caseData.refs) {
-					data.refs = caseData.refs;
+				if (refs) {
+					data.refs = refs;
 				}
 
 				const testCase = await testRailClient.cases.updateCase(caseId, data);
@@ -201,7 +250,7 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error updating test case ${caseId}`,
+					`Error updating test case ${args.caseId}`,
 					error,
 				);
 				return {
@@ -213,100 +262,22 @@ export function registerCaseTools(
 	);
 
 	// Delete a test case
-	server.tool("deleteCase", deleteTestCaseSchema, async ({ caseId }) => {
-		try {
-			await testRailClient.cases.deleteCase(caseId);
-			const successResponse = createSuccessResponse(
-				"Test case deleted successfully",
-				{},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error deleting test case ${caseId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
-
-	// Get all test case types
-	server.tool("getCaseTypes", getTestCaseTypesSchema, async () => {
-		try {
-			const caseTypes = await testRailClient.cases.getCaseTypes();
-			const successResponse = createSuccessResponse(
-				"Case types retrieved successfully",
-				{
-					types: caseTypes,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error fetching case types",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
-
-	// Get all test case fields
-	server.tool("getCaseFields", getTestCaseFieldsSchema, async () => {
-		try {
-			const caseFields = await testRailClient.cases.getCaseFields();
-			const successResponse = createSuccessResponse(
-				"Case fields retrieved successfully",
-				{
-					fields: caseFields,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error fetching case fields",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
-
-	// Copy test cases to a section
 	server.tool(
-		"copyToSection",
-		copyTestCasesToSectionSchema,
-		async ({ caseIds, sectionId }) => {
+		"deleteCase",
+		{ caseId: deleteTestCaseSchema.shape.caseId },
+		async (args, extra) => {
 			try {
-				const result = await testRailClient.cases.copyToSection(
-					caseIds,
-					sectionId,
-				);
+				const { caseId } = args;
+				await testRailClient.cases.deleteCase(caseId);
 				const successResponse = createSuccessResponse(
-					"Test cases copied successfully",
-					{
-						status: result.status,
-					},
+					`Test case ${caseId} deleted successfully`,
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error copying test cases to section ${sectionId}`,
+					`Error deleting test case ${args.caseId}`,
 					error,
 				);
 				return {
@@ -317,20 +288,74 @@ export function registerCaseTools(
 		},
 	);
 
-	// Move test cases to a section
+	// Get all test case types
+	server.tool("getCaseTypes", {}, async (args, extra) => {
+		try {
+			const caseTypes = await testRailClient.cases.getCaseTypes();
+			const successResponse = createSuccessResponse(
+				"Test case types retrieved successfully",
+				{
+					caseTypes,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				"Error fetching test case types",
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
+
+	// Get all test case fields
+	server.tool("getCaseFields", {}, async (args, extra) => {
+		try {
+			const caseFields = await testRailClient.cases.getCaseFields();
+			const successResponse = createSuccessResponse(
+				"Test case fields retrieved successfully",
+				{
+					caseFields,
+				},
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(successResponse) }],
+			};
+		} catch (error) {
+			const errorResponse = createErrorResponse(
+				"Error fetching test case fields",
+				error,
+			);
+			return {
+				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+				isError: true,
+			};
+		}
+	});
+
+	// Copy test cases to section
 	server.tool(
-		"moveToSection",
-		moveTestCasesToSectionSchema,
-		async ({ caseIds, sectionId }) => {
+		"copyToSection",
+		{
+			caseIds: copyTestCasesToSectionSchema.shape.caseIds,
+			sectionId: copyTestCasesToSectionSchema.shape.sectionId,
+		},
+		async (args, extra) => {
 			try {
-				const result = await testRailClient.cases.moveToSection(
+				const { caseIds, sectionId } = args;
+				const result = await testRailClient.cases.copyToSection(
 					caseIds,
 					sectionId,
 				);
 				const successResponse = createSuccessResponse(
-					"Test cases moved successfully",
+					"Test cases copied successfully",
 					{
-						status: result.status,
+						result,
 					},
 				);
 				return {
@@ -338,7 +363,43 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error moving test cases to section ${sectionId}`,
+					`Error copying test cases to section ${args.sectionId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
+
+	// Move test cases to section
+	server.tool(
+		"moveToSection",
+		{
+			caseIds: moveTestCasesToSectionSchema.shape.caseIds,
+			sectionId: moveTestCasesToSectionSchema.shape.sectionId,
+		},
+		async (args, extra) => {
+			try {
+				const { caseIds, sectionId } = args;
+				const result = await testRailClient.cases.moveToSection(
+					caseIds,
+					sectionId,
+				);
+				const successResponse = createSuccessResponse(
+					"Test cases moved successfully",
+					{
+						result,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error moving test cases to section ${args.sectionId}`,
 					error,
 				);
 				return {
@@ -352,9 +413,10 @@ export function registerCaseTools(
 	// Get test case history
 	server.tool(
 		"getCaseHistory",
-		getTestCaseHistorySchema,
-		async ({ caseId }) => {
+		{ caseId: getTestCaseHistorySchema.shape.caseId },
+		async (args, extra) => {
 			try {
+				const { caseId } = args;
 				const history = await testRailClient.cases.getCaseHistory(caseId);
 				const successResponse = createSuccessResponse(
 					"Test case history retrieved successfully",
@@ -367,7 +429,7 @@ export function registerCaseTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error fetching history for test case ${caseId}`,
+					`Error fetching history for test case ${args.caseId}`,
 					error,
 				);
 				return {

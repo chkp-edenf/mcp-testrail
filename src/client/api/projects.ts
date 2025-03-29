@@ -1,19 +1,19 @@
 import { BaseTestRailClient } from "./baseClient.js";
-import { TestRailProject } from "../../shared/schemas/projects.js";
-import { handleApiError } from "./utils.js";
 import {
-	GetProjectInputType,
-	AddProjectInputType,
-	UpdateProjectInputType,
-	DeleteProjectInputType,
+	GetProjectInput,
+	AddProjectInput,
+	UpdateProjectInput,
+	DeleteProjectInput,
+	TestRailProject,
 } from "../../shared/schemas/projects.js";
+import { handleApiError } from "./utils.js";
 
 export class ProjectsClient extends BaseTestRailClient {
 	/**
 	 * Get a specific project
 	 */
 	async getProject(
-		projectId: GetProjectInputType["projectId"],
+		projectId: GetProjectInput["projectId"],
 	): Promise<TestRailProject> {
 		try {
 			const response = await this.client.get<TestRailProject>(
@@ -51,7 +51,7 @@ export class ProjectsClient extends BaseTestRailClient {
 	 * Create a new project
 	 */
 	async addProject(
-		data: Omit<AddProjectInputType, "suite_mode"> & { suite_mode?: number },
+		data: Omit<AddProjectInput, "suite_mode"> & { suite_mode?: number },
 	): Promise<TestRailProject> {
 		try {
 			const response = await this.client.post<TestRailProject>(
@@ -68,8 +68,8 @@ export class ProjectsClient extends BaseTestRailClient {
 	 * Update an existing project
 	 */
 	async updateProject(
-		projectId: UpdateProjectInputType["projectId"],
-		data: Omit<UpdateProjectInputType, "projectId">,
+		projectId: UpdateProjectInput["projectId"],
+		data: Omit<UpdateProjectInput, "projectId">,
 	): Promise<TestRailProject> {
 		try {
 			const response = await this.client.post<TestRailProject>(
@@ -86,7 +86,7 @@ export class ProjectsClient extends BaseTestRailClient {
 	 * Delete an existing project
 	 */
 	async deleteProject(
-		projectId: DeleteProjectInputType["projectId"],
+		projectId: DeleteProjectInput["projectId"],
 	): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_project/${projectId}`, {});

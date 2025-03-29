@@ -10,7 +10,7 @@ import { TestRailSuite } from "../shared/schemas/suites.js";
 import { TestRailMilestone } from "../shared/schemas/milestones.js";
 import { TestRailRun } from "../shared/schemas/runs.js";
 import { TestRailResult } from "../shared/schemas/results.js";
-import { TestStatus } from "../shared/schemas/common.js";
+import { TestStatusEnum } from "../shared/schemas/common.js";
 import { TestRailUser } from "../shared/schemas/users.js";
 import { TestRailPlan } from "../shared/schemas/plans.js";
 import { TestRailSharedStep } from "../shared/schemas/sharedSteps.js";
@@ -79,7 +79,7 @@ export function registerResourceTemplates(
 export function getTestCaseTemplate(
 	testCase: TestRailCase,
 	project?: TestRailProject,
-	statuses?: TestStatus[],
+	statuses?: Record<number, { label: string; color: string }>,
 	users?: TestRailUser[],
 ): string {
 	// Find user information
@@ -96,9 +96,7 @@ export function getTestCaseTemplate(
 
 	// Get status information
 	const statusInfo =
-		testCase.status_id && statuses
-			? statuses.find((status) => status.id === testCase.status_id)
-			: undefined;
+		testCase.status_id && statuses ? statuses[testCase.status_id] : undefined;
 
 	return `
   <div class="testrail-case">

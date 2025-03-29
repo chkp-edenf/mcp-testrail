@@ -19,7 +19,7 @@ export function registerProjectTools(
 	testRailClient: TestRailClient,
 ): void {
 	// Get all projects
-	server.tool("getProjects", getProjectsSchema, async () => {
+	server.tool("getProjects", {}, async (args, extra) => {
 		try {
 			const projects = await testRailClient.projects.getProjects();
 			const successResponse = createSuccessResponse(
@@ -44,36 +44,49 @@ export function registerProjectTools(
 	});
 
 	// Get a specific project by ID
-	server.tool("getProject", getProjectSchema, async ({ projectId }) => {
-		try {
-			const project = await testRailClient.projects.getProject(projectId);
-			const successResponse = createSuccessResponse(
-				"Project retrieved successfully",
-				{
-					project,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error fetching project ${projectId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getProject",
+		{
+			projectId: getProjectSchema.shape.projectId,
+		},
+		async (args, extra) => {
+			try {
+				const { projectId } = args;
+				const project = await testRailClient.projects.getProject(projectId);
+				const successResponse = createSuccessResponse(
+					"Project retrieved successfully",
+					{
+						project,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error fetching project ${args.projectId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Create a new project
 	server.tool(
 		"addProject",
-		addProjectSchema,
-		async ({ name, announcement, show_announcement, suite_mode }) => {
+		{
+			name: addProjectSchema.shape.name,
+			announcement: addProjectSchema.shape.announcement,
+			show_announcement: addProjectSchema.shape.show_announcement,
+			suite_mode: addProjectSchema.shape.suite_mode,
+		},
+		async (args, extra) => {
 			try {
+				const { name, announcement, show_announcement, suite_mode } = args;
 				const project = await testRailClient.projects.addProject({
 					name,
 					announcement,
@@ -105,15 +118,22 @@ export function registerProjectTools(
 	// Update a project
 	server.tool(
 		"updateProject",
-		updateProjectSchema,
-		async ({
-			projectId,
-			name,
-			announcement,
-			show_announcement,
-			is_completed,
-		}) => {
+		{
+			projectId: updateProjectSchema.shape.projectId,
+			name: updateProjectSchema.shape.name,
+			announcement: updateProjectSchema.shape.announcement,
+			show_announcement: updateProjectSchema.shape.show_announcement,
+			is_completed: updateProjectSchema.shape.is_completed,
+		},
+		async (args, extra) => {
 			try {
+				const {
+					projectId,
+					name,
+					announcement,
+					show_announcement,
+					is_completed,
+				} = args;
 				const project = await testRailClient.projects.updateProject(projectId, {
 					name,
 					announcement,
@@ -131,7 +151,7 @@ export function registerProjectTools(
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error updating project ${projectId}`,
+					`Error updating project ${args.projectId}`,
 					error,
 				);
 				return {
@@ -143,24 +163,31 @@ export function registerProjectTools(
 	);
 
 	// Delete a project
-	server.tool("deleteProject", deleteProjectSchema, async ({ projectId }) => {
-		try {
-			await testRailClient.projects.deleteProject(projectId);
-			const successResponse = createSuccessResponse(
-				`Project ${projectId} deleted successfully`,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error deleting project ${projectId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"deleteProject",
+		{
+			projectId: deleteProjectSchema.shape.projectId,
+		},
+		async (args, extra) => {
+			try {
+				const { projectId } = args;
+				await testRailClient.projects.deleteProject(projectId);
+				const successResponse = createSuccessResponse(
+					`Project ${projectId} deleted successfully`,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error deleting project ${args.projectId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 }

@@ -8,14 +8,14 @@ import {
 } from "../../shared/schemas/cases.js";
 import { handleApiError } from "./utils.js";
 import {
-	GetTestCaseInputType,
-	GetTestCasesInputType,
-	AddTestCaseInputType,
-	UpdateTestCaseInputType,
-	DeleteTestCaseInputType,
-	CopyTestCasesToSectionInputType,
-	MoveTestCasesToSectionInputType,
-	GetTestCaseHistoryInputType,
+	GetTestCaseInput,
+	GetTestCasesInput,
+	AddTestCaseInput,
+	UpdateTestCaseInput,
+	DeleteTestCaseInput,
+	CopyTestCasesToSectionInput,
+	MoveTestCasesToSectionInput,
+	GetTestCaseHistoryInput,
 } from "../../shared/schemas/cases.js";
 
 export class CasesClient extends BaseTestRailClient {
@@ -24,7 +24,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param caseId The ID of the test case
 	 * @returns Promise with test case details
 	 */
-	async getCase(caseId: GetTestCaseInputType["caseId"]): Promise<TestRailCase> {
+	async getCase(caseId: GetTestCaseInput["caseId"]): Promise<TestRailCase> {
 		try {
 			const response: AxiosResponse<TestRailCase> = await this.client.get(
 				`/api/v2/get_case/${caseId}`,
@@ -42,7 +42,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with array of test cases
 	 */
 	async getCases(
-		projectId: GetTestCasesInputType["projectId"],
+		projectId: GetTestCasesInput["projectId"],
 		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailCase[]> {
 		try {
@@ -66,7 +66,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with created test case
 	 */
 	async addCase(
-		sectionId: AddTestCaseInputType["sectionId"],
+		sectionId: AddTestCaseInput["sectionId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailCase> {
 		try {
@@ -90,7 +90,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with updated test case
 	 */
 	async updateCase(
-		caseId: UpdateTestCaseInputType["caseId"],
+		caseId: UpdateTestCaseInput["caseId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailCase> {
 		try {
@@ -108,7 +108,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * Deletes an existing test case
 	 * @param caseId The ID of the test case
 	 */
-	async deleteCase(caseId: DeleteTestCaseInputType["caseId"]): Promise<void> {
+	async deleteCase(caseId: DeleteTestCaseInput["caseId"]): Promise<void> {
 		try {
 			await this.client.post(`/api/v2/delete_case/${caseId}`, {});
 		} catch (error) {
@@ -122,7 +122,7 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with test case history
 	 */
 	async getCaseHistory(
-		caseId: GetTestCaseHistoryInputType["caseId"],
+		caseId: GetTestCaseHistoryInput["caseId"],
 	): Promise<TestRailCaseHistory[]> {
 		try {
 			const response: AxiosResponse<TestRailCaseHistory[]> =
@@ -169,8 +169,8 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with status
 	 */
 	async copyToSection(
-		caseIds: CopyTestCasesToSectionInputType["caseIds"],
-		sectionId: CopyTestCasesToSectionInputType["sectionId"],
+		caseIds: CopyTestCasesToSectionInput["caseIds"],
+		sectionId: CopyTestCasesToSectionInput["sectionId"],
 	): Promise<{ status: boolean }> {
 		try {
 			const data = {
@@ -197,8 +197,8 @@ export class CasesClient extends BaseTestRailClient {
 	 * @returns Promise with status
 	 */
 	async moveToSection(
-		caseIds: MoveTestCasesToSectionInputType["caseIds"],
-		sectionId: MoveTestCasesToSectionInputType["sectionId"],
+		caseIds: MoveTestCasesToSectionInput["caseIds"],
+		sectionId: MoveTestCasesToSectionInput["sectionId"],
 	): Promise<{ status: boolean }> {
 		try {
 			const data = {
@@ -226,10 +226,10 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param caseIds Array of test case IDs to update
 	 */
 	async updateCases(
-		projectId: GetTestCasesInputType["projectId"],
+		projectId: GetTestCasesInput["projectId"],
 		suiteId: number | null,
 		data: Record<string, unknown>,
-		caseIds: UpdateTestCaseInputType["caseId"][],
+		caseIds: UpdateTestCaseInput["caseId"][],
 	): Promise<void> {
 		try {
 			const endpoint = suiteId
@@ -249,9 +249,9 @@ export class CasesClient extends BaseTestRailClient {
 	 * @param caseIds Array of test case IDs to delete
 	 */
 	async deleteCases(
-		projectId: GetTestCasesInputType["projectId"],
+		projectId: GetTestCasesInput["projectId"],
 		suiteId: number | null,
-		caseIds: DeleteTestCaseInputType["caseId"][],
+		caseIds: DeleteTestCaseInput["caseId"][],
 	): Promise<void> {
 		try {
 			const endpoint = suiteId

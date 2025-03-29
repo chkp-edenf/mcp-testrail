@@ -117,6 +117,9 @@ export function registerResultTools(
 		},
 	);
 
+	// FIXME: Result addition tools are commented out due to type conversion issues
+	// If you want to fix these features, please review how numeric parameters are handled
+	/*
 	// Add a result for a test
 	server.tool(
 		"addResult",
@@ -246,70 +249,74 @@ export function registerResultTools(
 	);
 
 	// Add multiple test results
-	server.tool("addResults", addResultsSchema, async ({ runId, results }) => {
-		try {
-			// Prepare data to send to API
-			const data = {
-				results: results.map((result) => {
-					const resultData: Record<string, unknown> = {
-						test_id: result.testId,
-					};
+	server.tool(
+		"addResults", 
+		addResultsSchema, 
+		async ({ runId, results }) => {
+			try {
+				// Prepare data to send to API
+				const data = {
+					results: results.map((result) => {
+						const resultData: Record<string, unknown> = {
+							test_id: result.testId,
+						};
 
-					// Add status ID if specified
-					if (result.statusId) {
-						resultData.status_id = result.statusId;
-					}
+						// Add status ID if specified
+						if (result.statusId) {
+							resultData.status_id = result.statusId;
+						}
 
-					// Add comment if specified
-					if (result.comment) {
-						resultData.comment = result.comment;
-					}
+						// Add comment if specified
+						if (result.comment) {
+							resultData.comment = result.comment;
+						}
 
-					// Add version if specified
-					if (result.version) {
-						resultData.version = result.version;
-					}
+						// Add version if specified
+						if (result.version) {
+							resultData.version = result.version;
+						}
 
-					// Add elapsed time if specified
-					if (result.elapsed) {
-						resultData.elapsed = result.elapsed;
-					}
+						// Add elapsed time if specified
+						if (result.elapsed) {
+							resultData.elapsed = result.elapsed;
+						}
 
-					// Add defects if specified
-					if (result.defects) {
-						resultData.defects = result.defects;
-					}
+						// Add defects if specified
+						if (result.defects) {
+							resultData.defects = result.defects;
+						}
 
-					// Add assignee ID if specified
-					if (result.assignedtoId) {
-						resultData.assignedto_id = result.assignedtoId;
-					}
+						// Add assignee ID if specified
+						if (result.assignedtoId) {
+							resultData.assignedto_id = result.assignedtoId;
+						}
 
-					return resultData;
-				}),
-			};
+						return resultData;
+					}),
+				};
 
-			const addedResults = await testRailClient.results.addResults(runId, data);
-			const successResponse = createSuccessResponse(
-				"Results added successfully",
-				{
-					results: addedResults,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error adding results for run ${runId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
+				const addedResults = await testRailClient.results.addResults(runId, data);
+				const successResponse = createSuccessResponse(
+					"Results added successfully",
+					{
+						results: addedResults,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error adding results for run ${runId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
 		}
-	});
+	);
 
 	// Add results for multiple test cases
 	server.tool(
@@ -383,4 +390,5 @@ export function registerResultTools(
 			}
 		},
 	);
+	*/
 }

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// テスト実行一覧取得のためのスキーマ
+// Schema for retrieving test runs for a project
 export const getRunsSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	createdAfter: z
@@ -30,12 +30,12 @@ export const getRunsSchema = {
 	offset: z.number().optional().describe("The offset to start returning runs"),
 };
 
-// 特定のテスト実行取得のためのスキーマ
+// Schema for retrieving a specific test run
 export const getRunSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 };
 
-// テスト実行追加のためのスキーマ
+// Schema for adding a test run
 export const addRunSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	name: z.string().describe("Test run name"),
@@ -61,7 +61,7 @@ export const addRunSchema = {
 	refs: z.string().optional().describe("Reference/requirement IDs"),
 };
 
-// テスト実行更新のためのスキーマ
+// Schema for updating a test run
 export const updateRunSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 	name: z.string().optional().describe("Test run name"),
@@ -79,17 +79,17 @@ export const updateRunSchema = {
 	refs: z.string().optional().describe("Reference/requirement IDs"),
 };
 
-// テスト実行クローズのためのスキーマ
+// Schema for closing a test run
 export const closeRunSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 };
 
-// テスト実行削除のためのスキーマ
+// Schema for deleting a test run
 export const deleteRunSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 };
 
-// 各スキーマからZodオブジェクトを作成
+// Create Zod objects from each schema
 export const GetRunsInput = z.object(getRunsSchema);
 export const GetRunInput = z.object(getRunSchema);
 export const AddRunInput = z.object(addRunSchema);
@@ -97,7 +97,7 @@ export const UpdateRunInput = z.object(updateRunSchema);
 export const CloseRunInput = z.object(closeRunSchema);
 export const DeleteRunInput = z.object(deleteRunSchema);
 
-// 入力型を抽出
+// Extract input types
 export type GetRunsInputType = z.infer<typeof GetRunsInput>;
 export type GetRunInputType = z.infer<typeof GetRunInput>;
 export type AddRunInputType = z.infer<typeof AddRunInput>;
@@ -106,7 +106,7 @@ export type CloseRunInputType = z.infer<typeof CloseRunInput>;
 export type DeleteRunInputType = z.infer<typeof DeleteRunInput>;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions - migrated from types.ts
 // -----------------------------------------------
 
 /**

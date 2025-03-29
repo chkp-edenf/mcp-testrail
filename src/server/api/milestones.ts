@@ -2,31 +2,31 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { TestRailClient } from "../../client/api/index.js";
 import { createSuccessResponse, createErrorResponse } from "./utils.js";
 import {
-	getMilestonesSchema,
 	getMilestoneSchema,
+	getMilestonesSchema,
 	addMilestoneSchema,
 	updateMilestoneSchema,
 	deleteMilestoneSchema,
 } from "../../shared/schemas/milestones.js";
 
 /**
- * マイルストーン関連のAPIツールを登録する関数
- * @param server McpServerインスタンス
- * @param testRailClient TestRailクライアントインスタンス
+ * Function to register milestone-related API tools
+ * @param server McpServer instance
+ * @param testRailClient TestRail client instance
  */
 export function registerMilestoneTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// マイルストーン一覧取得
-	server.tool("getMilestones", getMilestonesSchema, async ({ projectId }) => {
+	// Get a specific milestone
+	server.tool("getMilestone", getMilestoneSchema, async ({ milestoneId }) => {
 		try {
-			const milestones =
-				await testRailClient.milestones.getMilestones(projectId);
+			const milestone =
+				await testRailClient.milestones.getMilestone(milestoneId);
 			const successResponse = createSuccessResponse(
-				"Milestones retrieved successfully",
+				"Milestone retrieved successfully",
 				{
-					milestones,
+					milestone,
 				},
 			);
 			return {
@@ -34,7 +34,7 @@ export function registerMilestoneTools(
 			};
 		} catch (error) {
 			const errorResponse = createErrorResponse(
-				`Error fetching milestones for project ${projectId}`,
+				`Error fetching milestone ${milestoneId}`,
 				error,
 			);
 			return {
@@ -44,85 +44,120 @@ export function registerMilestoneTools(
 		}
 	});
 
-	// マイルストーン詳細取得
-	server.tool("getMilestone", getMilestoneSchema, async ({ milestoneId }) => {
-		try {
-			const milestone =
-				await testRailClient.milestones.getMilestone(milestoneId);
-			const successResponse = createSuccessResponse(
-				"Milestone retrieved successfully",
-				{ milestone },
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error fetching milestone",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	// Get all milestones for a project
+	server.tool(
+		"getMilestones",
+		getMilestonesSchema,
+		async ({ projectId, isCompleted }) => {
+			try {
+				const milestones = await testRailClient.milestones.getMilestones(
+					projectId,
+					isCompleted,
+				);
+				const successResponse = createSuccessResponse(
+					"Milestones retrieved successfully",
+					{
+						milestones,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error fetching milestones for project ${projectId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
-	// マイルストーン作成
-	server.tool("addMilestone", addMilestoneSchema, async (params) => {
-		try {
-			const { projectId, ...milestoneData } = params;
-			const milestone = await testRailClient.milestones.addMilestone(
-				projectId,
-				milestoneData,
-			);
-			const successResponse = createSuccessResponse(
-				"Milestone created successfully",
-				{ milestone },
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error creating milestone",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	// Add a new milestone
+	server.tool(
+		"addMilestone",
+		addMilestoneSchema,
+		async ({ projectId, name, description, dueOn, startOn, parentId }) => {
+			try {
+				const data: Record<string, unknown> = {
+					name,
+					description,
+				};
 
-	// マイルストーン更新
-	server.tool("updateMilestone", updateMilestoneSchema, async (params) => {
-		try {
-			const { milestoneId, ...milestoneData } = params;
-			const milestone = await testRailClient.milestones.updateMilestone(
-				milestoneId,
-				milestoneData,
-			);
-			const successResponse = createSuccessResponse(
-				"Milestone updated successfully",
-				{ milestone },
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error updating milestone",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+				if (dueOn) data.due_on = dueOn;
+				if (startOn) data.start_on = startOn;
+				if (parentId) data.parent_id = parentId;
 
-	// マイルストーン削除
+				const milestone = await testRailClient.milestones.addMilestone(
+					projectId,
+					data,
+				);
+				const successResponse = createSuccessResponse(
+					"Milestone created successfully",
+					{
+						milestone,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					"Error creating milestone",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
+
+	// Update a milestone
+	server.tool(
+		"updateMilestone",
+		updateMilestoneSchema,
+		async ({ milestoneId, name, description, dueOn, startOn, isCompleted }) => {
+			try {
+				const data: Record<string, unknown> = {};
+
+				if (name) data.name = name;
+				if (description !== undefined) data.description = description;
+				if (dueOn !== undefined) data.due_on = dueOn;
+				if (startOn !== undefined) data.start_on = startOn;
+				if (isCompleted !== undefined) data.is_completed = isCompleted;
+
+				const milestone = await testRailClient.milestones.updateMilestone(
+					milestoneId,
+					data,
+				);
+				const successResponse = createSuccessResponse(
+					"Milestone updated successfully",
+					{
+						milestone,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error updating milestone ${milestoneId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
+
+	// Delete a milestone
 	server.tool(
 		"deleteMilestone",
 		deleteMilestoneSchema,
@@ -131,14 +166,14 @@ export function registerMilestoneTools(
 				await testRailClient.milestones.deleteMilestone(milestoneId);
 				const successResponse = createSuccessResponse(
 					"Milestone deleted successfully",
-					{ milestoneId },
+					{},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					"Error deleting milestone",
+					`Error deleting milestone ${milestoneId}`,
 					error,
 				);
 				return {

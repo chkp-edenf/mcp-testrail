@@ -1,4 +1,4 @@
-// テスト結果に関するAPIクライアントの実装
+// Implementation of the API client for test results
 import { AxiosResponse } from "axios";
 import { BaseTestRailClient } from "./baseClient.js";
 import { TestRailResult } from "../../shared/schemas/results.js";
@@ -15,10 +15,10 @@ import {
 
 export class ResultsClient extends BaseTestRailClient {
 	/**
-	 * 1つのテストに対する結果のリストを返します
-	 * @param testId テストのID
-	 * @param params オプションのパラメータ（limit, offset, defects_filter, status_id）
-	 * @returns テスト結果のリスト
+	 * Returns a list of results for a test
+	 * @param testId ID of the test
+	 * @param params Optional parameters (limit, offset, defects_filter, status_id)
+	 * @returns List of test results
 	 */
 	async getResults(
 		testId: GetResultsInputType["testId"],
@@ -36,11 +36,11 @@ export class ResultsClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * テストケースIDとテストランIDに基づいて、そのテストの結果のリストを返します
-	 * @param runId テストランのID
-	 * @param caseId テストケースのID
-	 * @param params オプションのパラメータ（limit, offset, defects_filter, status_id）
-	 * @returns テスト結果のリスト
+	 * Returns a list of results for a test case based on the test run ID and case ID
+	 * @param runId ID of the test run
+	 * @param caseId ID of the test case
+	 * @param params Optional parameters (limit, offset, defects_filter, status_id)
+	 * @returns List of test results
 	 */
 	async getResultsForCase(
 		runId: GetResultsForCaseInputType["runId"],
@@ -62,10 +62,10 @@ export class ResultsClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * テストランに対する結果のリストを返します
-	 * @param runId テストランのID
-	 * @param params オプションのパラメータ（limit, offset, defects_filter, status_id）
-	 * @returns テスト結果のリスト
+	 * Returns a list of results for a test run
+	 * @param runId ID of the test run
+	 * @param params Optional parameters (limit, offset, defects_filter, status_id)
+	 * @returns List of test results
 	 */
 	async getResultsForRun(
 		runId: GetResultsForRunInputType["runId"],
@@ -83,10 +83,10 @@ export class ResultsClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * テストに対して結果を追加します
-	 * @param testId テストのID
-	 * @param data テスト結果のデータ（status_id, comment, version, elapsed, defects, assignedto_id など）
-	 * @returns 追加されたテスト結果
+	 * Adds a result to a test
+	 * @param testId ID of the test
+	 * @param data Result data (status_id, comment, version, elapsed, defects, assignedto_id, etc.)
+	 * @returns Added test result
 	 */
 	async addResult(
 		testId: AddResultInputType["testId"],
@@ -104,11 +104,11 @@ export class ResultsClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * テストケースとテストランに基づいてテスト結果を追加します
-	 * @param runId テストランのID
-	 * @param caseId テストケースのID
-	 * @param data テスト結果のデータ（status_id, comment, version, elapsed, defects, assignedto_id など）
-	 * @returns 追加されたテスト結果
+	 * Adds a result for a test case based on the test run and case ID
+	 * @param runId ID of the test run
+	 * @param caseId ID of the test case
+	 * @param data Result data (status_id, comment, version, elapsed, defects, assignedto_id, etc.)
+	 * @returns Added test result
 	 */
 	async addResultForCase(
 		runId: AddResultForCaseInputType["runId"],
@@ -116,19 +116,19 @@ export class ResultsClient extends BaseTestRailClient {
 		data: Partial<Omit<AddResultForCaseInputType, "runId" | "caseId">>,
 	): Promise<TestRailResult> {
 		try {
-			// デバッグログを追加
+			// Add debug log
 			console.log(
 				`Sending request to add result for case ${caseId} in run ${runId}`,
 			);
 
-			// リクエスト実行
+			// Execute request
 			const response: AxiosResponse<TestRailResult> = await this.client.post(
 				`/api/v2/add_result_for_case/${runId}/${caseId}`,
 				data,
 			);
 			return response.data;
 		} catch (error) {
-			// エラーをより詳細に記録
+			// Log error in more detail
 			console.error("Error adding result for case. Details:", error);
 			throw handleApiError(
 				error,
@@ -138,10 +138,10 @@ export class ResultsClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * テストランに対して複数のテスト結果をまとめて追加します
-	 * @param runId テストランのID
-	 * @param data 結果データ（results配列を含む）
-	 * @returns 追加されたテスト結果のリスト
+	 * Adds multiple results to a test run at once
+	 * @param runId ID of the test run
+	 * @param data Result data (including results array)
+	 * @returns List of added test results
 	 */
 	async addResults(
 		runId: AddResultsInputType["runId"],
@@ -159,10 +159,10 @@ export class ResultsClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * テストランに対して複数のテストケース結果をまとめて追加します
-	 * @param runId テストランのID
-	 * @param data 結果データ（results配列を含む）
-	 * @returns 追加されたテスト結果のリスト
+	 * Adds multiple case results to a test run at once
+	 * @param runId ID of the test run
+	 * @param data Result data (including results array)
+	 * @returns List of added test results
 	 */
 	async addResultsForCases(
 		runId: AddResultsForCasesInputType["runId"],

@@ -11,15 +11,15 @@ import {
 } from "../../shared/schemas/sections.js";
 
 /**
- * セクション関連のAPIツールを登録する関数
- * @param server McpServerインスタンス
- * @param testRailClient TestRailクライアントインスタンス
+ * Function to register section-related API tools
+ * @param server McpServer instance
+ * @param testRailClient TestRail client instance
  */
 export function registerSectionTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// セクション詳細取得
+	// Get a specific section
 	server.tool("getSection", getSectionSchema, async ({ sectionId }) => {
 		try {
 			const section = await testRailClient.sections.getSection(sectionId);
@@ -44,7 +44,7 @@ export function registerSectionTools(
 		}
 	});
 
-	// プロジェクトまたはスイートのセクション一覧取得
+	// Get all sections for a project or suite
 	server.tool(
 		"getSections",
 		getSectionsSchema,
@@ -76,7 +76,7 @@ export function registerSectionTools(
 		},
 	);
 
-	// セクション作成
+	// Create a new section
 	server.tool(
 		"addSection",
 		addSectionSchema,
@@ -115,7 +115,7 @@ export function registerSectionTools(
 		},
 	);
 
-	// セクション移動
+	// Move a section
 	server.tool(
 		"moveSection",
 		moveSectionSchema,
@@ -155,7 +155,7 @@ export function registerSectionTools(
 		},
 	);
 
-	// セクション更新
+	// Update a section
 	server.tool(
 		"updateSection",
 		updateSectionSchema,
@@ -191,7 +191,7 @@ export function registerSectionTools(
 		},
 	);
 
-	// セクション削除
+	// Delete a section
 	server.tool(
 		"deleteSection",
 		deleteSectionSchema,

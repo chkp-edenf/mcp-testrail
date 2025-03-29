@@ -1,17 +1,17 @@
 import { z } from "zod";
 import { TestRailRunSchema } from "./runs.js";
 
-// プロジェクト内のテストプラン一覧取得のためのスキーマ
+// Schema for retrieving all test plans for a project
 export const getPlansSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 };
 
-// 特定のテストプラン取得のためのスキーマ
+// Schema for retrieving a specific test plan
 export const getPlanSchema = {
 	planId: z.number().describe("TestRail Plan ID"),
 };
 
-// テストプラン追加のためのスキーマ
+// Schema for adding a test plan
 export const addPlanSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	name: z.string().describe("Test plan name (required)"),
@@ -48,7 +48,7 @@ export const addPlanSchema = {
 		.describe("Test suite entries to include in the plan"),
 };
 
-// テストプランエントリー追加のためのスキーマ
+// Schema for adding an entry to a test plan
 export const addPlanEntrySchema = {
 	planId: z.number().describe("TestRail Plan ID"),
 	suite_id: z.number().describe("Test suite ID"),
@@ -69,7 +69,7 @@ export const addPlanEntrySchema = {
 	refs: z.string().optional().describe("Reference/requirement IDs"),
 };
 
-// テストプラン更新のためのスキーマ
+// Schema for updating a test plan
 export const updatePlanSchema = {
 	planId: z.number().describe("TestRail Plan ID"),
 	name: z.string().optional().describe("Test plan name"),
@@ -80,7 +80,7 @@ export const updatePlanSchema = {
 		.describe("Milestone ID to associate with"),
 };
 
-// テストプランエントリー更新のためのスキーマ
+// Schema for updating a test plan entry
 export const updatePlanEntrySchema = {
 	planId: z.number().describe("TestRail Plan ID"),
 	entryId: z.string().describe("TestRail Plan Entry ID"),
@@ -101,23 +101,23 @@ export const updatePlanEntrySchema = {
 	refs: z.string().optional().describe("Reference/requirement IDs"),
 };
 
-// テストプラン終了のためのスキーマ
+// Schema for closing a test plan
 export const closePlanSchema = {
 	planId: z.number().describe("TestRail Plan ID"),
 };
 
-// テストプラン削除のためのスキーマ
+// Schema for deleting a test plan
 export const deletePlanSchema = {
 	planId: z.number().describe("TestRail Plan ID"),
 };
 
-// テストプランエントリー削除のためのスキーマ
+// Schema for deleting a test plan entry
 export const deletePlanEntrySchema = {
 	planId: z.number().describe("TestRail Plan ID"),
 	entryId: z.string().describe("TestRail Plan Entry ID"),
 };
 
-// 各スキーマからZodオブジェクトを作成
+// Create Zod objects from each schema
 export const GetPlansInput = z.object(getPlansSchema);
 export const GetPlanInput = z.object(getPlanSchema);
 export const AddPlanInput = z.object(addPlanSchema);
@@ -128,7 +128,7 @@ export const ClosePlanInput = z.object(closePlanSchema);
 export const DeletePlanInput = z.object(deletePlanSchema);
 export const DeletePlanEntryInput = z.object(deletePlanEntrySchema);
 
-// 入力型を抽出
+// Extract input types
 export type GetPlansInputType = z.infer<typeof GetPlansInput>;
 export type GetPlanInputType = z.infer<typeof GetPlanInput>;
 export type AddPlanInputType = z.infer<typeof AddPlanInput>;
@@ -140,7 +140,7 @@ export type DeletePlanInputType = z.infer<typeof DeletePlanInput>;
 export type DeletePlanEntryInputType = z.infer<typeof DeletePlanEntryInput>;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions - migrated from types.ts
 // -----------------------------------------------
 
 /**

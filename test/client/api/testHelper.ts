@@ -6,7 +6,7 @@ import { TestRailClientConfig } from '../../../src/client/api/baseClient.js';
 // Mock axios
 vi.mock('axios');
 
-// 標準的なモックの設定を行う関数
+// Function to set up standard mocks
 export function setupMocks() {
   // Mock axios instance
   const mockAxiosInstance = {
@@ -29,7 +29,7 @@ export function setupMocks() {
   return mockAxiosInstance;
 }
 
-// テスト用のクライアントを生成
+// Create a client for testing
 export function createTestClient() {
   const mockConfig: TestRailClientConfig = {
     baseURL: 'https://example.testrail.com',

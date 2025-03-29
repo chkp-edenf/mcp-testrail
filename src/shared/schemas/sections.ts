@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-// 特定のセクション取得のためのスキーマ
+// Schema for retrieving a specific section
 export const getSectionSchema = {
 	sectionId: z.number().describe("TestRail Section ID"),
 };
 
-// プロジェクト内のセクション一覧取得のためのスキーマ
+// Schema for retrieving all sections in a project
 export const getSectionsSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	suiteId: z
@@ -14,7 +14,7 @@ export const getSectionsSchema = {
 		.describe("TestRail Suite ID (optional for single suite projects)"),
 };
 
-// セクション追加のためのスキーマ
+// Schema for adding a section
 export const addSectionSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	name: z.string().describe("Section name (required)"),
@@ -26,7 +26,7 @@ export const addSectionSchema = {
 		.describe("Test Suite ID (required for multi-suite projects)"),
 };
 
-// セクション移動のためのスキーマ
+// Schema for moving a section
 export const moveSectionSchema = {
 	sectionId: z.number().describe("TestRail Section ID"),
 	parentId: z.number().nullable().describe("Parent section ID (null for root)"),
@@ -37,20 +37,20 @@ export const moveSectionSchema = {
 		.describe("ID of the section to position after"),
 };
 
-// セクション更新のためのスキーマ
+// Schema for updating a section
 export const updateSectionSchema = {
 	sectionId: z.number().describe("TestRail Section ID"),
 	name: z.string().optional().describe("Section name"),
 	description: z.string().optional().describe("Section description"),
 };
 
-// セクション削除のためのスキーマ
+// Schema for deleting a section
 export const deleteSectionSchema = {
 	sectionId: z.number().describe("TestRail Section ID"),
 	soft: z.boolean().optional().describe("True for soft delete (preview only)"),
 };
 
-// 各スキーマからZodオブジェクトを作成
+// Create Zod objects from each schema
 export const GetSectionInput = z.object(getSectionSchema);
 export const GetSectionsInput = z.object(getSectionsSchema);
 export const AddSectionInput = z.object(addSectionSchema);
@@ -58,7 +58,7 @@ export const MoveSectionInput = z.object(moveSectionSchema);
 export const UpdateSectionInput = z.object(updateSectionSchema);
 export const DeleteSectionInput = z.object(deleteSectionSchema);
 
-// 入力型を抽出
+// Extract input types
 export type GetSectionInputType = z.infer<typeof GetSectionInput>;
 export type GetSectionsInputType = z.infer<typeof GetSectionsInput>;
 export type AddSectionInputType = z.infer<typeof AddSectionInput>;
@@ -67,7 +67,7 @@ export type UpdateSectionInputType = z.infer<typeof UpdateSectionInput>;
 export type DeleteSectionInputType = z.infer<typeof DeleteSectionInput>;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions - migrated from types.ts
 // -----------------------------------------------
 
 /**

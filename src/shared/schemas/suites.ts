@@ -1,50 +1,50 @@
 import { z } from "zod";
 
-// プロジェクト内のスイート一覧取得のためのスキーマ
-export const getSuitesSchema = {
+// Schema for retrieving all suites in a project
+export const getSuitesSchema = z.object({
 	projectId: z.number().describe("TestRail Project ID"),
-};
+});
 
-// 特定のスイート取得のためのスキーマ
-export const getSuiteSchema = {
+// Schema for retrieving a specific suite
+export const getSuiteSchema = z.object({
 	suiteId: z.number().describe("TestRail Suite ID"),
-};
+});
 
-// スイート追加のためのスキーマ
-export const addSuiteSchema = {
+// Schema for adding a suite
+export const addSuiteSchema = z.object({
 	projectId: z.number().describe("TestRail Project ID"),
-	name: z.string().describe("Test suite name (required)"),
-	description: z.string().optional().describe("Test suite description"),
-};
+	name: z.string().describe("Name of the suite"),
+	description: z.string().optional().describe("Description of the suite"),
+});
 
-// スイート更新のためのスキーマ
-export const updateSuiteSchema = {
+// Schema for updating a suite
+export const updateSuiteSchema = z.object({
 	suiteId: z.number().describe("TestRail Suite ID"),
-	name: z.string().optional().describe("Test suite name"),
-	description: z.string().optional().describe("Test suite description"),
-};
+	name: z.string().optional().describe("Name of the suite"),
+	description: z.string().optional().describe("Description of the suite"),
+});
 
-// スイート削除のためのスキーマ
-export const deleteSuiteSchema = {
+// Schema for deleting a suite
+export const deleteSuiteSchema = z.object({
 	suiteId: z.number().describe("TestRail Suite ID"),
-};
+});
 
-// 各スキーマからZodオブジェクトを作成
-export const GetSuitesInput = z.object(getSuitesSchema);
-export const GetSuiteInput = z.object(getSuiteSchema);
-export const AddSuiteInput = z.object(addSuiteSchema);
-export const UpdateSuiteInput = z.object(updateSuiteSchema);
-export const DeleteSuiteInput = z.object(deleteSuiteSchema);
+// Create Zod objects from each schema
+export const getSuitesInputSchema = getSuitesSchema;
+export const getSuiteInputSchema = getSuiteSchema;
+export const addSuiteInputSchema = addSuiteSchema;
+export const updateSuiteInputSchema = updateSuiteSchema;
+export const deleteSuiteInputSchema = deleteSuiteSchema;
 
-// 入力型を抽出
-export type GetSuitesInputType = z.infer<typeof GetSuitesInput>;
-export type GetSuiteInputType = z.infer<typeof GetSuiteInput>;
-export type AddSuiteInputType = z.infer<typeof AddSuiteInput>;
-export type UpdateSuiteInputType = z.infer<typeof UpdateSuiteInput>;
-export type DeleteSuiteInputType = z.infer<typeof DeleteSuiteInput>;
+// Extract input types
+export type GetSuitesInput = z.infer<typeof getSuitesInputSchema>;
+export type GetSuiteInput = z.infer<typeof getSuiteInputSchema>;
+export type AddSuiteInput = z.infer<typeof addSuiteInputSchema>;
+export type UpdateSuiteInput = z.infer<typeof updateSuiteInputSchema>;
+export type DeleteSuiteInput = z.infer<typeof deleteSuiteInputSchema>;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions migrated from types.ts
 // -----------------------------------------------
 
 /**
@@ -53,12 +53,12 @@ export type DeleteSuiteInputType = z.infer<typeof DeleteSuiteInput>;
 export const TestRailSuiteSchema = z.object({
 	id: z.number(),
 	name: z.string(),
-	description: z.string().optional(),
+	description: z.string().nullable(),
 	project_id: z.number(),
-	is_baseline: z.boolean().optional(),
-	is_completed: z.boolean().optional(),
-	is_master: z.boolean().optional(),
-	completed_on: z.number().nullable().optional(),
+	is_master: z.boolean(),
+	is_baseline: z.boolean(),
+	is_completed: z.boolean(),
+	completed_on: z.number().nullable(),
 	url: z.string(),
 });
 export type TestRailSuite = z.infer<typeof TestRailSuiteSchema>;

@@ -15,21 +15,23 @@ import {
 } from "../../shared/schemas/cases.js";
 
 /**
- * テストケース関連のAPIツールを登録する関数
- * @param server McpServerインスタンス
- * @param testRailClient TestRailクライアントインスタンス
+ * Function to register test case-related API tools
+ * @param server McpServer instance
+ * @param testRailClient TestRail client instance
  */
 export function registerCaseTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// テストケース詳細取得
-	server.tool("getTestCase", getTestCaseSchema, async ({ caseId }) => {
+	// Get a specific test case
+	server.tool("getCase", getTestCaseSchema, async ({ caseId }) => {
 		try {
 			const testCase = await testRailClient.cases.getCase(caseId);
 			const successResponse = createSuccessResponse(
-				`Test case ${caseId} retrieved successfully`,
-				{ testCase },
+				"Test case retrieved successfully",
+				{
+					case: testCase,
+				},
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -46,84 +48,28 @@ export function registerCaseTools(
 		}
 	});
 
-	// プロジェクトのテストケース一覧取得
-	server.tool("getTestCases", getTestCasesSchema, async ({ projectId }) => {
-		try {
-			const testCases = await testRailClient.cases.getCases(projectId);
-			const successResponse = createSuccessResponse(
-				`Test cases for project ${projectId} retrieved successfully`,
-				{ testCases },
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error fetching test cases for project ${projectId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
-
-	// テストケース追加
+	// Get all test cases for a project
 	server.tool(
-		"addTestCase",
-		addTestCaseSchema,
-		async ({
-			sectionId,
-			title,
-			customPrerequisites,
-			customSteps,
-			customExpected,
-			typeId,
-			priorityId,
-			estimate,
-			milestoneId,
-			refs,
-		}) => {
+		"getCases",
+		getTestCasesSchema,
+		async ({ projectId, ...filters }) => {
 			try {
-				// テストケースのデータを構築
-				const caseData: Record<string, unknown> = {
-					title,
-					custom_preconds: customPrerequisites,
-					custom_steps: customSteps,
-					custom_expected: customExpected,
-					type_id: typeId,
-					priority_id: priorityId,
-					estimate,
-					milestone_id: milestoneId,
-					refs,
-				};
-
-				// 空または未定義のフィールドを削除
-				for (const key of Object.keys(caseData)) {
-					if (
-						caseData[key] === undefined ||
-						caseData[key] === null ||
-						caseData[key] === ""
-					) {
-						delete caseData[key];
-					}
-				}
-
-				const testCase = await testRailClient.cases.addCase(
-					sectionId,
-					caseData,
+				const testCases = await testRailClient.cases.getCases(
+					projectId,
+					filters,
 				);
 				const successResponse = createSuccessResponse(
-					"Test case created successfully",
-					{ testCase },
+					"Test cases retrieved successfully",
+					{
+						cases: testCases,
+					},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					"Error creating test case",
+					`Error fetching test cases for project ${projectId}`,
 					error,
 				);
 				return {
@@ -134,45 +80,121 @@ export function registerCaseTools(
 		},
 	);
 
-	// テストケース更新
+	// Add a new test case
 	server.tool(
-		"updateTestCase",
-		updateTestCaseSchema,
-		async ({
-			caseId,
-			title,
-			customPrerequisites,
-			customSteps,
-			customExpected,
-			typeId,
-			priorityId,
-			estimate,
-			milestoneId,
-			refs,
-		}) => {
+		"addCase",
+		addTestCaseSchema,
+		async ({ sectionId, ...caseData }) => {
 			try {
-				// 更新データの構築
-				const caseData: Record<string, unknown> = {};
+				// Build test case data
+				const data: Record<string, unknown> = {};
 
-				if (title !== undefined) caseData.title = title;
-				if (customPrerequisites !== undefined)
-					caseData.custom_preconds = customPrerequisites;
-				if (customSteps !== undefined) caseData.custom_steps = customSteps;
-				if (customExpected !== undefined)
-					caseData.custom_expected = customExpected;
-				if (typeId !== undefined) caseData.type_id = typeId;
-				if (priorityId !== undefined) caseData.priority_id = priorityId;
-				if (estimate !== undefined) caseData.estimate = estimate;
-				if (milestoneId !== undefined) caseData.milestone_id = milestoneId;
-				if (refs !== undefined) caseData.refs = refs;
+				// Add title if specified
+				if (caseData.title) {
+					data.title = caseData.title;
+				}
 
-				const testCase = await testRailClient.cases.updateCase(
-					caseId,
-					caseData,
-				);
+				// Add type ID if specified
+				if (caseData.typeId) {
+					data.type_id = caseData.typeId;
+				}
+
+				// Add priority ID if specified
+				if (caseData.priorityId) {
+					data.priority_id = caseData.priorityId;
+				}
+
+				// Add estimate if specified
+				if (caseData.estimate) {
+					data.estimate = caseData.estimate;
+				}
+
+				// Add milestone ID if specified
+				if (caseData.milestoneId) {
+					data.milestone_id = caseData.milestoneId;
+				}
+
+				// Add references if specified
+				if (caseData.refs) {
+					data.refs = caseData.refs;
+				}
+
+				// Remove empty or undefined fields
+				Object.keys(data).forEach((key) => {
+					const value = data[key];
+					if (value === undefined || value === null || value === "") {
+						delete data[key];
+					}
+				});
+
+				const testCase = await testRailClient.cases.addCase(sectionId, data);
 				const successResponse = createSuccessResponse(
-					`Test case ${caseId} updated successfully`,
-					{ testCase },
+					"Test case created successfully",
+					{
+						case: testCase,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error adding test case to section ${sectionId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
+
+	// Update a test case
+	server.tool(
+		"updateCase",
+		updateTestCaseSchema,
+		async ({ caseId, ...caseData }) => {
+			try {
+				// Build update data
+				const data: Record<string, unknown> = {};
+
+				// Add title if specified
+				if (caseData.title) {
+					data.title = caseData.title;
+				}
+
+				// Add type ID if specified
+				if (caseData.typeId) {
+					data.type_id = caseData.typeId;
+				}
+
+				// Add priority ID if specified
+				if (caseData.priorityId) {
+					data.priority_id = caseData.priorityId;
+				}
+
+				// Add estimate if specified
+				if (caseData.estimate) {
+					data.estimate = caseData.estimate;
+				}
+
+				// Add milestone ID if specified
+				if (caseData.milestoneId) {
+					data.milestone_id = caseData.milestoneId;
+				}
+
+				// Add references if specified
+				if (caseData.refs) {
+					data.refs = caseData.refs;
+				}
+
+				const testCase = await testRailClient.cases.updateCase(caseId, data);
+				const successResponse = createSuccessResponse(
+					"Test case updated successfully",
+					{
+						case: testCase,
+					},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -190,12 +212,13 @@ export function registerCaseTools(
 		},
 	);
 
-	// テストケース削除
-	server.tool("deleteTestCase", deleteTestCaseSchema, async ({ caseId }) => {
+	// Delete a test case
+	server.tool("deleteCase", deleteTestCaseSchema, async ({ caseId }) => {
 		try {
 			await testRailClient.cases.deleteCase(caseId);
 			const successResponse = createSuccessResponse(
-				`Test case ${caseId} deleted successfully`,
+				"Test case deleted successfully",
+				{},
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -212,20 +235,22 @@ export function registerCaseTools(
 		}
 	});
 
-	// テストケースタイプ一覧取得
-	server.tool("getTestCaseTypes", getTestCaseTypesSchema, async () => {
+	// Get all test case types
+	server.tool("getCaseTypes", getTestCaseTypesSchema, async () => {
 		try {
 			const caseTypes = await testRailClient.cases.getCaseTypes();
 			const successResponse = createSuccessResponse(
-				"Test case types retrieved successfully",
-				{ caseTypes },
+				"Case types retrieved successfully",
+				{
+					types: caseTypes,
+				},
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
 			};
 		} catch (error) {
 			const errorResponse = createErrorResponse(
-				"Error fetching test case types",
+				"Error fetching case types",
 				error,
 			);
 			return {
@@ -235,20 +260,22 @@ export function registerCaseTools(
 		}
 	});
 
-	// テストケースフィールド一覧取得
-	server.tool("getTestCaseFields", getTestCaseFieldsSchema, async () => {
+	// Get all test case fields
+	server.tool("getCaseFields", getTestCaseFieldsSchema, async () => {
 		try {
 			const caseFields = await testRailClient.cases.getCaseFields();
 			const successResponse = createSuccessResponse(
-				"Test case fields retrieved successfully",
-				{ caseFields },
+				"Case fields retrieved successfully",
+				{
+					fields: caseFields,
+				},
 			);
 			return {
 				content: [{ type: "text", text: JSON.stringify(successResponse) }],
 			};
 		} catch (error) {
 			const errorResponse = createErrorResponse(
-				"Error fetching test case fields",
+				"Error fetching case fields",
 				error,
 			);
 			return {
@@ -258,23 +285,21 @@ export function registerCaseTools(
 		}
 	});
 
-	// テストケースをセクションにコピー
+	// Copy test cases to a section
 	server.tool(
-		"copyTestCasesToSection",
+		"copyToSection",
 		copyTestCasesToSectionSchema,
-		async ({ sectionId, caseIds }) => {
+		async ({ caseIds, sectionId }) => {
 			try {
-				if (!Array.isArray(caseIds) || caseIds.length === 0) {
-					throw new Error("caseIds must be a non-empty array");
-				}
-
 				const result = await testRailClient.cases.copyToSection(
 					caseIds,
 					sectionId,
 				);
 				const successResponse = createSuccessResponse(
-					`Test cases copied to section ${sectionId} successfully`,
-					{ result },
+					"Test cases copied successfully",
+					{
+						status: result.status,
+					},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -292,23 +317,21 @@ export function registerCaseTools(
 		},
 	);
 
-	// テストケースをセクションに移動
+	// Move test cases to a section
 	server.tool(
-		"moveTestCasesToSection",
+		"moveToSection",
 		moveTestCasesToSectionSchema,
-		async ({ sectionId, caseIds }) => {
+		async ({ caseIds, sectionId }) => {
 			try {
-				if (!Array.isArray(caseIds) || caseIds.length === 0) {
-					throw new Error("caseIds must be a non-empty array");
-				}
-
 				const result = await testRailClient.cases.moveToSection(
 					caseIds,
 					sectionId,
 				);
 				const successResponse = createSuccessResponse(
-					`Test cases moved to section ${sectionId} successfully`,
-					{ result },
+					"Test cases moved successfully",
+					{
+						status: result.status,
+					},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
@@ -326,23 +349,25 @@ export function registerCaseTools(
 		},
 	);
 
-	// テストケース履歴取得
+	// Get test case history
 	server.tool(
-		"getTestCaseHistory",
+		"getCaseHistory",
 		getTestCaseHistorySchema,
 		async ({ caseId }) => {
 			try {
 				const history = await testRailClient.cases.getCaseHistory(caseId);
 				const successResponse = createSuccessResponse(
-					`Test case ${caseId} history retrieved successfully`,
-					{ history },
+					"Test case history retrieved successfully",
+					{
+						history,
+					},
 				);
 				return {
 					content: [{ type: "text", text: JSON.stringify(successResponse) }],
 				};
 			} catch (error) {
 				const errorResponse = createErrorResponse(
-					`Error fetching test case ${caseId} history`,
+					`Error fetching history for test case ${caseId}`,
 					error,
 				);
 				return {

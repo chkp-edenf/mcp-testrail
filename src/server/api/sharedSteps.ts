@@ -11,15 +11,15 @@ import {
 } from "../../shared/schemas/sharedSteps.js";
 
 /**
- * 共有ステップ関連のAPIツールを登録する関数
- * @param server McpServerインスタンス
- * @param testRailClient TestRailクライアントインスタンス
+ * Function to register shared step-related API tools
+ * @param server McpServer instance
+ * @param testRailClient TestRail client instance
  */
 export function registerSharedStepTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// 共有ステップ取得
+	// Get a specific shared step
 	server.tool(
 		"getSharedStep",
 		getSharedStepSchema,
@@ -49,7 +49,7 @@ export function registerSharedStepTools(
 		},
 	);
 
-	// プロジェクトの共有ステップ一覧取得
+	// Get all shared steps for a project
 	server.tool(
 		"getSharedSteps",
 		getSharedStepsSchema,
@@ -81,7 +81,7 @@ export function registerSharedStepTools(
 		},
 	);
 
-	// 共有ステップ作成
+	// Add a new shared step
 	server.tool(
 		"addSharedStep",
 		addSharedStepSchema,
@@ -124,7 +124,7 @@ export function registerSharedStepTools(
 		},
 	);
 
-	// 共有ステップ更新
+	// Update a shared step
 	server.tool(
 		"updateSharedStep",
 		updateSharedStepSchema,
@@ -173,7 +173,7 @@ export function registerSharedStepTools(
 		},
 	);
 
-	// 共有ステップ削除
+	// Delete a shared step
 	server.tool(
 		"deleteSharedStep",
 		deleteSharedStepSchema,

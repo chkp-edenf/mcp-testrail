@@ -1,17 +1,15 @@
 import { z } from "zod";
 
-// プロジェクト一覧取得のためのスキーマ
-export const getProjectsSchema = {
-	// 特にパラメータの必要がないため空オブジェクト
-};
+// Schema for retrieving all projects
+export const getProjectsSchema = z.object({});
 
-// 特定のプロジェクト取得のためのスキーマ
-export const getProjectSchema = {
+// Schema for retrieving a specific project
+export const getProjectSchema = z.object({
 	projectId: z.number().describe("TestRail Project ID"),
-};
+});
 
-// プロジェクト追加のためのスキーマ
-export const addProjectSchema = {
+// Schema for adding a project
+export const addProjectSchema = z.object({
 	name: z.string().describe("Project name (required)"),
 	announcement: z
 		.string()
@@ -23,14 +21,16 @@ export const addProjectSchema = {
 		.describe("Show announcement on project overview page"),
 	suite_mode: z
 		.number()
+		.min(1)
+		.max(3)
 		.optional()
 		.describe(
-			"Suite mode (1: single suite, 2: single + baselines, 3: multiple suites)",
+			"Suite mode: 1 for single suite, 2 for single suite with baselines, 3 for multiple suites",
 		),
-};
+});
 
-// プロジェクト更新のためのスキーマ
-export const updateProjectSchema = {
+// Schema for updating a project
+export const updateProjectSchema = z.object({
 	projectId: z.number().describe("TestRail Project ID"),
 	name: z.string().optional().describe("Project name"),
 	announcement: z
@@ -42,42 +42,37 @@ export const updateProjectSchema = {
 		.optional()
 		.describe("Show announcement on project overview page"),
 	is_completed: z.boolean().optional().describe("Mark project as completed"),
-};
+});
 
-// プロジェクト削除のためのスキーマ
-export const deleteProjectSchema = {
+// Schema for deleting a project
+export const deleteProjectSchema = z.object({
 	projectId: z.number().describe("TestRail Project ID"),
-};
+});
 
-// 各スキーマからZodオブジェクトを作成
-export const GetProjectsInput = z.object(getProjectsSchema);
-export const GetProjectInput = z.object(getProjectSchema);
-export const AddProjectInput = z.object(addProjectSchema);
-export const UpdateProjectInput = z.object(updateProjectSchema);
-export const DeleteProjectInput = z.object(deleteProjectSchema);
+// Create Zod objects from each schema
+export const getProjectsInputSchema = getProjectsSchema;
+export const getProjectInputSchema = getProjectSchema;
+export const addProjectInputSchema = addProjectSchema;
+export const updateProjectInputSchema = updateProjectSchema;
+export const deleteProjectInputSchema = deleteProjectSchema;
 
-// 入力型を抽出
-export type GetProjectsInputType = z.infer<typeof GetProjectsInput>;
-export type GetProjectInputType = z.infer<typeof GetProjectInput>;
-export type AddProjectInputType = z.infer<typeof AddProjectInput>;
-export type UpdateProjectInputType = z.infer<typeof UpdateProjectInput>;
-export type DeleteProjectInputType = z.infer<typeof DeleteProjectInput>;
+// Extract input types
+export type GetProjectsInput = z.infer<typeof getProjectsInputSchema>;
+export type GetProjectInput = z.infer<typeof getProjectInputSchema>;
+export type AddProjectInput = z.infer<typeof addProjectInputSchema>;
+export type UpdateProjectInput = z.infer<typeof updateProjectInputSchema>;
+export type DeleteProjectInput = z.infer<typeof deleteProjectInputSchema>;
 
-// -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
-// -----------------------------------------------
-
-/**
- * TestRail API Response for Project
- */
+// Response schema definitions migrated from types.ts
 export const TestRailProjectSchema = z.object({
 	id: z.number(),
 	name: z.string(),
-	announcement: z.string(),
+	announcement: z.string().nullable(),
 	show_announcement: z.boolean(),
 	is_completed: z.boolean(),
-	completed_on: z.number(),
-	suite_mode: z.number(),
+	completed_on: z.number().nullable(),
 	url: z.string(),
+	suite_mode: z.number(),
 });
+
 export type TestRailProject = z.infer<typeof TestRailProjectSchema>;

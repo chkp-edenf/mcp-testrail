@@ -10,15 +10,15 @@ import {
 } from "../../shared/schemas/projects.js";
 
 /**
- * プロジェクト関連のAPIツールを登録する関数
- * @param server McpServerインスタンス
- * @param testRailClient TestRailクライアントインスタンス
+ * Function to register project-related API tools
+ * @param server McpServer instance
+ * @param testRailClient TestRail client instance
  */
 export function registerProjectTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
-	// プロジェクト一覧取得
+	// Get all projects
 	server.tool("getProjects", getProjectsSchema, async () => {
 		try {
 			const projects = await testRailClient.projects.getProjects();
@@ -43,7 +43,7 @@ export function registerProjectTools(
 		}
 	});
 
-	// 特定のプロジェクトの詳細取得
+	// Get a specific project by ID
 	server.tool("getProject", getProjectSchema, async ({ projectId }) => {
 		try {
 			const project = await testRailClient.projects.getProject(projectId);
@@ -68,7 +68,7 @@ export function registerProjectTools(
 		}
 	});
 
-	// 新規プロジェクト作成
+	// Create a new project
 	server.tool(
 		"addProject",
 		addProjectSchema,
@@ -102,7 +102,7 @@ export function registerProjectTools(
 		},
 	);
 
-	// プロジェクト更新
+	// Update a project
 	server.tool(
 		"updateProject",
 		updateProjectSchema,
@@ -142,7 +142,7 @@ export function registerProjectTools(
 		},
 	);
 
-	// プロジェクト削除
+	// Delete a project
 	server.tool("deleteProject", deleteProjectSchema, async ({ projectId }) => {
 		try {
 			await testRailClient.projects.deleteProject(projectId);

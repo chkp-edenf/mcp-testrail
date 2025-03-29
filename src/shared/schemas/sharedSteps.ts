@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 共有ステップのステップアイテムのスキーマ
+// Schema for shared step item
 export const sharedStepItemSchema = z.object({
 	content: z.string().describe("Step content"),
 	expected: z.string().optional().describe("Expected result"),
@@ -8,12 +8,12 @@ export const sharedStepItemSchema = z.object({
 	refs: z.string().optional().describe("References"),
 });
 
-// 特定の共有ステップ取得のためのスキーマ
+// Schema for retrieving a specific shared step
 export const getSharedStepSchema = {
 	sharedStepId: z.number().describe("TestRail Shared Step ID"),
 };
 
-// 共有ステップ一覧取得のためのスキーマ
+// Schema for retrieving all shared steps for a project
 export const getSharedStepsSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	createdAfter: z
@@ -50,21 +50,21 @@ export const getSharedStepsSchema = {
 		.describe("The offset to start returning shared steps"),
 };
 
-// 共有ステップ追加のためのスキーマ
+// Schema for adding a shared step
 export const addSharedStepSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	title: z.string().describe("Shared step title"),
 	steps: z.array(sharedStepItemSchema).describe("Shared step items"),
 };
 
-// 共有ステップ更新のためのスキーマ
+// Schema for updating a shared step
 export const updateSharedStepSchema = {
 	sharedStepId: z.number().describe("TestRail Shared Step ID"),
 	title: z.string().optional().describe("Shared step title"),
 	steps: z.array(sharedStepItemSchema).optional().describe("Shared step items"),
 };
 
-// 共有ステップ削除のためのスキーマ
+// Schema for deleting a shared step
 export const deleteSharedStepSchema = {
 	sharedStepId: z.number().describe("TestRail Shared Step ID"),
 	keepInCases: z
@@ -73,14 +73,14 @@ export const deleteSharedStepSchema = {
 		.describe("Whether to keep the steps in cases that use them"),
 };
 
-// 各スキーマからZodオブジェクトを作成
+// Create Zod objects from each schema
 export const GetSharedStepInput = z.object(getSharedStepSchema);
 export const GetSharedStepsInput = z.object(getSharedStepsSchema);
 export const AddSharedStepInput = z.object(addSharedStepSchema);
 export const UpdateSharedStepInput = z.object(updateSharedStepSchema);
 export const DeleteSharedStepInput = z.object(deleteSharedStepSchema);
 
-// 入力型を抽出
+// Extract input types
 export type GetSharedStepInputType = z.infer<typeof GetSharedStepInput>;
 export type GetSharedStepsInputType = z.infer<typeof GetSharedStepsInput>;
 export type AddSharedStepInputType = z.infer<typeof AddSharedStepInput>;
@@ -89,7 +89,7 @@ export type DeleteSharedStepInputType = z.infer<typeof DeleteSharedStepInput>;
 export type SharedStepItemType = z.infer<typeof sharedStepItemSchema>;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions - migrated from types.ts
 // -----------------------------------------------
 
 /**

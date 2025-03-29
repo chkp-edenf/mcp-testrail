@@ -1,30 +1,30 @@
 import { z } from "zod";
 
-// ユーザー取得用のスキーマ（引数なし）
+// Schema for retrieving all users (no parameters needed)
 export const getUsersSchema = {};
 
-// ユーザーIDによる取得用のスキーマ
+// Schema for retrieving a user by ID
 export const getUserSchema = {
 	userId: z.number().describe("TestRail User ID"),
 };
 
-// メールアドレスによるユーザー取得用のスキーマ
+// Schema for retrieving a user by email address
 export const getUserByEmailSchema = {
 	email: z.string().email().describe("Email address of the user"),
 };
 
-// 各スキーマからZodオブジェクトを作成
+// Create Zod objects from each schema
 export const GetUsersInput = z.object(getUsersSchema);
 export const GetUserInput = z.object(getUserSchema);
 export const GetUserByEmailInput = z.object(getUserByEmailSchema);
 
-// 入力型を抽出
+// Extract input types
 export type GetUsersInputType = z.infer<typeof GetUsersInput>;
 export type GetUserInputType = z.infer<typeof GetUserInput>;
 export type GetUserByEmailInputType = z.infer<typeof GetUserByEmailInput>;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions - migrated from types.ts
 // -----------------------------------------------
 
 /**

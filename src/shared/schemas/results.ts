@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// テスト結果取得のためのスキーマ
+// Schema for retrieving test results
 export const getResultsSchema = {
 	testId: z.number().describe("TestRail Test ID"),
 	limit: z
@@ -18,7 +18,7 @@ export const getResultsSchema = {
 	defectsFilter: z.string().optional().describe("Filter by defect ID"),
 };
 
-// ケース別テスト結果取得のためのスキーマ
+// Schema for retrieving test results for a specific case
 export const getResultsForCaseSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 	caseId: z.number().describe("TestRail Case ID"),
@@ -37,7 +37,7 @@ export const getResultsForCaseSchema = {
 	defectsFilter: z.string().optional().describe("Filter by defect ID"),
 };
 
-// テスト実行別結果取得のためのスキーマ
+// Schema for retrieving test results for a run
 export const getResultsForRunSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 	limit: z
@@ -55,7 +55,7 @@ export const getResultsForRunSchema = {
 	defectsFilter: z.string().optional().describe("Filter by defect ID"),
 };
 
-// 単一テスト結果追加のためのスキーマ
+// Schema for adding a test result
 export const addResultSchema = {
 	testId: z.number().describe("TestRail Test ID"),
 	statusId: z
@@ -72,7 +72,7 @@ export const addResultSchema = {
 		.describe("Time spent testing (e.g., '30s', '2m 30s')"),
 };
 
-// テスト結果追加のためのスキーマ
+// Schema for adding a test result for a specific case
 export const addResultForCaseSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 	caseId: z.number().describe("TestRail Case ID"),
@@ -90,7 +90,7 @@ export const addResultForCaseSchema = {
 		.describe("Time spent testing (e.g., '30s', '2m 30s')"),
 };
 
-// 複数テスト結果追加のためのスキーマ
+// Schema for adding multiple test results
 export const addResultsSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 	results: z
@@ -122,7 +122,7 @@ export const addResultsSchema = {
 		.describe("Array of test results to add"),
 };
 
-// 複数テストケース結果追加のためのスキーマ
+// Schema for adding multiple test results for cases
 export const addResultsForCasesSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 	results: z
@@ -154,7 +154,7 @@ export const addResultsForCasesSchema = {
 		.describe("Array of test case results to add"),
 };
 
-// 各スキーマからZodオブジェクトを作成
+// Create Zod objects from each schema
 export const GetResultsInput = z.object(getResultsSchema);
 export const GetResultsForCaseInput = z.object(getResultsForCaseSchema);
 export const GetResultsForRunInput = z.object(getResultsForRunSchema);
@@ -163,7 +163,7 @@ export const AddResultForCaseInput = z.object(addResultForCaseSchema);
 export const AddResultsInput = z.object(addResultsSchema);
 export const AddResultsForCasesInput = z.object(addResultsForCasesSchema);
 
-// 入力型を抽出
+// Extract input types
 export type GetResultsInputType = z.infer<typeof GetResultsInput>;
 export type GetResultsForCaseInputType = z.infer<typeof GetResultsForCaseInput>;
 export type GetResultsForRunInputType = z.infer<typeof GetResultsForRunInput>;
@@ -175,7 +175,7 @@ export type AddResultsForCasesInputType = z.infer<
 >;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions - migrated from types.ts
 // -----------------------------------------------
 
 /**

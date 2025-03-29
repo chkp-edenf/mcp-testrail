@@ -1,117 +1,105 @@
 import { z } from "zod";
 
-// 特定のテストケース取得のためのスキーマ
-export const getTestCaseSchema = {
-	caseId: z.number().describe("TestRail Test Case ID"),
-};
+// Schema for retrieving a specific test case
+export const getTestCaseSchema = z.object({
+	caseId: z.number().describe("TestRail Case ID"),
+});
 
-// プロジェクト内のテストケース一覧取得のためのスキーマ
-export const getTestCasesSchema = {
+// Schema for retrieving all test cases in a project
+export const getTestCasesSchema = z.object({
 	projectId: z.number().describe("TestRail Project ID"),
-};
+});
 
-// テストケース追加のためのスキーマ
-export const addTestCaseSchema = {
+// Schema for adding a test case
+export const addTestCaseSchema = z.object({
 	sectionId: z.number().describe("TestRail Section ID"),
 	title: z.string().describe("Test case title"),
 	typeId: z.number().optional().describe("Test case type ID"),
 	priorityId: z.number().optional().describe("Test case priority ID"),
-	estimate: z
-		.string()
-		.optional()
-		.describe("Time estimate (e.g., '30s', '1m 45s', '3h')"),
-	milestoneId: z.number().optional().describe("Milestone ID"),
-	refs: z.string().optional().describe("Reference/requirement IDs"),
+	estimate: z.string().optional().describe("Test case estimated time"),
+	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
+	refs: z.string().optional().describe("Test case references"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
-};
+});
 
-// テストケース更新のためのスキーマ
-export const updateTestCaseSchema = {
-	caseId: z.number().describe("TestRail Test Case ID"),
+// Schema for updating a test case
+export const updateTestCaseSchema = z.object({
+	caseId: z.number().describe("TestRail Case ID"),
 	title: z.string().optional().describe("Test case title"),
 	typeId: z.number().optional().describe("Test case type ID"),
 	priorityId: z.number().optional().describe("Test case priority ID"),
-	estimate: z
-		.string()
-		.optional()
-		.describe("Time estimate (e.g., '30s', '1m 45s', '3h')"),
-	milestoneId: z.number().optional().describe("Milestone ID"),
-	refs: z.string().optional().describe("Reference/requirement IDs"),
+	estimate: z.string().optional().describe("Test case estimated time"),
+	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
+	refs: z.string().optional().describe("Test case references"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
-};
+});
 
-// テストケース削除のためのスキーマ
-export const deleteTestCaseSchema = {
-	caseId: z.number().describe("TestRail Test Case ID"),
-};
+// Schema for deleting a test case
+export const deleteTestCaseSchema = z.object({
+	caseId: z.number().describe("TestRail Case ID"),
+});
 
-// テストケースタイプ取得のためのスキーマ
-export const getTestCaseTypesSchema = {
-	// 特にパラメータの必要がないため空オブジェクト
-};
+// Schema for retrieving test case types
+export const getTestCaseTypesSchema = z.object({});
 
-// テストケースフィールド取得のためのスキーマ
-export const getTestCaseFieldsSchema = {
-	// 特にパラメータの必要がないため空オブジェクト
-};
+// Schema for retrieving test case fields
+export const getTestCaseFieldsSchema = z.object({});
 
-// テストケースをセクションにコピーするためのスキーマ
-export const copyTestCasesToSectionSchema = {
+// Schema for copying test cases to a section
+export const copyTestCasesToSectionSchema = z.object({
+	caseIds: z.array(z.number()).describe("Array of TestRail Case IDs"),
 	sectionId: z.number().describe("Target TestRail Section ID"),
-	caseIds: z.array(z.number()).describe("Array of Test Case IDs to copy"),
-};
+});
 
-// テストケースをセクションに移動するためのスキーマ
-export const moveTestCasesToSectionSchema = {
+// Schema for moving test cases to a section
+export const moveTestCasesToSectionSchema = z.object({
+	caseIds: z.array(z.number()).describe("Array of TestRail Case IDs"),
 	sectionId: z.number().describe("Target TestRail Section ID"),
-	caseIds: z.array(z.number()).describe("Array of Test Case IDs to move"),
-};
+});
 
-// テストケース履歴取得のためのスキーマ
-export const getTestCaseHistorySchema = {
-	caseId: z.number().describe("TestRail Test Case ID"),
-};
+// Schema for retrieving test case history
+export const getTestCaseHistorySchema = z.object({
+	caseId: z.number().describe("TestRail Case ID"),
+});
 
-// 各スキーマからZodオブジェクトを作成
-export const GetTestCaseInput = z.object(getTestCaseSchema);
-export const GetTestCasesInput = z.object(getTestCasesSchema);
-export const AddTestCaseInput = z.object(addTestCaseSchema);
-export const UpdateTestCaseInput = z.object(updateTestCaseSchema);
-export const DeleteTestCaseInput = z.object(deleteTestCaseSchema);
-export const GetTestCaseTypesInput = z.object(getTestCaseTypesSchema);
-export const GetTestCaseFieldsInput = z.object(getTestCaseFieldsSchema);
-export const CopyTestCasesToSectionInput = z.object(
-	copyTestCasesToSectionSchema,
-);
-export const MoveTestCasesToSectionInput = z.object(
-	moveTestCasesToSectionSchema,
-);
-export const GetTestCaseHistoryInput = z.object(getTestCaseHistorySchema);
+// Create Zod objects from each schema
+export const getTestCaseInputSchema = getTestCaseSchema;
+export const getTestCasesInputSchema = getTestCasesSchema;
+export const addTestCaseInputSchema = addTestCaseSchema;
+export const updateTestCaseInputSchema = updateTestCaseSchema;
+export const deleteTestCaseInputSchema = deleteTestCaseSchema;
+export const getTestCaseTypesInputSchema = getTestCaseTypesSchema;
+export const getTestCaseFieldsInputSchema = getTestCaseFieldsSchema;
+export const copyTestCasesToSectionInputSchema = copyTestCasesToSectionSchema;
+export const moveTestCasesToSectionInputSchema = moveTestCasesToSectionSchema;
+export const getTestCaseHistoryInputSchema = getTestCaseHistorySchema;
 
-// 入力型を抽出
-export type GetTestCaseInputType = z.infer<typeof GetTestCaseInput>;
-export type GetTestCasesInputType = z.infer<typeof GetTestCasesInput>;
-export type AddTestCaseInputType = z.infer<typeof AddTestCaseInput>;
-export type UpdateTestCaseInputType = z.infer<typeof UpdateTestCaseInput>;
-export type DeleteTestCaseInputType = z.infer<typeof DeleteTestCaseInput>;
-export type GetTestCaseTypesInputType = z.infer<typeof GetTestCaseTypesInput>;
-export type GetTestCaseFieldsInputType = z.infer<typeof GetTestCaseFieldsInput>;
-export type CopyTestCasesToSectionInputType = z.infer<
-	typeof CopyTestCasesToSectionInput
+// Extract input types
+export type GetTestCaseInput = z.infer<typeof getTestCaseInputSchema>;
+export type GetTestCasesInput = z.infer<typeof getTestCasesInputSchema>;
+export type AddTestCaseInput = z.infer<typeof addTestCaseInputSchema>;
+export type UpdateTestCaseInput = z.infer<typeof updateTestCaseInputSchema>;
+export type DeleteTestCaseInput = z.infer<typeof deleteTestCaseInputSchema>;
+export type GetTestCaseTypesInput = z.infer<typeof getTestCaseTypesInputSchema>;
+export type GetTestCaseFieldsInput = z.infer<
+	typeof getTestCaseFieldsInputSchema
 >;
-export type MoveTestCasesToSectionInputType = z.infer<
-	typeof MoveTestCasesToSectionInput
+export type CopyTestCasesToSectionInput = z.infer<
+	typeof copyTestCasesToSectionInputSchema
 >;
-export type GetTestCaseHistoryInputType = z.infer<
-	typeof GetTestCaseHistoryInput
+export type MoveTestCasesToSectionInput = z.infer<
+	typeof moveTestCasesToSectionInputSchema
+>;
+export type GetTestCaseHistoryInput = z.infer<
+	typeof getTestCaseHistoryInputSchema
 >;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions migrated from types.ts
 // -----------------------------------------------
 
 /**
@@ -133,21 +121,21 @@ export const TestRailCaseSchema = z.object({
 	template_id: z.number(),
 	type_id: z.number(),
 	priority_id: z.number(),
-	milestone_id: z.number().optional(),
-	refs: z.string().optional(),
+	milestone_id: z.number().nullable(),
+	refs: z.string().nullable(),
 	created_by: z.number(),
 	created_on: z.number(),
-	updated_by: z.number(),
-	updated_on: z.number(),
-	estimate: z.string().optional(),
-	estimate_forecast: z.string().optional(),
+	updated_by: z.number().nullable(),
+	updated_on: z.number().nullable(),
+	estimate: z.string().nullable(),
+	estimate_forecast: z.string().nullable(),
 	suite_id: z.number(),
-	custom_preconds: z.string().optional(),
-	custom_steps: z.string().optional(),
-	custom_expected: z.string().optional(),
-	custom_steps_separated: z.array(TestRailStepSchema).optional(),
-	custom_mission: z.string().optional(),
-	custom_goals: z.string().optional(),
+	display_order: z.number(),
+	is_deleted: z.boolean().default(false).optional(),
+	status_id: z.number().optional(),
+	custom_preconds: z.string().nullable().optional(),
+	custom_steps: z.string().nullable().optional(),
+	custom_expected: z.string().nullable().optional(),
 });
 export type TestRailCase = z.infer<typeof TestRailCaseSchema>;
 

@@ -1,16 +1,16 @@
 import { z } from "zod";
 
-// プロジェクト内のマイルストーン一覧取得のためのスキーマ
+// Schema for retrieving all milestones in a project
 export const getMilestonesSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 };
 
-// 特定のマイルストーン取得のためのスキーマ
+// Schema for retrieving a specific milestone
 export const getMilestoneSchema = {
 	milestoneId: z.number().describe("TestRail Milestone ID"),
 };
 
-// マイルストーン追加のためのスキーマ
+// Schema for adding a milestone
 export const addMilestoneSchema = {
 	projectId: z.number().describe("TestRail Project ID"),
 	name: z.string().describe("Milestone name (required)"),
@@ -32,7 +32,7 @@ export const addMilestoneSchema = {
 		.describe("Started status of the milestone"),
 };
 
-// マイルストーン更新のためのスキーマ
+// Schema for updating a milestone
 export const updateMilestoneSchema = {
 	milestoneId: z.number().describe("TestRail Milestone ID"),
 	name: z.string().optional().describe("Milestone name"),
@@ -54,19 +54,19 @@ export const updateMilestoneSchema = {
 		.describe("Started status of the milestone"),
 };
 
-// マイルストーン削除のためのスキーマ
+// Schema for deleting a milestone
 export const deleteMilestoneSchema = {
 	milestoneId: z.number().describe("TestRail Milestone ID"),
 };
 
-// 各スキーマからZodオブジェクトを作成
+// Create Zod objects from each schema
 export const GetMilestonesInput = z.object(getMilestonesSchema);
 export const GetMilestoneInput = z.object(getMilestoneSchema);
 export const AddMilestoneInput = z.object(addMilestoneSchema);
 export const UpdateMilestoneInput = z.object(updateMilestoneSchema);
 export const DeleteMilestoneInput = z.object(deleteMilestoneSchema);
 
-// 入力型を抽出
+// Extract input types
 export type GetMilestonesInputType = z.infer<typeof GetMilestonesInput>;
 export type GetMilestoneInputType = z.infer<typeof GetMilestoneInput>;
 export type AddMilestoneInputType = z.infer<typeof AddMilestoneInput>;
@@ -74,7 +74,7 @@ export type UpdateMilestoneInputType = z.infer<typeof UpdateMilestoneInput>;
 export type DeleteMilestoneInputType = z.infer<typeof DeleteMilestoneInput>;
 
 // -----------------------------------------------
-// レスポンススキーマ定義 - types.tsからの移行
+// Response schema definitions - migrated from types.ts
 // -----------------------------------------------
 
 /**

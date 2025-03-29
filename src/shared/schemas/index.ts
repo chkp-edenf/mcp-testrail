@@ -1,35 +1,35 @@
-// スキーマを一元管理するインデックスファイル
-// 新しいスキーマを追加したらここでエクスポートする
+// Index file for centralized schema management
+// Export new schemas when added
 
-// 共通スキーマとタイプ
+// Common schemas and types
 export * from "./common.js";
 
-// テスト結果関連スキーマ
+// Test result related schemas
 export * from "./results.js";
 
-// プロジェクト関連スキーマ
+// Project related schemas
 export * from "./projects.js";
 
-// テストケース関連スキーマ
+// Test case related schemas
 export * from "./cases.js";
 
-// セクション関連スキーマ
+// Section related schemas
 export * from "./sections.js";
 
-// テスト実行関連スキーマ
+// Test run related schemas
 export * from "./runs.js";
 
-// 共有ステップ関連スキーマ
+// Shared steps related schemas
 export * from "./sharedSteps.js";
 
-// マイルストーン関連スキーマ
+// Milestone related schemas
 export * from "./milestones.js";
 
-// テストスイート関連スキーマ
+// Test suite related schemas
 export * from "./suites.js";
 
-// ユーザー関連スキーマ
+// User related schemas
 export * from "./users.js";
 
-// テストプラン関連スキーマ
+// Test plan related schemas
 export * from "./plans.js";

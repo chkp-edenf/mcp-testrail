@@ -80,8 +80,8 @@ export const startServer = async () => {
 	});
 
 	// Start the server
-	app.listen(3000, () => {
+	app.listen(8080, () => {
 		console.log("Server started successfully.");
-		console.log("Server is running on SSE at http://localhost:3000/sse");
+		console.log("Server is running on SSE at http://localhost:8080/sse");
 	});
 };

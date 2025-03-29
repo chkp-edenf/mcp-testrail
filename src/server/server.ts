@@ -4,9 +4,8 @@ import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import "dotenv/config";
 import { TestRailClient, TestRailClientConfig } from "../client/api/index.js";
 import { registerAllTools } from "./api/index.js";
-import { registerResourceTemplates } from "./templates.js";
 
-// TestRail設定の検証
+// Validate TestRail configuration
 if (
 	!process.env.TESTRAIL_URL ||
 	!process.env.TESTRAIL_USERNAME ||
@@ -17,7 +16,7 @@ if (
 	);
 }
 
-// URL形式の修正: https://example.testrail.com/index.php?/
+// Correct URL format: https://example.testrail.com/index.php?/
 const url = process.env.TESTRAIL_URL;
 const baseURL = url.endsWith("/index.php?/")
 	? url
@@ -25,7 +24,7 @@ const baseURL = url.endsWith("/index.php?/")
 		? `${url}index.php?/`
 		: `${url}/index.php?/`;
 
-// TestRailクライアント設定
+// TestRail client configuration
 const testRailConfig: TestRailClientConfig = {
 	baseURL: baseURL,
 	auth: {
@@ -34,32 +33,29 @@ const testRailConfig: TestRailClientConfig = {
 	},
 };
 
-// TestRailクライアントの初期化
+// Initialize TestRail client
 const testRailClient = new TestRailClient(testRailConfig);
 
-// McpServerの作成
+// Create McpServer
 const server = new McpServer({
 	name: "TestRail MCP Server",
 	version: "1.0.0",
 });
 
-// トランスポート管理用のマップ
+// Map for transport management
 const transports: { [sessionId: string]: SSEServerTransport } = {};
 
-// サーバーの起動関数
+// Server startup function
 export const startServer = async () => {
 	console.log("Starting TestRail MCP Server...");
 
-	// Expressアプリの作成
+	// Create Express app
 	const app = express();
 
-	// すべてのAPIツールを登録
+	// Register all API tools
 	registerAllTools(server, testRailClient);
 
-	// リソーステンプレートを登録
-	registerResourceTemplates(server, testRailClient);
-
-	// SSEエンドポイントの設定
+	// SSE endpoint configuration
 	app.get("/sse", async (_, res) => {
 		const transport = new SSEServerTransport("/messages", res);
 		transports[transport.sessionId] = transport;
@@ -71,7 +67,7 @@ export const startServer = async () => {
 		await server.connect(transport);
 	});
 
-	// メッセージ処理エンドポイントの設定
+	// Message handling endpoint configuration
 	app.post("/messages", async (req, res) => {
 		const sessionId = req.query.sessionId as string;
 		const transport = transports[sessionId];
@@ -79,15 +75,13 @@ export const startServer = async () => {
 		if (transport) {
 			await transport.handlePostMessage(req, res);
 		} else {
-			res
-				.status(400)
-				.send("セッションIDに対応するトランスポートが見つかりません");
+			res.status(400).send("No transport found for the session ID");
 		}
 	});
 
-	// サーバーの起動
-	app.listen(3000, () => {
+	// Start the server
+	app.listen(8080, () => {
 		console.log("Server started successfully.");
-		console.log("server is running on SSE at http://localhost:3000/sse");
+		console.log("Server is running on SSE at http://localhost:8080/sse");
 	});
 };

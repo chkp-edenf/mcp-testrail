@@ -40,6 +40,25 @@ To use the TestRail MCP server in Cursor with Claude:
 
 Once connected, you'll see all the available tools as shown in the image above.
 
+Or, you can connect this MCP server by setting like the below.
+
+```json
+{
+  "mcpServers": {
+    "TestRail": {
+      "type": "command",
+      "command": "${YOUR_NODE_PATH}/node",
+      "args": ["${YOUR_PROJECT_PATH}/mcp-testrail/dist/stdio.js"],
+      "env": {
+        "TESTRAIL_URL": "https://example.testrail.io",
+        "TESTRAIL_USERNAME": "hoge@gmail.com",
+        "TESTRAIL_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
 ### Calling Tools from MCP Clients
 
 When using an MCP-supported client like Claude in Cursor, you can call the TestRail MCP tools directly during your conversation. For each tool, you'll need to provide the appropriate parameters as defined in the TestRail API.

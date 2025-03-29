@@ -101,7 +101,9 @@ export const TestRailSharedStepItemSchema = z.object({
 	expected: z.string().nullable().optional(),
 	refs: z.string().nullable().optional(),
 });
-export type TestRailSharedStepItem = z.infer<typeof TestRailSharedStepItemSchema>;
+export type TestRailSharedStepItem = z.infer<
+	typeof TestRailSharedStepItemSchema
+>;
 
 /**
  * TestRail API Response for Shared Step

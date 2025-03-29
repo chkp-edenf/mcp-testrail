@@ -55,6 +55,9 @@ export const PaginatedResponseSchema = z.object({
 	}),
 	items: z.array(z.any()),
 });
-export type PaginatedResponse<T> = Omit<z.infer<typeof PaginatedResponseSchema>, 'items'> & {
+export type PaginatedResponse<T> = Omit<
+	z.infer<typeof PaginatedResponseSchema>,
+	"items"
+> & {
 	items: T[];
-}; 
+};

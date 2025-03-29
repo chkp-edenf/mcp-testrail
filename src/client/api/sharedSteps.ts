@@ -1,12 +1,12 @@
 import { BaseTestRailClient } from "./baseClient.js";
-import { 
-	TestRailSharedStep, 
+import {
+	TestRailSharedStep,
 	TestRailSharedStepItem,
 	GetSharedStepInputType,
 	GetSharedStepsInputType,
 	AddSharedStepInputType,
 	UpdateSharedStepInputType,
-	DeleteSharedStepInputType
+	DeleteSharedStepInputType,
 } from "../../shared/schemas/sharedSteps.js";
 import { handleApiError } from "./utils.js";
 
@@ -16,7 +16,9 @@ export class SharedStepsClient extends BaseTestRailClient {
 	 * @param sharedStepId The ID of the shared step
 	 * @returns Promise with shared step details
 	 */
-	async getSharedStep(sharedStepId: GetSharedStepInputType["sharedStepId"]): Promise<TestRailSharedStep> {
+	async getSharedStep(
+		sharedStepId: GetSharedStepInputType["sharedStepId"],
+	): Promise<TestRailSharedStep> {
 		try {
 			const response = await this.client.get<TestRailSharedStep>(
 				`/api/v2/get_shared_step/${sharedStepId}`,

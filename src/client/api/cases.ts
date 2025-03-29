@@ -4,7 +4,7 @@ import {
 	TestRailCase,
 	TestRailCaseField,
 	TestRailCaseType,
-	TestRailCaseHistory
+	TestRailCaseHistory,
 } from "../../shared/schemas/cases.js";
 import { handleApiError } from "./utils.js";
 import {

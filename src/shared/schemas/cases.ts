@@ -178,7 +178,9 @@ export const TestRailCaseFieldConfigSchema = z.object({
 		items: z.string(),
 	}),
 });
-export type TestRailCaseFieldConfig = z.infer<typeof TestRailCaseFieldConfigSchema>;
+export type TestRailCaseFieldConfig = z.infer<
+	typeof TestRailCaseFieldConfigSchema
+>;
 
 /**
  * TestRail API Response for Case Field
@@ -207,10 +209,12 @@ export const TestRailCaseHistorySchema = z.object({
 	case_id: z.number(),
 	user_id: z.number(),
 	timestamp: z.number(),
-	changes: z.array(z.object({
-		field: z.string(),
-		old_value: z.string().nullable(),
-		new_value: z.string().nullable(),
-	})),
+	changes: z.array(
+		z.object({
+			field: z.string(),
+			old_value: z.string().nullable(),
+			new_value: z.string().nullable(),
+		}),
+	),
 });
 export type TestRailCaseHistory = z.infer<typeof TestRailCaseHistorySchema>;

@@ -121,17 +121,9 @@ export class ResultsClient extends BaseTestRailClient {
 	): Promise<TestRailResult> {
 		try {
 			// Convert camelCase to snake_case for API
-			const apiData: Record<string, unknown> = {};
-			if (data.statusId) apiData.status_id = data.statusId;
-			if (data.comment) apiData.comment = data.comment;
-			if (data.version) apiData.version = data.version;
-			if (data.elapsed) apiData.elapsed = data.elapsed;
-			if (data.defects) apiData.defects = data.defects;
-			if (data.assignedtoId) apiData.assignedto_id = data.assignedtoId;
-
 			const response: AxiosResponse<TestRailResult> = await this.client.post(
 				`/api/v2/add_result_for_case/${runId}/${caseId}`,
-				apiData,
+				data,
 			);
 			return response.data;
 		} catch (error) {

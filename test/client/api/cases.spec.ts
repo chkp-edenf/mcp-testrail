@@ -172,10 +172,14 @@ describe('Cases API', () => {
     mockAxiosInstance.get.mockResolvedValue({ data: mockCases });
     
     // Test method
-    const result = await client.cases.getCases(1);
+    const result = await client.cases.getCases(1, 1);  // projectId: 1, suiteId: 1
     
     // Verify axios get was called correctly
-    expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_cases/1', { params: undefined });
+    expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_cases/1', { 
+      params: {
+        suite_id: 1
+      }
+    });
     
     // Verify result
     expect(result).toEqual(mockCases);

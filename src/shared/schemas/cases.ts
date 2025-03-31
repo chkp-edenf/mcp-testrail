@@ -8,6 +8,7 @@ export const getTestCaseSchema = z.object({
 // Schema for retrieving all test cases in a project
 export const getTestCasesSchema = z.object({
 	projectId: z.number().describe("TestRail Project ID"),
+	suiteId: z.number().describe("TestRail Suite ID"),
 });
 
 // Schema for adding a test case

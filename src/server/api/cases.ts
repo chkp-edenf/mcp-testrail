@@ -56,11 +56,11 @@ export function registerCaseTools(
 	// Get all test cases for a project
 	server.tool(
 		"getCases",
-		{ projectId: getTestCasesSchema.shape.projectId },
+		{ projectId: getTestCasesSchema.shape.projectId, suiteId: getTestCasesSchema.shape.suiteId },
 		async (args, extra) => {
 			try {
-				const { projectId } = args;
-				const testCases = await testRailClient.cases.getCases(projectId, {});
+				const { projectId, suiteId } = args;
+				const testCases = await testRailClient.cases.getCases(projectId, suiteId);
 				const successResponse = createSuccessResponse(
 					"Test cases retrieved successfully",
 					{

@@ -38,17 +38,24 @@ export class CasesClient extends BaseTestRailClient {
 	/**
 	 * Gets test cases for a specific project, suite, or section
 	 * @param projectId The ID of the project
-	 * @param filters Optional filter parameters including suite_id, section_id
+	 * @param suiteId The ID of the test suite
+	 * @param filters Optional filter parameters including section_id
 	 * @returns Promise with array of test cases
 	 */
 	async getCases(
 		projectId: GetTestCasesInput["projectId"],
+		suiteId: number,
 		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailCase[]> {
 		try {
 			const response: AxiosResponse<TestRailCase[]> = await this.client.get(
 				`/api/v2/get_cases/${projectId}`,
-				{ params: filters },
+				{
+					params: {
+						suite_id: suiteId,
+						...filters,
+					},
+				},
 			);
 			return response.data;
 		} catch (error) {

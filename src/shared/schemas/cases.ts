@@ -67,6 +67,22 @@ export const getTestCaseHistorySchema = z.object({
 	caseId: z.number().describe("TestRail Case ID"),
 });
 
+// Schema for updating multiple test cases
+export const updateTestCasesSchema = z.object({
+	projectId: z.number().describe("TestRail Project ID"),
+	suiteId: z.number().describe("TestRail Suite ID"),
+	caseIds: z.array(z.number()).describe("Array of TestRail Case IDs"),
+	title: z.string().optional().describe("Test case title"),
+	typeId: z.number().optional().describe("Test case type ID"),
+	priorityId: z.number().optional().describe("Test case priority ID"),
+	estimate: z.string().optional().describe("Test case estimated time"),
+	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
+	refs: z.string().optional().describe("Test case references"),
+	customPrerequisites: z.string().optional().describe("Prerequisites"),
+	customSteps: z.string().optional().describe("Test case steps"),
+	customExpected: z.string().optional().describe("Expected results"),
+});
+
 // Create Zod objects from each schema
 export const getTestCaseInputSchema = getTestCaseSchema;
 export const getTestCasesInputSchema = getTestCasesSchema;
@@ -78,6 +94,7 @@ export const getTestCaseFieldsInputSchema = getTestCaseFieldsSchema;
 export const copyTestCasesToSectionInputSchema = copyTestCasesToSectionSchema;
 export const moveTestCasesToSectionInputSchema = moveTestCasesToSectionSchema;
 export const getTestCaseHistoryInputSchema = getTestCaseHistorySchema;
+export const updateTestCasesInputSchema = updateTestCasesSchema;
 
 // Extract input types
 export type GetTestCaseInput = z.infer<typeof getTestCaseInputSchema>;
@@ -98,6 +115,7 @@ export type MoveTestCasesToSectionInput = z.infer<
 export type GetTestCaseHistoryInput = z.infer<
 	typeof getTestCaseHistoryInputSchema
 >;
+export type UpdateTestCasesInput = z.infer<typeof updateTestCasesInputSchema>;
 
 // -----------------------------------------------
 // Response schema definitions migrated from types.ts

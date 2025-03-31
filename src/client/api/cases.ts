@@ -234,15 +234,12 @@ export class CasesClient extends BaseTestRailClient {
 	 */
 	async updateCases(
 		projectId: GetTestCasesInput["projectId"],
-		suiteId: number | null,
+		suiteId: number,
 		data: Record<string, unknown>,
 		caseIds: UpdateTestCaseInput["caseId"][],
 	): Promise<void> {
 		try {
-			const endpoint = suiteId
-				? `/api/v2/update_cases/${projectId}?suite_id=${suiteId}`
-				: `/api/v2/update_cases/${projectId}`;
-
+			const endpoint = `/api/v2/update_cases/${projectId}?suite_id=${suiteId}`;
 			await this.client.post(endpoint, { ...data, case_ids: caseIds });
 		} catch (error) {
 			throw handleApiError(error, "Failed to update test cases");
@@ -257,14 +254,11 @@ export class CasesClient extends BaseTestRailClient {
 	 */
 	async deleteCases(
 		projectId: GetTestCasesInput["projectId"],
-		suiteId: number | null,
+		suiteId: number,
 		caseIds: DeleteTestCaseInput["caseId"][],
 	): Promise<void> {
 		try {
-			const endpoint = suiteId
-				? `/api/v2/delete_cases/${projectId}?suite_id=${suiteId}`
-				: `/api/v2/delete_cases/${projectId}`;
-
+			const endpoint = `/api/v2/delete_cases/${projectId}?suite_id=${suiteId}`;
 			await this.client.post(endpoint, { case_ids: caseIds });
 		} catch (error) {
 			throw handleApiError(error, "Failed to delete test cases");

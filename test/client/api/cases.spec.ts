@@ -241,29 +241,40 @@ describe('Cases API', () => {
   });
 
   it('updates multiple test cases', async () => {
-    // Mock successful operation
+    // Mock successful update (no response data)
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
-    // Update data
-    const updateData = {
-      priority_id: 4
+    // Test data
+    const caseData = {
+      title: 'Updated Test Case',
+      type_id: 2,
+      priority_id: 3
     };
+    const caseIds = [1, 2, 3];
     
     // Test method
-    await client.cases.updateCases(1, 2, updateData, [1, 2]);
+    await client.cases.updateCases(1, 1, caseData, caseIds);  // projectId: 1, suiteId: 1
     
     // Verify axios post was called correctly
-    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_cases/1?suite_id=2', { ...updateData, case_ids: [1, 2] });
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_cases/1?suite_id=1', {
+      ...caseData,
+      case_ids: caseIds
+    });
   });
 
   it('deletes multiple test cases', async () => {
-    // Mock successful operation
+    // Mock successful deletion (no response data)
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
+    // Test data
+    const caseIds = [1, 2, 3];
+    
     // Test method
-    await client.cases.deleteCases(1, 2, [1, 2]);
+    await client.cases.deleteCases(1, 1, caseIds);  // projectId: 1, suiteId: 1
     
     // Verify axios post was called correctly
-    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_cases/1?suite_id=2', { case_ids: [1, 2] });
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_cases/1?suite_id=1', {
+      case_ids: caseIds
+    });
   });
 }); 

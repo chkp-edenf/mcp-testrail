@@ -22,14 +22,14 @@ export function registerAllTools(
 ): void {
 	// Register tools for each resource type
 	registerProjectTools(server, testRailClient);
+	registerSuiteTools(server, testRailClient);
 	registerCaseTools(server, testRailClient);
 	registerSectionTools(server, testRailClient);
-	registerSuiteTools(server, testRailClient);
 	registerRunTools(server, testRailClient);
 	registerResultTools(server, testRailClient);
-	registerSharedStepTools(server, testRailClient);
-	registerMilestoneTools(server, testRailClient);
 	registerPlanTools(server, testRailClient);
+	registerMilestoneTools(server, testRailClient);
+	registerSharedStepTools(server, testRailClient);
 	registerUserTools(server, testRailClient);
 }
 

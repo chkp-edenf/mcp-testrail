@@ -12,6 +12,7 @@ import {
 	copyTestCasesToSectionSchema,
 	moveTestCasesToSectionSchema,
 	getTestCaseHistorySchema,
+	updateTestCasesSchema,
 } from "../../shared/schemas/cases.js";
 
 /**
@@ -56,11 +57,17 @@ export function registerCaseTools(
 	// Get all test cases for a project
 	server.tool(
 		"getCases",
-		{ projectId: getTestCasesSchema.shape.projectId },
+		{
+			projectId: getTestCasesSchema.shape.projectId,
+			suiteId: getTestCasesSchema.shape.suiteId,
+		},
 		async (args, extra) => {
 			try {
-				const { projectId } = args;
-				const testCases = await testRailClient.cases.getCases(projectId, {});
+				const { projectId, suiteId } = args;
+				const testCases = await testRailClient.cases.getCases(
+					projectId,
+					suiteId,
+				);
 				const successResponse = createSuccessResponse(
 					"Test cases retrieved successfully",
 					{
@@ -430,6 +437,117 @@ export function registerCaseTools(
 			} catch (error) {
 				const errorResponse = createErrorResponse(
 					`Error fetching history for test case ${args.caseId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
+
+	// Update multiple test cases
+	server.tool(
+		"updateCases",
+		{
+			projectId: updateTestCasesSchema.shape.projectId,
+			suiteId: updateTestCasesSchema.shape.suiteId,
+			caseIds: updateTestCasesSchema.shape.caseIds,
+			title: updateTestCasesSchema.shape.title,
+			typeId: updateTestCasesSchema.shape.typeId,
+			priorityId: updateTestCasesSchema.shape.priorityId,
+			estimate: updateTestCasesSchema.shape.estimate,
+			milestoneId: updateTestCasesSchema.shape.milestoneId,
+			refs: updateTestCasesSchema.shape.refs,
+			customPrerequisites: updateTestCasesSchema.shape.customPrerequisites,
+			customSteps: updateTestCasesSchema.shape.customSteps,
+			customExpected: updateTestCasesSchema.shape.customExpected,
+		},
+		async (args, extra) => {
+			try {
+				const {
+					projectId,
+					suiteId,
+					caseIds,
+					title,
+					typeId,
+					priorityId,
+					estimate,
+					milestoneId,
+					refs,
+					customPrerequisites,
+					customSteps,
+					customExpected,
+				} = args;
+
+				// Build update data
+				const data: Record<string, unknown> = {};
+
+				// Add title if specified
+				if (title) {
+					data.title = title;
+				}
+
+				// Add type ID if specified
+				if (typeId) {
+					data.type_id = typeId;
+				}
+
+				// Add priority ID if specified
+				if (priorityId) {
+					data.priority_id = priorityId;
+				}
+
+				// Add estimate if specified
+				if (estimate) {
+					data.estimate = estimate;
+				}
+
+				// Add milestone ID if specified
+				if (milestoneId) {
+					data.milestone_id = milestoneId;
+				}
+
+				// Add references if specified
+				if (refs) {
+					data.refs = refs;
+				}
+
+				// Add custom fields if specified
+				if (customPrerequisites) {
+					data.custom_preconds = customPrerequisites;
+				}
+				if (customSteps) {
+					data.custom_steps = customSteps;
+				}
+				if (customExpected) {
+					data.custom_expected = customExpected;
+				}
+
+				// Remove empty or undefined fields
+				for (const key of Object.keys(data)) {
+					const value = data[key];
+					if (value === undefined || value === null || value === "") {
+						delete data[key];
+					}
+				}
+
+				await testRailClient.cases.updateCases(
+					projectId,
+					suiteId,
+					data,
+					caseIds,
+				);
+				const successResponse = createSuccessResponse(
+					"Test cases updated successfully",
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error updating test cases for project ${args.projectId}`,
 					error,
 				);
 				return {

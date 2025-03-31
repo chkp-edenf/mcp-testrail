@@ -38,17 +38,24 @@ export class CasesClient extends BaseTestRailClient {
 	/**
 	 * Gets test cases for a specific project, suite, or section
 	 * @param projectId The ID of the project
-	 * @param filters Optional filter parameters including suite_id, section_id
+	 * @param suiteId The ID of the test suite
+	 * @param filters Optional filter parameters including section_id
 	 * @returns Promise with array of test cases
 	 */
 	async getCases(
 		projectId: GetTestCasesInput["projectId"],
+		suiteId: number,
 		filters?: Record<string, string | number | boolean | null | undefined>,
 	): Promise<TestRailCase[]> {
 		try {
 			const response: AxiosResponse<TestRailCase[]> = await this.client.get(
 				`/api/v2/get_cases/${projectId}`,
-				{ params: filters },
+				{
+					params: {
+						suite_id: suiteId,
+						...filters,
+					},
+				},
 			);
 			return response.data;
 		} catch (error) {
@@ -227,15 +234,12 @@ export class CasesClient extends BaseTestRailClient {
 	 */
 	async updateCases(
 		projectId: GetTestCasesInput["projectId"],
-		suiteId: number | null,
+		suiteId: number,
 		data: Record<string, unknown>,
 		caseIds: UpdateTestCaseInput["caseId"][],
 	): Promise<void> {
 		try {
-			const endpoint = suiteId
-				? `/api/v2/update_cases/${projectId}?suite_id=${suiteId}`
-				: `/api/v2/update_cases/${projectId}`;
-
+			const endpoint = `/api/v2/update_cases/${projectId}?suite_id=${suiteId}`;
 			await this.client.post(endpoint, { ...data, case_ids: caseIds });
 		} catch (error) {
 			throw handleApiError(error, "Failed to update test cases");
@@ -250,14 +254,11 @@ export class CasesClient extends BaseTestRailClient {
 	 */
 	async deleteCases(
 		projectId: GetTestCasesInput["projectId"],
-		suiteId: number | null,
+		suiteId: number,
 		caseIds: DeleteTestCaseInput["caseId"][],
 	): Promise<void> {
 		try {
-			const endpoint = suiteId
-				? `/api/v2/delete_cases/${projectId}?suite_id=${suiteId}`
-				: `/api/v2/delete_cases/${projectId}`;
-
+			const endpoint = `/api/v2/delete_cases/${projectId}?suite_id=${suiteId}`;
 			await this.client.post(endpoint, { case_ids: caseIds });
 		} catch (error) {
 			throw handleApiError(error, "Failed to delete test cases");

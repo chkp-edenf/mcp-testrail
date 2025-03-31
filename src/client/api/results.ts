@@ -45,7 +45,7 @@ export class ResultsClient extends BaseTestRailClient {
 	async getResultsForCase(
 		runId: GetResultsForCaseInputType["runId"],
 		caseId: GetResultsForCaseInputType["caseId"],
-		params?: Record<string, string | number | boolean | null | undefined>,
+		params?: Omit<GetResultsForCaseInputType, "runId" | "caseId">,
 	): Promise<TestRailResult[]> {
 		try {
 			const response: AxiosResponse<TestRailResult[]> = await this.client.get(
@@ -119,30 +119,19 @@ export class ResultsClient extends BaseTestRailClient {
 		caseId: AddResultForCaseInputType["caseId"],
 		data: Partial<Omit<AddResultForCaseInputType, "runId" | "caseId">>,
 	): Promise<TestRailResult> {
-		// TEMPORARILY COMMENTED OUT: add_result_for_case implementation
-		/*
 		try {
-			// Add debug log
-			console.log(
-				`Sending request to add result for case ${caseId} in run ${runId}`,
-			);
-
-			// Execute request
+			// Convert camelCase to snake_case for API
 			const response: AxiosResponse<TestRailResult> = await this.client.post(
 				`/api/v2/add_result_for_case/${runId}/${caseId}`,
 				data,
 			);
 			return response.data;
 		} catch (error) {
-			// Log error in more detail
-			console.error("Error adding result for case. Details:", error);
 			throw handleApiError(
 				error,
 				`Failed to add result for case ${caseId} in run ${runId}`,
 			);
 		}
-		*/
-		throw new Error("Method temporarily disabled");
 	}
 
 	/**
@@ -180,8 +169,6 @@ export class ResultsClient extends BaseTestRailClient {
 		runId: AddResultsForCasesInputType["runId"],
 		data: Record<string, unknown>,
 	): Promise<TestRailResult[]> {
-		// TEMPORARILY COMMENTED OUT: add_results_for_cases implementation
-		/*
 		try {
 			const response: AxiosResponse<TestRailResult[]> = await this.client.post(
 				`/api/v2/add_results_for_cases/${runId}`,
@@ -194,7 +181,5 @@ export class ResultsClient extends BaseTestRailClient {
 				`Failed to add results for cases in run ${runId}`,
 			);
 		}
-		*/
-		throw new Error("Method temporarily disabled");
 	}
 }

@@ -5,9 +5,7 @@ import {
 	getResultsSchema,
 	getResultsForCaseSchema,
 	getResultsForRunSchema,
-	addResultSchema,
 	addResultForCaseSchema,
-	addResultsSchema,
 	addResultsForCasesSchema,
 } from "../../shared/schemas/results.js";
 
@@ -117,71 +115,6 @@ export function registerResultTools(
 		},
 	);
 
-	// FIXME: Result addition tools are commented out due to type conversion issues
-	// If you want to fix these features, please review how numeric parameters are handled
-	/*
-	// Add a result for a test
-	server.tool(
-		"addResult",
-		addResultSchema,
-		async ({ testId, ...resultData }) => {
-			try {
-				// Prepare result data
-				const data: Record<string, unknown> = {};
-
-				// Add status ID if specified
-				if (resultData.statusId) {
-					data.status_id = resultData.statusId;
-				}
-
-				// Add comment if specified
-				if (resultData.comment) {
-					data.comment = resultData.comment;
-				}
-
-				// Add version if specified
-				if (resultData.version) {
-					data.version = resultData.version;
-				}
-
-				// Add elapsed time if specified
-				if (resultData.elapsed) {
-					data.elapsed = resultData.elapsed;
-				}
-
-				// Add defects if specified
-				if (resultData.defects) {
-					data.defects = resultData.defects;
-				}
-
-				// Add assignee ID if specified
-				if (resultData.assignedtoId) {
-					data.assignedto_id = resultData.assignedtoId;
-				}
-
-				const result = await testRailClient.results.addResult(testId, data);
-				const successResponse = createSuccessResponse(
-					"Result added successfully",
-					{
-						result,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error adding result for test ${testId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
-
 	// Add a result for a specific test case in a run
 	server.tool(
 		"addResultForCase",
@@ -246,76 +179,6 @@ export function registerResultTools(
 				};
 			}
 		},
-	);
-
-	// Add multiple test results
-	server.tool(
-		"addResults", 
-		addResultsSchema, 
-		async ({ runId, results }) => {
-			try {
-				// Prepare data to send to API
-				const data = {
-					results: results.map((result) => {
-						const resultData: Record<string, unknown> = {
-							test_id: result.testId,
-						};
-
-						// Add status ID if specified
-						if (result.statusId) {
-							resultData.status_id = result.statusId;
-						}
-
-						// Add comment if specified
-						if (result.comment) {
-							resultData.comment = result.comment;
-						}
-
-						// Add version if specified
-						if (result.version) {
-							resultData.version = result.version;
-						}
-
-						// Add elapsed time if specified
-						if (result.elapsed) {
-							resultData.elapsed = result.elapsed;
-						}
-
-						// Add defects if specified
-						if (result.defects) {
-							resultData.defects = result.defects;
-						}
-
-						// Add assignee ID if specified
-						if (result.assignedtoId) {
-							resultData.assignedto_id = result.assignedtoId;
-						}
-
-						return resultData;
-					}),
-				};
-
-				const addedResults = await testRailClient.results.addResults(runId, data);
-				const successResponse = createSuccessResponse(
-					"Results added successfully",
-					{
-						results: addedResults,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error adding results for run ${runId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		}
 	);
 
 	// Add results for multiple test cases
@@ -390,5 +253,4 @@ export function registerResultTools(
 			}
 		},
 	);
-	*/
 }

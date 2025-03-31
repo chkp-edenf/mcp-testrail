@@ -45,7 +45,7 @@ export class ResultsClient extends BaseTestRailClient {
 	async getResultsForCase(
 		runId: GetResultsForCaseInputType["runId"],
 		caseId: GetResultsForCaseInputType["caseId"],
-		params?: Record<string, string | number | boolean | null | undefined>,
+		params?: Omit<GetResultsForCaseInputType, "runId" | "caseId">,
 	): Promise<TestRailResult[]> {
 		try {
 			const response: AxiosResponse<TestRailResult[]> = await this.client.get(

@@ -26,7 +26,7 @@ The TestRail MCP server provides the following tools:
 To use the TestRail MCP server in Cursor with Claude:
 
 1. Start the server locally with `npm run start`
-  - Please run `npm run install` and `npm run build`, before you execute the command
+  - Please run `npm install` and `npm run build`, before you execute the command
   - Please set up your .env based on the .env.example file as a reference.
 2. The server will run on `http://localhost:8080/sse`
 3. In Cursor, navigate to the MCP Servers section and add the TestRail server
@@ -43,6 +43,7 @@ Once connected, you'll see all the available tools as shown in the image above.
 Or, you can connect this MCP server by setting like the below.
 
 ```json
+// Example for Claude Desktop
 {
   "mcpServers": {
     "TestRail": {
@@ -65,7 +66,17 @@ When using an MCP-supported client like Claude in Cursor, you can call the TestR
 
 From Cursor:
 
-![From Cursor](docs/images/fromCursor.png)
+```json
+// You can set ~/.cursor/mcp.json as below
+{
+  "mcpServers": {
+    "testrail": {
+      "type": "sse",
+      "url": "http://localhost:8080/sse"
+    }
+  }
+}
+```
 
 From Claude Desktop:
 

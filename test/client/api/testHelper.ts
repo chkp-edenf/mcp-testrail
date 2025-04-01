@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import axios from 'axios';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { TestRailClient } from '../../../src/client/api/index.js';
 import { TestRailClientConfig } from '../../../src/client/api/baseClient.js';
 
@@ -15,16 +15,29 @@ export function setupMocks() {
     put: vi.fn(),
     patch: vi.fn(),
     delete: vi.fn(),
+    request: vi.fn(),
     defaults: {
       headers: {
         common: {}
+      },
+      timeout: 30000
+    },
+    interceptors: {
+      request: {
+        use: vi.fn(),
+        eject: vi.fn(),
+        clear: vi.fn()
+      },
+      response: {
+        use: vi.fn((fn) => fn),
+        eject: vi.fn(),
+        clear: vi.fn()
       }
     }
-  };
+  } as unknown as AxiosInstance;
   
   // Setup axios mocks
-  // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-  (axios.create as any).mockReturnValue(mockAxiosInstance);
+  vi.mocked(axios.create).mockReturnValue(mockAxiosInstance);
   
   return mockAxiosInstance;
 }

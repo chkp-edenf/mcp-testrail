@@ -18,6 +18,12 @@ import {
 	GetTestCaseHistoryInput,
 } from "../../shared/schemas/cases.js";
 
+interface GetCasesParams {
+	limit?: number;
+	offset?: number;
+	[key: string]: string | number | boolean | null | undefined;
+}
+
 export class CasesClient extends BaseTestRailClient {
 	/**
 	 * Gets a specific test case by ID
@@ -36,24 +42,30 @@ export class CasesClient extends BaseTestRailClient {
 	}
 
 	/**
-	 * Gets test cases for a specific project, suite, or section
+	 * Gets test cases for a specific project and suite
 	 * @param projectId The ID of the project
 	 * @param suiteId The ID of the test suite
-	 * @param filters Optional filter parameters including section_id
+	 * @param params Optional parameters including pagination (limit, offset) and other filters
 	 * @returns Promise with array of test cases
 	 */
 	async getCases(
 		projectId: GetTestCasesInput["projectId"],
 		suiteId: number,
-		filters?: Record<string, string | number | boolean | null | undefined>,
+		params?: Partial<GetCasesParams>,
 	): Promise<TestRailCase[]> {
 		try {
+			const defaultParams = {
+				limit: 50,
+				offset: 0,
+				...params,
+			};
+
 			const response: AxiosResponse<TestRailCase[]> = await this.client.get(
 				`/api/v2/get_cases/${projectId}`,
 				{
 					params: {
 						suite_id: suiteId,
-						...filters,
+						...defaultParams,
 					},
 				},
 			);

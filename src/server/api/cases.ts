@@ -14,6 +14,7 @@ import {
 	getTestCaseHistorySchema,
 	updateTestCasesSchema,
 } from "../../shared/schemas/cases.js";
+import { z } from "zod";
 
 /**
  * Function to register test case-related API tools
@@ -60,18 +61,39 @@ export function registerCaseTools(
 		{
 			projectId: getTestCasesSchema.shape.projectId,
 			suiteId: getTestCasesSchema.shape.suiteId,
+			limit: z
+				.number()
+				.optional()
+				.default(50)
+				.describe("Number of cases to return per page"),
+			offset: z
+				.number()
+				.optional()
+				.default(0)
+				.describe("Offset for pagination"),
 		},
 		async (args, extra) => {
 			try {
-				const { projectId, suiteId } = args;
+				const { projectId, suiteId, limit = 50, offset = 0 } = args;
 				const testCases = await testRailClient.cases.getCases(
 					projectId,
 					suiteId,
+					{
+						suite_id: suiteId,
+						limit,
+						offset,
+					},
 				);
 				const successResponse = createSuccessResponse(
 					"Test cases retrieved successfully",
 					{
 						cases: testCases,
+						pagination: {
+							limit,
+							offset,
+							total: testCases.length,
+							hasMore: testCases.length === limit,
+						},
 					},
 				);
 				return {

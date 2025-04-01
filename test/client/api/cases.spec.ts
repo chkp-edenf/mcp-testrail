@@ -171,13 +171,15 @@ describe('Cases API', () => {
     ];
     mockAxiosInstance.get.mockResolvedValue({ data: mockCases });
     
-    // Test method
-    const result = await client.cases.getCases(1, 1);  // projectId: 1, suiteId: 1
+    // Test method with pagination parameters
+    const result = await client.cases.getCases(1, 1, { limit: 50, offset: 0 });  // projectId: 1, suiteId: 1, pagination
     
-    // Verify axios get was called correctly
+    // Verify axios get was called correctly with pagination parameters
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v2/get_cases/1', { 
       params: {
-        suite_id: 1
+        suite_id: 1,
+        limit: 50,
+        offset: 0
       }
     });
     

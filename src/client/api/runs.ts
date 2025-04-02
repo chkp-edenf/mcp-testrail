@@ -9,7 +9,6 @@ import {
 	AddRunInputType,
 	UpdateRunInputType,
 	CloseRunInputType,
-	DeleteRunInputType,
 } from "../../shared/schemas/runs.js";
 
 export class RunsClient extends BaseTestRailClient {
@@ -112,18 +111,6 @@ export class RunsClient extends BaseTestRailClient {
 			return response.data;
 		} catch (error) {
 			throw handleApiError(error, `Failed to close test run ${runId}`);
-		}
-	}
-
-	/**
-	 * Deletes a test run
-	 * @param runId The ID of the test run
-	 */
-	async deleteRun(runId: DeleteRunInputType["runId"]): Promise<void> {
-		try {
-			await this.client.post(`/api/v2/delete_run/${runId}`, {});
-		} catch (error) {
-			throw handleApiError(error, `Failed to delete test run ${runId}`);
 		}
 	}
 

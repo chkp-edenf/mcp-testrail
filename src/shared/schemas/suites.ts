@@ -24,24 +24,17 @@ export const updateSuiteSchema = z.object({
 	description: z.string().optional().describe("Description of the suite"),
 });
 
-// Schema for deleting a suite
-export const deleteSuiteSchema = z.object({
-	suiteId: z.number().describe("TestRail Suite ID"),
-});
-
 // Create Zod objects from each schema
 export const getSuitesInputSchema = getSuitesSchema;
 export const getSuiteInputSchema = getSuiteSchema;
 export const addSuiteInputSchema = addSuiteSchema;
 export const updateSuiteInputSchema = updateSuiteSchema;
-export const deleteSuiteInputSchema = deleteSuiteSchema;
 
 // Extract input types
 export type GetSuitesInput = z.infer<typeof getSuitesInputSchema>;
 export type GetSuiteInput = z.infer<typeof getSuiteInputSchema>;
 export type AddSuiteInput = z.infer<typeof addSuiteInputSchema>;
 export type UpdateSuiteInput = z.infer<typeof updateSuiteInputSchema>;
-export type DeleteSuiteInput = z.infer<typeof deleteSuiteInputSchema>;
 
 // -----------------------------------------------
 // Response schema definitions migrated from types.ts

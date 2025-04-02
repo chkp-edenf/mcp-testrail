@@ -13,6 +13,8 @@ import {
 	moveTestCasesToSectionSchema,
 	getTestCaseHistorySchema,
 	updateTestCasesSchema,
+	TestRailCase,
+	TestRailCaseSchema,
 } from "../../shared/schemas/cases.js";
 import { z } from "zod";
 
@@ -25,18 +27,78 @@ export function registerCaseTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
+	// Extract column names from TestRailCase type
+	type ColumnName = keyof TestRailCase;
+	const availableColumns = Object.keys(
+		TestRailCaseSchema.shape,
+	) as ColumnName[];
+
+	// Default columns that exclude large text fields
+	const defaultColumns: ColumnName[] = [
+		"id",
+		"title",
+		"section_id",
+		"template_id",
+		"type_id",
+		"priority_id",
+		"milestone_id",
+		"refs",
+		"estimate",
+		"suite_id",
+		"display_order",
+		"is_deleted",
+		"status_id",
+		"updated_on",
+		"created_on",
+		"created_by",
+		"updated_by",
+	];
+
 	// Get a specific test case
 	server.tool(
 		"getCase",
-		{ caseId: getTestCaseSchema.shape.caseId },
+		{
+			caseId: getTestCaseSchema.shape.caseId,
+			pickColumns: z
+				.array(z.enum(availableColumns as [string, ...string[]]))
+				.optional()
+				.default(defaultColumns)
+				.describe(
+					`Specific columns to include in the response. Available columns: ${availableColumns.join(", ")}. Default includes most fields except large text fields. Use empty array [] for all columns.`,
+				),
+		},
 		async (args, extra) => {
 			try {
-				const { caseId } = args;
+				const { caseId, pickColumns } = args;
 				const testCase = await testRailClient.cases.getCase(caseId);
+
+				let responseData: Partial<TestRailCase> = testCase;
+
+				// If pickColumns is provided and not empty, filter the columns
+				// Empty array means include all columns
+				if (pickColumns && pickColumns.length > 0) {
+					// Create filtered copy with only requested columns
+					const filtered: Partial<TestRailCase> = {
+						id: testCase.id,
+					};
+
+					// Add only the requested columns
+					for (const column of pickColumns) {
+						if (column in testCase && column !== "id") {
+							// Use type assertion more carefully
+							(filtered as Record<string, unknown>)[column] = (
+								testCase as Record<string, unknown>
+							)[column];
+						}
+					}
+
+					responseData = filtered;
+				}
+
 				const successResponse = createSuccessResponse(
 					"Test case retrieved successfully",
 					{
-						case: testCase,
+						case: responseData,
 					},
 				);
 				return {
@@ -73,10 +135,23 @@ export function registerCaseTools(
 				.optional()
 				.default(0)
 				.describe("Offset for pagination"),
+			pickColumns: z
+				.array(z.enum(availableColumns as [string, ...string[]]))
+				.optional()
+				.default(defaultColumns)
+				.describe(
+					`Specific columns to include in the response. Available columns: ${availableColumns.join(", ")}. Default includes most fields except large text fields. Use empty array [] for all columns.`,
+				),
 		},
 		async (args, extra) => {
 			try {
-				const { projectId, suiteId, limit = 50, offset = 0 } = args;
+				const {
+					projectId,
+					suiteId,
+					limit = 50,
+					offset = 0,
+					pickColumns,
+				} = args;
 				const testCases = await testRailClient.cases.getCases(
 					projectId,
 					suiteId,
@@ -86,10 +161,37 @@ export function registerCaseTools(
 						offset,
 					},
 				);
+
+				let responseData: Partial<TestRailCase>[] = testCases;
+
+				// If pickColumns is provided and not empty, filter the columns
+				// Empty array means include all columns
+				if (pickColumns && pickColumns.length > 0) {
+					// Create filtered copies with only requested columns
+					responseData = testCases.map((testCase) => {
+						// Always include id
+						const filtered: Partial<TestRailCase> = {
+							id: testCase.id,
+						};
+
+						// Add only the requested columns
+						for (const column of pickColumns) {
+							if (column in testCase && column !== "id") {
+								// Use type assertion more carefully
+								(filtered as Record<string, unknown>)[column] = (
+									testCase as Record<string, unknown>
+								)[column];
+							}
+						}
+
+						return filtered;
+					});
+				}
+
 				const successResponse = createSuccessResponse(
 					"Test cases retrieved successfully",
 					{
-						cases: testCases,
+						cases: responseData,
 						pagination: {
 							limit,
 							offset,

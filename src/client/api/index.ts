@@ -6,7 +6,6 @@ import { CasesClient } from "./cases.js";
 import { MilestonesClient } from "./milestones.js";
 import { SuitesClient } from "./suites.js";
 import { RunsClient } from "./runs.js";
-import { UsersClient } from "./users.js";
 import { PlansClient } from "./plans.js";
 import { ResultsClient } from "./results.js";
 
@@ -21,7 +20,6 @@ export class TestRailClient extends BaseTestRailClient {
 	readonly milestones: MilestonesClient;
 	readonly suites: SuitesClient;
 	readonly runs: RunsClient;
-	readonly users: UsersClient;
 	readonly plans: PlansClient;
 	readonly results: ResultsClient;
 
@@ -34,7 +32,6 @@ export class TestRailClient extends BaseTestRailClient {
 		this.milestones = new MilestonesClient(config);
 		this.suites = new SuitesClient(config);
 		this.runs = new RunsClient(config);
-		this.users = new UsersClient(config);
 		this.plans = new PlansClient(config);
 		this.results = new ResultsClient(config);
 	}
@@ -49,7 +46,6 @@ export { CasesClient } from "./cases.js";
 export { MilestonesClient } from "./milestones.js";
 export { SuitesClient } from "./suites.js";
 export { RunsClient } from "./runs.js";
-export { UsersClient } from "./users.js";
 export { PlansClient } from "./plans.js";
 export { ResultsClient } from "./results.js";
 export {

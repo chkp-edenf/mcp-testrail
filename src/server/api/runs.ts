@@ -7,7 +7,6 @@ import {
 	addRunSchema,
 	updateRunSchema,
 	closeRunSchema,
-	deleteRunSchema,
 } from "../../shared/schemas/runs.js";
 
 /**
@@ -201,31 +200,6 @@ export function registerRunTools(
 		} catch (error) {
 			const errorResponse = createErrorResponse(
 				`Error closing test run ${runId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
-
-	// Delete a test run
-	server.tool("deleteRun", deleteRunSchema, async ({ runId }) => {
-		try {
-			await testRailClient.runs.deleteRun(runId);
-			const successResponse = createSuccessResponse(
-				"Test run deleted successfully",
-				{
-					runId,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error deleting test run ${runId}`,
 				error,
 			);
 			return {

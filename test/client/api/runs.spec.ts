@@ -193,15 +193,4 @@ describe('Runs API', () => {
     // Verify result
     expect(result).toEqual(mockRun);
   });
-  
-  it('deletes a run', async () => {
-    // Mock successful deletion (no response data)
-    mockAxiosInstance.post.mockResolvedValue({ data: {} });
-    
-    // Test method
-    await client.runs.deleteRun(1);
-    
-    // Verify axios post was called correctly
-    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_run/1', {});
-  });
 }); 

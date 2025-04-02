@@ -84,18 +84,12 @@ export const closeRunSchema = {
 	runId: z.number().describe("TestRail Run ID"),
 };
 
-// Schema for deleting a test run
-export const deleteRunSchema = {
-	runId: z.number().describe("TestRail Run ID"),
-};
-
 // Create Zod objects from each schema
 export const GetRunsInput = z.object(getRunsSchema);
 export const GetRunInput = z.object(getRunSchema);
 export const AddRunInput = z.object(addRunSchema);
 export const UpdateRunInput = z.object(updateRunSchema);
 export const CloseRunInput = z.object(closeRunSchema);
-export const DeleteRunInput = z.object(deleteRunSchema);
 
 // Extract input types
 export type GetRunsInputType = z.infer<typeof GetRunsInput>;
@@ -103,7 +97,6 @@ export type GetRunInputType = z.infer<typeof GetRunInput>;
 export type AddRunInputType = z.infer<typeof AddRunInput>;
 export type UpdateRunInputType = z.infer<typeof UpdateRunInput>;
 export type CloseRunInputType = z.infer<typeof CloseRunInput>;
-export type DeleteRunInputType = z.infer<typeof DeleteRunInput>;
 
 // -----------------------------------------------
 // Response schema definitions - migrated from types.ts

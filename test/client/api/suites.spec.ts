@@ -124,15 +124,4 @@ describe('Suites API', () => {
     // Verify result
     expect(result).toEqual(mockSuite);
   });
-  
-  it('deletes a suite', async () => {
-    // Mock successful deletion (no response data)
-    mockAxiosInstance.post.mockResolvedValue({ data: {} });
-    
-    // Test method
-    await client.suites.deleteSuite(1);
-    
-    // Verify axios post was called correctly
-    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/delete_suite/1', {});
-  });
 }); 

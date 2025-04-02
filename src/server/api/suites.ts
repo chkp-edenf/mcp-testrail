@@ -6,7 +6,6 @@ import {
 	getSuiteSchema,
 	addSuiteSchema,
 	updateSuiteSchema,
-	deleteSuiteSchema,
 } from "../../shared/schemas/suites.js";
 
 /**
@@ -145,33 +144,6 @@ export function registerSuiteTools(
 			} catch (error) {
 				const errorResponse = createErrorResponse(
 					`Error updating suite ${args.suiteId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
-
-	// Delete a test suite
-	server.tool(
-		"deleteSuite",
-		{ suiteId: deleteSuiteSchema.shape.suiteId },
-		async (args, extra) => {
-			try {
-				const { suiteId } = args;
-				await testRailClient.suites.deleteSuite(suiteId);
-				const successResponse = createSuccessResponse(
-					`Suite ${suiteId} deleted successfully`,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error deleting suite ${args.suiteId}`,
 					error,
 				);
 				return {

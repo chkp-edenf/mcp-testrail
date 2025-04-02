@@ -5,7 +5,6 @@ import {
 	GetSuitesInput,
 	AddSuiteInput,
 	UpdateSuiteInput,
-	DeleteSuiteInput,
 	TestRailSuite,
 } from "../../shared/schemas/suites.js";
 import { handleApiError } from "./utils.js";
@@ -96,18 +95,6 @@ export class SuitesClient extends BaseTestRailClient {
 			return response.data;
 		} catch (error) {
 			throw handleApiError(error, `Failed to update test suite ${suiteId}`);
-		}
-	}
-
-	/**
-	 * Deletes a test suite
-	 * @param suiteId The ID of the test suite
-	 */
-	async deleteSuite(suiteId: DeleteSuiteInput["suiteId"]): Promise<void> {
-		try {
-			await this.client.post(`/api/v2/delete_suite/${suiteId}`, {});
-		} catch (error) {
-			throw handleApiError(error, `Failed to delete test suite ${suiteId}`);
 		}
 	}
 }

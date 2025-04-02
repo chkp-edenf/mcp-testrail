@@ -28,8 +28,5 @@ export * from "./milestones.js";
 // Test suite related schemas
 export * from "./suites.js";
 
-// User related schemas
-export * from "./users.js";
-
 // Test plan related schemas
 export * from "./plans.js";

@@ -65,7 +65,9 @@ export function registerCaseTools(
 				.number()
 				.optional()
 				.default(50)
-				.describe("Number of cases to return per page"),
+				.describe(
+					"Number of cases to return per page. If you cannot get all cases, try separating the request into multiple calls",
+				),
 			offset: z
 				.number()
 				.optional()

@@ -9,15 +9,14 @@ The TestRail MCP server provides the following tools:
 | Category | Tools |
 |----------|-------|
 | **Projects** | `getProjects`, `getProject`, `addProject`, `updateProject`, `deleteProject` |
-| **Cases** | `getCase`, `getCases`, `addCase`, `updateCase`, `deleteCase`, `getCaseTypes`, `getCaseFields` |
-| **Sections** | `getSection`, `getSections`, `addSection`, `moveSection`, `updateSection`, `deleteSection`, `copyToSection`, `moveToSection`, `getCaseHistory` |
-| **Suites** | `getSuites`, `getSuite`, `addSuite`, `updateSuite`, `deleteSuite` |
-| **Runs** | `getRuns`, `getRun`, `addRun`, `updateRun`, `closeRun`, `deleteRun` |
-| **Shared Steps** | `getSharedStep`, `getSharedSteps`, `addSharedStep`, `updateSharedStep`, `deleteSharedStep` |
-| **Milestones** | `getMilestone`, `getMilestones`, `addMilestone`, `updateMilestone`, `deleteMilestone` |
-| **Plans** | `getPlans`, `getPlan`, `addPlan`, `addPlanEntry`, `updatePlan`, `updatePlanEntry`, `closePlan`, `deletePlan`, `deletePlanEntry` |
-| **Results** | `getResults`, `getResultsForCase`, `getResultsForRun` |
-| **Users** | `getUsers`, `getUser`, `getUserByEmail` |
+| **Suites** | `getSuites`, `getSuite`, `addSuite`, `updateSuite` |
+| **Cases** | `getCase`, `getCases`, `addCase`, `updateCase`, `deleteCase`, `getCaseTypes`, `getCaseFields`, `copyToSection`, `moveToSection`, `getCaseHistory`, `updateCases` |
+| **Sections** | `getSection`, `getSections`, `addSection`, `moveSection`, `updateSection`, `deleteSection` |
+| **Runs** | `getRuns`, `getRun`, `addRun`, `updateRun`, `closeRun` |
+| **Results** | `getResults`, `getResultsForCase`, `getResultsForRun`, `addResultForCase`, `addResultsForCases` |
+| **Plans** | `getPlans` |
+| **Milestones** | `getMilestones` |
+| **Shared Steps** | `getSharedSteps` |
 
 ## Usage
 

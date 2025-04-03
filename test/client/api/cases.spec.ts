@@ -141,7 +141,7 @@ describe('Cases API', () => {
 
   it('retrieves all test cases for a project', async () => {
     // Mock response
-    const mockCases = [
+    const mockCasesArray = [
       { 
         id: 1, 
         title: 'Test Case 1', 
@@ -169,7 +169,19 @@ describe('Cases API', () => {
         suite_id: 1
       }
     ];
-    mockAxiosInstance.get.mockResolvedValue({ data: mockCases });
+    
+    const mockCasesResponse = {
+      cases: mockCasesArray,
+      offset: 0,
+      limit: 50,
+      size: 2,
+      _links: {
+        next: null,
+        prev: null
+      }
+    };
+    
+    mockAxiosInstance.get.mockResolvedValue({ data: mockCasesResponse });
     
     // Test method with pagination parameters
     const result = await client.cases.getCases(1, 1, { limit: 50, offset: 0 });  // projectId: 1, suiteId: 1, pagination
@@ -184,7 +196,7 @@ describe('Cases API', () => {
     });
     
     // Verify result
-    expect(result).toEqual(mockCases);
+    expect(result).toEqual(mockCasesResponse);
   });
 
   it('retrieves test case history', async () => {

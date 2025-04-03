@@ -20,8 +20,8 @@ export function registerAllTools(
 	testRailClient: TestRailClient,
 ): void {
 	// Register tools for each resource type
-	registerProjectTools(server, testRailClient);
 	registerSuiteTools(server, testRailClient);
+	registerProjectTools(server, testRailClient);
 	registerCaseTools(server, testRailClient);
 	registerSectionTools(server, testRailClient);
 	registerRunTools(server, testRailClient);

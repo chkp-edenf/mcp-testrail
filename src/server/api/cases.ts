@@ -13,6 +13,8 @@ import {
 	moveTestCasesToSectionSchema,
 	getTestCaseHistorySchema,
 	updateTestCasesSchema,
+	TestRailCase,
+	TestRailCaseSchema,
 } from "../../shared/schemas/cases.js";
 import { z } from "zod";
 
@@ -25,14 +27,46 @@ export function registerCaseTools(
 	server: McpServer,
 	testRailClient: TestRailClient,
 ): void {
+	// Extract column names from TestRailCase type
+	type ColumnName = keyof TestRailCase;
+	const availableColumns = Object.keys(
+		TestRailCaseSchema.shape,
+	) as ColumnName[];
+
+	// Default columns that exclude large text fields
+	const defaultColumns: ColumnName[] = [
+		"id",
+		"title",
+		"section_id",
+		"template_id",
+		"type_id",
+		"priority_id",
+		"milestone_id",
+		"refs",
+		"estimate",
+		"suite_id",
+		"display_order",
+		"is_deleted",
+		"status_id",
+		"updated_on",
+		"created_on",
+		"created_by",
+		"updated_by",
+	];
+
 	// Get a specific test case
 	server.tool(
 		"getCase",
-		{ caseId: getTestCaseSchema.shape.caseId },
+		"Retrieves complete details for a single test case, including all fields such as steps, expected results, and prerequisites.",
+		{
+			caseId: getTestCaseSchema.shape.caseId,
+		},
 		async (args, extra) => {
 			try {
 				const { caseId } = args;
 				const testCase = await testRailClient.cases.getCase(caseId);
+
+				// Return full case data for individual case requests
 				const successResponse = createSuccessResponse(
 					"Test case retrieved successfully",
 					{
@@ -58,11 +92,13 @@ export function registerCaseTools(
 	// Get all test cases for a project
 	server.tool(
 		"getCases",
+		"Retrieves test cases for a project with limited fields to reduce response size. Large text fields (steps, expected results, etc.) are excluded. For complete case details, use getCase with a specific case ID.",
 		{
 			projectId: getTestCasesSchema.shape.projectId,
 			suiteId: getTestCasesSchema.shape.suiteId,
 			limit: z
 				.number()
+				.min(1)
 				.optional()
 				.default(50)
 				.describe(
@@ -86,15 +122,36 @@ export function registerCaseTools(
 						offset,
 					},
 				);
+
+				// Always filter to default columns to reduce response size
+				const responseData = testCases.cases.map((testCase) => {
+					// Always include id
+					const filtered: Partial<TestRailCase> = {
+						id: testCase.id,
+					};
+
+					// Add only the default columns
+					for (const column of defaultColumns) {
+						if (column in testCase && column !== "id") {
+							// Use type assertion more carefully
+							(filtered as Record<string, unknown>)[column] = (
+								testCase as Record<string, unknown>
+							)[column];
+						}
+					}
+
+					return filtered;
+				});
+
 				const successResponse = createSuccessResponse(
 					"Test cases retrieved successfully",
 					{
-						cases: testCases,
+						cases: responseData,
 						pagination: {
 							limit,
 							offset,
-							total: testCases.length,
-							hasMore: testCases.length === limit,
+							total: testCases.size,
+							hasMore: testCases._links.next !== null,
 						},
 					},
 				);
@@ -320,54 +377,64 @@ export function registerCaseTools(
 	);
 
 	// Get all test case types
-	server.tool("getCaseTypes", {}, async (args, extra) => {
-		try {
-			const caseTypes = await testRailClient.cases.getCaseTypes();
-			const successResponse = createSuccessResponse(
-				"Test case types retrieved successfully",
-				{
-					caseTypes,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error fetching test case types",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getCaseTypes",
+		"Retrieves all available test case types in TestRail / TestRailで利用可能な全テストケースタイプを取得します",
+		{},
+		async (args, extra) => {
+			try {
+				const caseTypes = await testRailClient.cases.getCaseTypes();
+				const successResponse = createSuccessResponse(
+					"Test case types retrieved successfully",
+					{
+						caseTypes,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					"Error fetching test case types",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Get all test case fields
-	server.tool("getCaseFields", {}, async (args, extra) => {
-		try {
-			const caseFields = await testRailClient.cases.getCaseFields();
-			const successResponse = createSuccessResponse(
-				"Test case fields retrieved successfully",
-				{
-					caseFields,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error fetching test case fields",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getCaseFields",
+		"Retrieves all available test case fields in TestRail / TestRailで利用可能な全テストケースフィールドを取得します",
+		{},
+		async (args, extra) => {
+			try {
+				const caseFields = await testRailClient.cases.getCaseFields();
+				const successResponse = createSuccessResponse(
+					"Test case fields retrieved successfully",
+					{
+						caseFields,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					"Error fetching test case fields",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Copy test cases to section
 	server.tool(

@@ -62,47 +62,6 @@ export class BaseTestRailClient {
 			timeout: config.timeout ?? 30000,
 			auth: config.auth,
 		});
-
-		// Add response interceptor for error handling
-		this.client.interceptors.response.use(
-			(response) => response,
-			(error: AxiosError) => {
-				if (error.code === "ECONNABORTED") {
-					throw new TestRailTimeoutError();
-				}
-
-				if (!error.response) {
-					throw new TestRailNetworkError();
-				}
-
-				const status = error.response.status;
-				const errorData = error.response.data as { error?: string };
-				const message = errorData?.error || error.message;
-				const data = error.response.data;
-
-				switch (status) {
-					case 400:
-						throw new TestRailAPIError(status, `Bad Request: ${message}`, data);
-					case 401:
-						throw new TestRailAPIError(status, "Authentication failed", data);
-					case 403:
-						throw new TestRailAPIError(status, "Permission denied", data);
-					case 404:
-						throw new TestRailAPIError(status, "Resource not found", data);
-					case 429:
-						throw new TestRailAPIError(status, "Rate limit exceeded", data);
-					default:
-						if (status >= 500) {
-							throw new TestRailAPIError(status, "TestRail server error", data);
-						}
-						throw new TestRailAPIError(
-							status,
-							`Unknown error: ${message}`,
-							data,
-						);
-				}
-			},
-		);
 	}
 
 	/**

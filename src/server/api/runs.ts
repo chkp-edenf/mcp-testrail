@@ -21,6 +21,7 @@ export function registerRunTools(
 	// Get all test runs for a project
 	server.tool(
 		"getRuns",
+		"Retrieves all test runs for a specified TestRail project / 指定されたTestRailプロジェクトの全テスト実行を取得します",
 		getRunsSchema,
 		async ({ projectId, createdBy, ...filters }) => {
 			try {
@@ -60,33 +61,39 @@ export function registerRunTools(
 	);
 
 	// Get a specific test run
-	server.tool("getRun", getRunSchema, async ({ runId }) => {
-		try {
-			const run = await testRailClient.runs.getRun(runId);
-			const successResponse = createSuccessResponse(
-				"Test run retrieved successfully",
-				{
-					run,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error fetching test run ${runId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getRun",
+		"Retrieves details of a specific test run by ID / 特定のテスト実行の詳細をIDで取得します",
+		getRunSchema,
+		async ({ runId }) => {
+			try {
+				const run = await testRailClient.runs.getRun(runId);
+				const successResponse = createSuccessResponse(
+					"Test run retrieved successfully",
+					{
+						run,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error fetching test run ${runId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Create a new test run
 	server.tool(
 		"addRun",
+		"Creates a new test run in a TestRail project / TestRailプロジェクトに新しいテスト実行を作成します",
 		addRunSchema,
 		async ({
 			projectId,
@@ -139,6 +146,7 @@ export function registerRunTools(
 	// Update an existing test run
 	server.tool(
 		"updateRun",
+		"Updates an existing test run / 既存のテスト実行を更新します",
 		updateRunSchema,
 		async ({
 			runId,
@@ -185,27 +193,32 @@ export function registerRunTools(
 	);
 
 	// Close a test run
-	server.tool("closeRun", closeRunSchema, async ({ runId }) => {
-		try {
-			const run = await testRailClient.runs.closeRun(runId);
-			const successResponse = createSuccessResponse(
-				"Test run closed successfully",
-				{
-					run,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error closing test run ${runId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"closeRun",
+		"Closes a test run / テスト実行を終了します",
+		closeRunSchema,
+		async ({ runId }) => {
+			try {
+				const run = await testRailClient.runs.closeRun(runId);
+				const successResponse = createSuccessResponse(
+					"Test run closed successfully",
+					{
+						run,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error closing test run ${runId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 }

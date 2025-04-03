@@ -13,27 +13,32 @@ export function registerPlanTools(
 	testRailClient: TestRailClient,
 ): void {
 	// Get all test plans for a project
-	server.tool("getPlans", getPlansSchema, async ({ projectId }) => {
-		try {
-			const plans = await testRailClient.plans.getPlans(projectId);
-			const successResponse = createSuccessResponse(
-				"Test plans retrieved successfully",
-				{
-					plans,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error fetching test plans for project ${projectId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getPlans",
+		"Retrieves all test plans for a specified TestRail project / 指定されたTestRailプロジェクトの全テストプランを取得します",
+		getPlansSchema,
+		async ({ projectId }) => {
+			try {
+				const plans = await testRailClient.plans.getPlans(projectId);
+				const successResponse = createSuccessResponse(
+					"Test plans retrieved successfully",
+					{
+						plans,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error fetching test plans for project ${projectId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 }

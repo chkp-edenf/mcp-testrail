@@ -57,48 +57,20 @@ export function registerCaseTools(
 	// Get a specific test case
 	server.tool(
 		"getCase",
+		"Retrieves complete details for a single test case, including all fields such as steps, expected results, and prerequisites.",
 		{
 			caseId: getTestCaseSchema.shape.caseId,
-			pickColumns: z
-				.array(z.enum(availableColumns as [string, ...string[]]))
-				.optional()
-				.default(defaultColumns)
-				.describe(
-					`Specific columns to include in the response. Available columns: ${availableColumns.join(", ")}. Default includes most fields except large text fields. Use empty array [] for all columns.`,
-				),
 		},
 		async (args, extra) => {
 			try {
-				const { caseId, pickColumns } = args;
+				const { caseId } = args;
 				const testCase = await testRailClient.cases.getCase(caseId);
 
-				let responseData: Partial<TestRailCase> = testCase;
-
-				// If pickColumns is provided and not empty, filter the columns
-				// Empty array means include all columns
-				if (pickColumns && pickColumns.length > 0) {
-					// Create filtered copy with only requested columns
-					const filtered: Partial<TestRailCase> = {
-						id: testCase.id,
-					};
-
-					// Add only the requested columns
-					for (const column of pickColumns) {
-						if (column in testCase && column !== "id") {
-							// Use type assertion more carefully
-							(filtered as Record<string, unknown>)[column] = (
-								testCase as Record<string, unknown>
-							)[column];
-						}
-					}
-
-					responseData = filtered;
-				}
-
+				// Return full case data for individual case requests
 				const successResponse = createSuccessResponse(
 					"Test case retrieved successfully",
 					{
-						case: responseData,
+						case: testCase,
 					},
 				);
 				return {
@@ -120,11 +92,13 @@ export function registerCaseTools(
 	// Get all test cases for a project
 	server.tool(
 		"getCases",
+		"Retrieves test cases for a project with limited fields to reduce response size. Large text fields (steps, expected results, etc.) are excluded. For complete case details, use getCase with a specific case ID.",
 		{
 			projectId: getTestCasesSchema.shape.projectId,
 			suiteId: getTestCasesSchema.shape.suiteId,
 			limit: z
 				.number()
+				.min(1)
 				.optional()
 				.default(50)
 				.describe(
@@ -135,13 +109,6 @@ export function registerCaseTools(
 				.optional()
 				.default(0)
 				.describe("Offset for pagination"),
-			pickColumns: z
-				.array(z.enum(availableColumns as [string, ...string[]]))
-				.optional()
-				.default(defaultColumns)
-				.describe(
-					`Specific columns to include in the response. Available columns: ${availableColumns.join(", ")}. Default includes most fields except large text fields. Use empty array [] for all columns.`,
-				),
 		},
 		async (args, extra) => {
 			try {
@@ -150,7 +117,6 @@ export function registerCaseTools(
 					suiteId,
 					limit = 50,
 					offset = 0,
-					pickColumns,
 				} = args;
 				const testCases = await testRailClient.cases.getCases(
 					projectId,
@@ -162,31 +128,25 @@ export function registerCaseTools(
 					},
 				);
 
-				let responseData: Partial<TestRailCase>[] = testCases;
+				// Always filter to default columns to reduce response size
+				const responseData = testCases.cases.map((testCase) => {
+					// Always include id
+					const filtered: Partial<TestRailCase> = {
+						id: testCase.id,
+					};
 
-				// If pickColumns is provided and not empty, filter the columns
-				// Empty array means include all columns
-				if (pickColumns && pickColumns.length > 0) {
-					// Create filtered copies with only requested columns
-					responseData = testCases.map((testCase) => {
-						// Always include id
-						const filtered: Partial<TestRailCase> = {
-							id: testCase.id,
-						};
-
-						// Add only the requested columns
-						for (const column of pickColumns) {
-							if (column in testCase && column !== "id") {
-								// Use type assertion more carefully
-								(filtered as Record<string, unknown>)[column] = (
-									testCase as Record<string, unknown>
-								)[column];
-							}
+					// Add only the default columns
+					for (const column of defaultColumns) {
+						if (column in testCase && column !== "id") {
+							// Use type assertion more carefully
+							(filtered as Record<string, unknown>)[column] = (
+								testCase as Record<string, unknown>
+							)[column];
 						}
+					}
 
-						return filtered;
-					});
-				}
+					return filtered;
+				});
 
 				const successResponse = createSuccessResponse(
 					"Test cases retrieved successfully",
@@ -195,8 +155,8 @@ export function registerCaseTools(
 						pagination: {
 							limit,
 							offset,
-							total: testCases.length,
-							hasMore: testCases.length === limit,
+							total: testCases.size,
+							hasMore: testCases._links.next !== null,
 						},
 					},
 				);
@@ -422,54 +382,64 @@ export function registerCaseTools(
 	);
 
 	// Get all test case types
-	server.tool("getCaseTypes", {}, async (args, extra) => {
-		try {
-			const caseTypes = await testRailClient.cases.getCaseTypes();
-			const successResponse = createSuccessResponse(
-				"Test case types retrieved successfully",
-				{
-					caseTypes,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error fetching test case types",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getCaseTypes",
+		"Retrieves all available test case types in TestRail / TestRailで利用可能な全テストケースタイプを取得します",
+		{},
+		async (args, extra) => {
+			try {
+				const caseTypes = await testRailClient.cases.getCaseTypes();
+				const successResponse = createSuccessResponse(
+					"Test case types retrieved successfully",
+					{
+						caseTypes,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					"Error fetching test case types",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Get all test case fields
-	server.tool("getCaseFields", {}, async (args, extra) => {
-		try {
-			const caseFields = await testRailClient.cases.getCaseFields();
-			const successResponse = createSuccessResponse(
-				"Test case fields retrieved successfully",
-				{
-					caseFields,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				"Error fetching test case fields",
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getCaseFields",
+		"Retrieves all available test case fields in TestRail / TestRailで利用可能な全テストケースフィールドを取得します",
+		{},
+		async (args, extra) => {
+			try {
+				const caseFields = await testRailClient.cases.getCaseFields();
+				const successResponse = createSuccessResponse(
+					"Test case fields retrieved successfully",
+					{
+						caseFields,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					"Error fetching test case fields",
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Copy test cases to section
 	server.tool(

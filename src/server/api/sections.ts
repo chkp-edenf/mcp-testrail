@@ -20,33 +20,39 @@ export function registerSectionTools(
 	testRailClient: TestRailClient,
 ): void {
 	// Get a specific section
-	server.tool("getSection", getSectionSchema, async ({ sectionId }) => {
-		try {
-			const section = await testRailClient.sections.getSection(sectionId);
-			const successResponse = createSuccessResponse(
-				"Section retrieved successfully",
-				{
-					section,
-				},
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(successResponse) }],
-			};
-		} catch (error) {
-			const errorResponse = createErrorResponse(
-				`Error fetching section ${sectionId}`,
-				error,
-			);
-			return {
-				content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-				isError: true,
-			};
-		}
-	});
+	server.tool(
+		"getSection",
+		"Retrieves details of a specific section by ID / 特定のセクションの詳細をIDで取得します",
+		getSectionSchema,
+		async ({ sectionId }) => {
+			try {
+				const section = await testRailClient.sections.getSection(sectionId);
+				const successResponse = createSuccessResponse(
+					"Section retrieved successfully",
+					{
+						section,
+					},
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(successResponse) }],
+				};
+			} catch (error) {
+				const errorResponse = createErrorResponse(
+					`Error fetching section ${sectionId}`,
+					error,
+				);
+				return {
+					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
+					isError: true,
+				};
+			}
+		},
+	);
 
 	// Get all sections for a project or suite
 	server.tool(
 		"getSections",
+		"Retrieves all sections for a specified project and suite / 指定されたプロジェクトとスイートの全セクションを取得します",
 		getSectionsSchema,
 		async ({ projectId, suiteId }) => {
 			try {
@@ -79,6 +85,7 @@ export function registerSectionTools(
 	// Create a new section
 	server.tool(
 		"addSection",
+		"Creates a new section in a TestRail project / TestRailプロジェクトに新しいセクションを作成します",
 		addSectionSchema,
 		async ({ projectId, name, description, suiteId, parentId }) => {
 			try {
@@ -118,6 +125,7 @@ export function registerSectionTools(
 	// Move a section
 	server.tool(
 		"moveSection",
+		"Moves a section to a new position in the test hierarchy / テスト階層内の新しい位置にセクションを移動します",
 		moveSectionSchema,
 		async ({ sectionId, parentId, afterId }) => {
 			try {
@@ -158,6 +166,7 @@ export function registerSectionTools(
 	// Update a section
 	server.tool(
 		"updateSection",
+		"Updates an existing section / 既存のセクションを更新します",
 		updateSectionSchema,
 		async ({ sectionId, name, description }) => {
 			try {
@@ -194,6 +203,7 @@ export function registerSectionTools(
 	// Delete a section
 	server.tool(
 		"deleteSection",
+		"Deletes a section / セクションを削除します",
 		deleteSectionSchema,
 		async ({ sectionId, soft }) => {
 			try {

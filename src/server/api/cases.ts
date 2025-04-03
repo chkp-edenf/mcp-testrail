@@ -112,12 +112,7 @@ export function registerCaseTools(
 		},
 		async (args, extra) => {
 			try {
-				const {
-					projectId,
-					suiteId,
-					limit = 50,
-					offset = 0,
-				} = args;
+				const { projectId, suiteId, limit = 50, offset = 0 } = args;
 				const testCases = await testRailClient.cases.getCases(
 					projectId,
 					suiteId,

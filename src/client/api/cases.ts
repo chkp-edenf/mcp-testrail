@@ -52,7 +52,13 @@ export class CasesClient extends BaseTestRailClient {
 		projectId: GetTestCasesInput["projectId"],
 		suiteId: number,
 		params?: Partial<GetCasesParams>,
-	): Promise<{ cases: TestRailCase[], offset: number, limit: number, size: number, _links: { next: string | null, prev: string | null } }> {
+	): Promise<{
+		cases: TestRailCase[];
+		offset: number;
+		limit: number;
+		size: number;
+		_links: { next: string | null; prev: string | null };
+	}> {
 		try {
 			const defaultParams = {
 				limit: 50,
@@ -60,15 +66,18 @@ export class CasesClient extends BaseTestRailClient {
 				...params,
 			};
 
-			const response: AxiosResponse<{ cases: TestRailCase[], offset: number, limit: number, size: number, _links: { next: string | null, prev: string | null } }> = await this.client.get(
-				`/api/v2/get_cases/${projectId}`,
-				{
-					params: {
-						suite_id: suiteId,
-						...defaultParams,
-					},
+			const response: AxiosResponse<{
+				cases: TestRailCase[];
+				offset: number;
+				limit: number;
+				size: number;
+				_links: { next: string | null; prev: string | null };
+			}> = await this.client.get(`/api/v2/get_cases/${projectId}`, {
+				params: {
+					suite_id: suiteId,
+					...defaultParams,
 				},
-			);
+			});
 			return {
 				cases: response.data.cases,
 				offset: response.data.offset,

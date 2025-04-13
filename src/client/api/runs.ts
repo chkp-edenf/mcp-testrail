@@ -8,7 +8,6 @@ import {
 	GetRunsInputType,
 	AddRunInputType,
 	UpdateRunInputType,
-	CloseRunInputType,
 } from "../../shared/schemas/runs.js";
 
 export class RunsClient extends BaseTestRailClient {
@@ -94,23 +93,6 @@ export class RunsClient extends BaseTestRailClient {
 			return response.data;
 		} catch (error) {
 			throw handleApiError(error, `Failed to update test run ${runId}`);
-		}
-	}
-
-	/**
-	 * Closes a test run
-	 * @param runId The ID of the test run
-	 * @returns Promise with closed test run
-	 */
-	async closeRun(runId: CloseRunInputType["runId"]): Promise<TestRailRun> {
-		try {
-			const response: AxiosResponse<TestRailRun> = await this.client.post(
-				`/api/v2/close_run/${runId}`,
-				{},
-			);
-			return response.data;
-		} catch (error) {
-			throw handleApiError(error, `Failed to close test run ${runId}`);
 		}
 	}
 

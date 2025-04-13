@@ -79,24 +79,18 @@ export const updateRunSchema = {
 	refs: z.string().optional().describe("Reference/requirement IDs"),
 };
 
-// Schema for closing a test run
-export const closeRunSchema = {
-	runId: z.number().describe("TestRail Run ID"),
-};
 
 // Create Zod objects from each schema
 export const GetRunsInput = z.object(getRunsSchema);
 export const GetRunInput = z.object(getRunSchema);
 export const AddRunInput = z.object(addRunSchema);
 export const UpdateRunInput = z.object(updateRunSchema);
-export const CloseRunInput = z.object(closeRunSchema);
 
 // Extract input types
 export type GetRunsInputType = z.infer<typeof GetRunsInput>;
 export type GetRunInputType = z.infer<typeof GetRunInput>;
 export type AddRunInputType = z.infer<typeof AddRunInput>;
 export type UpdateRunInputType = z.infer<typeof UpdateRunInput>;
-export type CloseRunInputType = z.infer<typeof CloseRunInput>;
 
 // -----------------------------------------------
 // Response schema definitions - migrated from types.ts

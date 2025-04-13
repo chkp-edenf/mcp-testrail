@@ -8,6 +8,7 @@ import { registerMilestoneTools } from "./milestones.js";
 import { registerSuiteTools } from "./suites.js";
 import { registerPlanTools } from "./plans.js";
 import { registerRunTools } from "./runs.js";
+import { registerTestTools } from "./tests.js";
 import { registerResultTools } from "./results.js";
 
 /**
@@ -25,6 +26,7 @@ export function registerAllTools(
 	registerCaseTools(server, testRailClient);
 	registerSectionTools(server, testRailClient);
 	registerRunTools(server, testRailClient);
+	registerTestTools(server, testRailClient);
 	registerResultTools(server, testRailClient);
 	registerPlanTools(server, testRailClient);
 	registerMilestoneTools(server, testRailClient);
@@ -40,4 +42,5 @@ export * from "./milestones.js";
 export * from "./suites.js";
 export * from "./plans.js";
 export * from "./runs.js";
+export * from "./tests.js";
 export * from "./results.js";

@@ -6,7 +6,6 @@ import {
 	getRunSchema,
 	addRunSchema,
 	updateRunSchema,
-	closeRunSchema,
 } from "../../shared/schemas/runs.js";
 
 /**
@@ -182,36 +181,6 @@ export function registerRunTools(
 			} catch (error) {
 				const errorResponse = createErrorResponse(
 					`Error updating test run ${runId}`,
-					error,
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(errorResponse) }],
-					isError: true,
-				};
-			}
-		},
-	);
-
-	// Close a test run
-	server.tool(
-		"closeRun",
-		"Closes a test run / テスト実行を終了します",
-		closeRunSchema,
-		async ({ runId }) => {
-			try {
-				const run = await testRailClient.runs.closeRun(runId);
-				const successResponse = createSuccessResponse(
-					"Test run closed successfully",
-					{
-						run,
-					},
-				);
-				return {
-					content: [{ type: "text", text: JSON.stringify(successResponse) }],
-				};
-			} catch (error) {
-				const errorResponse = createErrorResponse(
-					`Error closing test run ${runId}`,
 					error,
 				);
 				return {

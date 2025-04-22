@@ -46,6 +46,6 @@
     "node": ">=20.18.1 <=22.14.0"
   },
   "bin": {
-    "mcp-testrail": "./dist/index.js"
+    "mcp-testrail": "./dist/stdio.js"
   }
 }

@@ -17,3 +17,6 @@ jobs:
 
       - name: Run CI tests
         run: npm run test:ci
+
+      - name: Can build
+        run: npm run build

@@ -79,7 +79,6 @@ export const updateRunSchema = {
 	refs: z.string().optional().describe("Reference/requirement IDs"),
 };
 
-
 // Create Zod objects from each schema
 export const GetRunsInput = z.object(getRunsSchema);
 export const GetRunInput = z.object(getRunSchema);

@@ -8,7 +8,7 @@ The TestRail MCP server provides the following tools:
 
 | Category | Tools |
 |----------|-------|
-| **Projects** | `getProjects`, `getProject`, `addProject`, `updateProject`, `deleteProject` |
+| **Projects** | `getProjects`, `getProject` |
 | **Suites** | `getSuites`, `getSuite`, `addSuite`, `updateSuite` |
 | **Cases** | `getCase`, `getCases`, `addCase`, `updateCase`, `deleteCase`, `getCaseTypes`, `getCaseFields`, `copyToSection`, `moveToSection`, `getCaseHistory`, `updateCases` |
 | **Sections** | `getSection`, `getSections`, `addSection`, `moveSection`, `updateSection`, `deleteSection` |
@@ -21,66 +21,24 @@ The TestRail MCP server provides the following tools:
 
 ## Usage
 
-### Setting up in Cursor with Claude
-
-To use the TestRail MCP server in Cursor with Claude:
-
-1. Start the server locally with `npm run start`
-  - Please run `npm install` and `npm run build`, before you execute the command
-  - Please set up your .env based on the .env.example file as a reference.
-2. The server will run on `http://localhost:8080/sse`
-3. In Cursor, navigate to the MCP Servers section and add the TestRail server
-
-![MCP Server Configuration in Cursor](docs/images/cursor.png)
-
-4. Configure with the following details:
-   - **Name**: TestRail
-   - **Server Link**: http://localhost:8080/sse
-   - **Connection Type**: SSE
-
-Once connected, you'll see all the available tools as shown in the image above.
-
-Or, you can connect this MCP server by setting like the below.
+You can connect this MCP server by setting like the below. This method uses `npx` to automatically download and run the latest version of the package, eliminating the need for local installation.
 
 ```json
-// Example for Claude Desktop
+// Example configuration using npx
 {
   "mcpServers": {
-    "TestRail": {
-      "type": "command",
-      "command": "${YOUR_NODE_PATH}/node",
-      "args": ["${YOUR_PROJECT_PATH}/mcp-testrail/dist/stdio.js"],
+    "testrail": {
+      "command": "npx",
+      "args": ["@bun913/mcp-testrail@latest"],
       "env": {
-        "TESTRAIL_URL": "https://example.testrail.io",
-        "TESTRAIL_USERNAME": "hoge@gmail.com",
-        "TESTRAIL_API_KEY": "YOUR_API_KEY"
+        "TESTRAIL_URL": "https://your-instance.testrail.io", // Replace with your TestRail URL
+        "TESTRAIL_USERNAME": "your-email@example.com", // Replace with your TestRail username
+        "TESTRAIL_API_KEY": "YOUR_API_KEY" // Replace with your TestRail API key
       }
     }
   }
 }
 ```
-
-### Calling Tools from MCP Clients
-
-When using an MCP-supported client like Claude in Cursor, you can call the TestRail MCP tools directly during your conversation. For each tool, you'll need to provide the appropriate parameters as defined in the TestRail API.
-
-From Cursor:
-
-```json
-// You can set ~/.cursor/mcp.json as below
-{
-  "mcpServers": {
-    "testrail": {
-      "type": "sse",
-      "url": "http://localhost:8080/sse"
-    }
-  }
-}
-```
-
-From Claude Desktop:
-
-![From Claude Desktop](docs/images/fromClaude.png)
 
 ## Troubleshooting
 

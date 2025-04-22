@@ -56,8 +56,6 @@ jobs:
           body: "Automated PR to update package version"
           branch: "update-version-${{ steps.semver.outputs.version }}"
           base: "main"
-          auto-merge: true
-          delete-branch: true
           commit-message: "chore: Update package version to ${{ steps.semver.outputs.version }}"
 
       - name: Create GitHub Release

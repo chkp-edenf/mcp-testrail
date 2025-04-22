@@ -32,9 +32,6 @@ jobs:
           git config user.name 'GitHub Action'
           git config user.email 'action@github.com'
 
-      - name: Create new branch
-        run: git checkout -b update-version-${{ steps.semver.outputs.version }}
-
       - name: Update package version
         run: npm version ${{ steps.semver.outputs.version }} --no-git-tag-version
 

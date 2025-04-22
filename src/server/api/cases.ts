@@ -174,6 +174,7 @@ export function registerCaseTools(
 	// Add a new test case
 	server.tool(
 		"addCase",
+		"Creates a new test case in TestRail with specified details including steps, prerequisites, and expected results / 指定された詳細（ステップ、前提条件、期待される結果を含む）で新しいテストケースをTestRailに作成します",
 		{
 			sectionId: addTestCaseSchema.shape.sectionId,
 			title: addTestCaseSchema.shape.title,
@@ -267,6 +268,7 @@ export function registerCaseTools(
 	// Update an existing test case
 	server.tool(
 		"updateCase",
+		"Updates an existing test case with specified details such as title, type, priority, and custom fields / 既存のテストケースをタイトル、タイプ、優先度、カスタムフィールドなどの指定された詳細で更新します",
 		{
 			caseId: updateTestCaseSchema.shape.caseId,
 			title: updateTestCaseSchema.shape.title,
@@ -352,6 +354,7 @@ export function registerCaseTools(
 	// Delete a test case
 	server.tool(
 		"deleteCase",
+		"Deletes a test case from TestRail / TestRailからテストケースを削除します",
 		{ caseId: deleteTestCaseSchema.shape.caseId },
 		async (args, extra) => {
 			try {
@@ -439,6 +442,7 @@ export function registerCaseTools(
 	// Copy test cases to section
 	server.tool(
 		"copyToSection",
+		"Copies specified test cases to a target section while keeping the originals / 指定されたテストケースを対象のセクションにコピーし、元のケースは保持します",
 		{
 			caseIds: copyTestCasesToSectionSchema.shape.caseIds,
 			sectionId: copyTestCasesToSectionSchema.shape.sectionId,
@@ -475,6 +479,7 @@ export function registerCaseTools(
 	// Move test cases to section
 	server.tool(
 		"moveToSection",
+		"Moves specified test cases to a target section / 指定されたテストケースを対象のセクションに移動します",
 		{
 			caseIds: moveTestCasesToSectionSchema.shape.caseIds,
 			sectionId: moveTestCasesToSectionSchema.shape.sectionId,
@@ -511,6 +516,7 @@ export function registerCaseTools(
 	// Get test case history
 	server.tool(
 		"getCaseHistory",
+		"Retrieves the change history of a test case including updates to fields and custom fields / テストケースの変更履歴（フィールドとカスタムフィールドの更新を含む）を取得します",
 		{ caseId: getTestCaseHistorySchema.shape.caseId },
 		async (args, extra) => {
 			try {
@@ -541,6 +547,7 @@ export function registerCaseTools(
 	// Update multiple test cases
 	server.tool(
 		"updateCases",
+		"Updates multiple test cases simultaneously with the same field values / 複数のテストケースを同じフィールド値で一括更新します",
 		{
 			projectId: updateTestCasesSchema.shape.projectId,
 			suiteId: updateTestCasesSchema.shape.suiteId,

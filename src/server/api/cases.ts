@@ -234,6 +234,17 @@ export function registerCaseTools(
 					data.refs = refs;
 				}
 
+				// Add custom fields if specified
+				if (customPrerequisites) {
+					data.custom_preconds = customPrerequisites;
+				}
+				if (customSteps) {
+					data.custom_steps = customSteps;
+				}
+				if (customExpected) {
+					data.custom_expected = customExpected;
+				}
+
 				// Remove empty or undefined fields
 				for (const key of Object.keys(data)) {
 					const value = data[key];
@@ -326,6 +337,17 @@ export function registerCaseTools(
 				// Add references if specified
 				if (refs) {
 					data.refs = refs;
+				}
+
+				// Add custom fields if specified
+				if (customPrerequisites) {
+					data.custom_preconds = customPrerequisites;
+				}
+				if (customSteps) {
+					data.custom_steps = customSteps;
+				}
+				if (customExpected) {
+					data.custom_expected = customExpected;
 				}
 
 				const testCase = await testRailClient.cases.updateCase(caseId, data);

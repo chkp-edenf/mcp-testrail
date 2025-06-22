@@ -57,7 +57,7 @@ export function registerCaseTools(
 	// Get a specific test case
 	server.tool(
 		"getCase",
-		"Retrieves complete details for a single test case, including all fields such as steps, expected results, and prerequisites.",
+		"Retrieves complete details for a single test case including steps, expected results, and prerequisites. REQUIRED: caseId.",
 		{
 			caseId: getTestCaseSchema.shape.caseId,
 		},
@@ -92,7 +92,7 @@ export function registerCaseTools(
 	// Get all test cases for a project
 	server.tool(
 		"getCases",
-		"Retrieves test cases for a project with limited fields to reduce response size. Large text fields (steps, expected results, etc.) are excluded. For complete case details, use getCase with a specific case ID.",
+		"Retrieves test cases list with basic fields only (excludes steps/expected results for performance). REQUIRED: projectId, suiteId. OPTIONAL: limit (default 50), offset (default 0). Use getCase for full details.",
 		{
 			projectId: getTestCasesSchema.shape.projectId,
 			suiteId: getTestCasesSchema.shape.suiteId,
@@ -174,7 +174,7 @@ export function registerCaseTools(
 	// Add a new test case
 	server.tool(
 		"addCase",
-		"Creates a new test case in TestRail with specified details including steps, prerequisites, and expected results / 指定された詳細（ステップ、前提条件、期待される結果を含む）で新しいテストケースをTestRailに作成します",
+		"Creates a new test case in TestRail. REQUIRED: sectionId, title. OPTIONAL: typeId, priorityId, customSteps, customExpected, etc. Use getCaseTypes to find valid typeId values.",
 		{
 			sectionId: addTestCaseSchema.shape.sectionId,
 			title: addTestCaseSchema.shape.title,
@@ -245,7 +245,7 @@ export function registerCaseTools(
 					data.custom_expected = customExpected;
 				}
 
-				// Remove empty or undefined fields
+				// Remove empty, undefined, null fields to avoid API errors
 				for (const key of Object.keys(data)) {
 					const value = data[key];
 					if (value === undefined || value === null || value === "") {
@@ -279,7 +279,7 @@ export function registerCaseTools(
 	// Update an existing test case
 	server.tool(
 		"updateCase",
-		"Updates an existing test case with specified details such as title, type, priority, and custom fields / 既存のテストケースをタイトル、タイプ、優先度、カスタムフィールドなどの指定された詳細で更新します",
+		"Updates an existing test case. REQUIRED: caseId. OPTIONAL: title, typeId, priorityId, customSteps, customExpected, etc. Only specified fields will be updated.",
 		{
 			caseId: updateTestCaseSchema.shape.caseId,
 			title: updateTestCaseSchema.shape.title,
@@ -645,7 +645,7 @@ export function registerCaseTools(
 					data.custom_expected = customExpected;
 				}
 
-				// Remove empty or undefined fields
+				// Remove empty, undefined, null fields to avoid API errors
 				for (const key of Object.keys(data)) {
 					const value = data[key];
 					if (value === undefined || value === null || value === "") {

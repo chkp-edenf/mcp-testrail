@@ -20,9 +20,22 @@ export const addTestCaseSchema = z.object({
 	estimate: z.string().optional().describe("Test case estimated time"),
 	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
 	refs: z.string().optional().describe("Test case references"),
+	templateId: z
+		.number()
+		.optional()
+		.describe("Template ID (use 2 for custom_steps_separated support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
+	customStepsSeparated: z
+		.array(
+			z.object({
+				content: z.string().describe("Step content"),
+				expected: z.string().describe("Expected result"),
+			}),
+		)
+		.optional()
+		.describe("Separated test steps array (requires template_id=2)"),
 });
 
 // Schema for updating a test case
@@ -34,9 +47,22 @@ export const updateTestCaseSchema = z.object({
 	estimate: z.string().optional().describe("Test case estimated time"),
 	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
 	refs: z.string().optional().describe("Test case references"),
+	templateId: z
+		.number()
+		.optional()
+		.describe("Template ID (use 2 for custom_steps_separated support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
+	customStepsSeparated: z
+		.array(
+			z.object({
+				content: z.string().describe("Step content"),
+				expected: z.string().describe("Expected result"),
+			}),
+		)
+		.optional()
+		.describe("Separated test steps array (requires template_id=2)"),
 });
 
 // Schema for deleting a test case
@@ -78,9 +104,22 @@ export const updateTestCasesSchema = z.object({
 	estimate: z.string().optional().describe("Test case estimated time"),
 	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
 	refs: z.string().optional().describe("Test case references"),
+	templateId: z
+		.number()
+		.optional()
+		.describe("Template ID (use 2 for custom_steps_separated support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
+	customStepsSeparated: z
+		.array(
+			z.object({
+				content: z.string().describe("Step content"),
+				expected: z.string().describe("Expected result"),
+			}),
+		)
+		.optional()
+		.describe("Separated test steps array (requires template_id=2)"),
 });
 
 // Create Zod objects from each schema
@@ -225,3 +264,62 @@ export const TestRailCaseHistorySchema = z.object({
 	),
 });
 export type TestRailCaseHistory = z.infer<typeof TestRailCaseHistorySchema>;
+
+// -----------------------------------------------
+// Client API data schemas (snake_case for TestRail API)
+// -----------------------------------------------
+
+/**
+ * Schema for data when adding a test case via client API
+ */
+export const addCaseDataSchema = z
+	.object({
+		title: z.string().optional(),
+		type_id: z.number().optional(),
+		priority_id: z.number().optional(),
+		template_id: z.number().optional(),
+		estimate: z.string().optional(),
+		milestone_id: z.number().optional(),
+		refs: z.string().optional(),
+		custom_preconds: z.string().optional(),
+		custom_steps: z.string().optional(),
+		custom_expected: z.string().optional(),
+		custom_steps_separated: z
+			.array(
+				z.object({
+					content: z.string(),
+					expected: z.string(),
+				}),
+			)
+			.optional(),
+	})
+	.strict();
+
+/**
+ * Schema for data when updating a test case via client API
+ */
+export const updateCaseDataSchema = z
+	.object({
+		title: z.string().optional(),
+		type_id: z.number().optional(),
+		priority_id: z.number().optional(),
+		template_id: z.number().optional(),
+		estimate: z.string().optional(),
+		milestone_id: z.number().optional(),
+		refs: z.string().optional(),
+		custom_preconds: z.string().optional(),
+		custom_steps: z.string().optional(),
+		custom_expected: z.string().optional(),
+		custom_steps_separated: z
+			.array(
+				z.object({
+					content: z.string(),
+					expected: z.string(),
+				}),
+			)
+			.optional(),
+	})
+	.strict();
+
+export type AddCaseData = z.infer<typeof addCaseDataSchema>;
+export type UpdateCaseData = z.infer<typeof updateCaseDataSchema>;

@@ -291,4 +291,122 @@ describe('Cases API', () => {
       case_ids: caseIds
     });
   });
+
+  it('creates a test case with template_id and custom_steps_shared', async () => {
+    // Mock response
+    const mockCase = { 
+      id: 1, 
+      title: 'Test Case with Custom Steps', 
+      section_id: 1,
+      template_id: 2,
+      type_id: 1,
+      priority_id: 2,
+      created_by: 1,
+      created_on: 1609459200,
+      updated_by: 1,
+      updated_on: 1609459300,
+      suite_id: 1,
+      custom_steps_shared: [
+        { content: 'Step 1', expected: 'Expected 1' },
+        { content: 'Step 2', expected: 'Expected 2' }
+      ]
+    };
+    mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
+    
+    // Test data with template_id and custom_steps_shared
+    const caseData = {
+      title: 'Test Case with Custom Steps',
+      template_id: 2,
+      type_id: 1,
+      priority_id: 2,
+      custom_steps_shared: [
+        { content: 'Step 1', expected: 'Expected 1' },
+        { content: 'Step 2', expected: 'Expected 2' }
+      ]
+    };
+    
+    // Test method
+    const result = await client.cases.addCase(1, caseData);
+    
+    // Verify axios post was called correctly
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/add_case/1', caseData);
+    
+    // Verify result
+    expect(result).toEqual(mockCase);
+    expect(result.template_id).toBe(2);
+    expect(result.custom_steps_shared).toEqual([
+      { content: 'Step 1', expected: 'Expected 1' },
+      { content: 'Step 2', expected: 'Expected 2' }
+    ]);
+  });
+
+  it('updates a test case with template_id and custom_steps_shared', async () => {
+    // Mock response
+    const mockCase = { 
+      id: 1, 
+      title: 'Updated Test Case with Custom Steps', 
+      section_id: 1,
+      template_id: 2,
+      type_id: 1,
+      priority_id: 2,
+      created_by: 1,
+      created_on: 1609459200,
+      updated_by: 1,
+      updated_on: 1609459400,
+      suite_id: 1,
+      custom_steps_shared: [
+        { content: 'Updated Step 1', expected: 'Updated Expected 1' },
+        { content: 'Updated Step 2', expected: 'Updated Expected 2' }
+      ]
+    };
+    mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
+    
+    // Test data with template_id and custom_steps_shared
+    const caseData = {
+      title: 'Updated Test Case with Custom Steps',
+      template_id: 2,
+      custom_steps_shared: [
+        { content: 'Updated Step 1', expected: 'Updated Expected 1' },
+        { content: 'Updated Step 2', expected: 'Updated Expected 2' }
+      ]
+    };
+    
+    // Test method
+    const result = await client.cases.updateCase(1, caseData);
+    
+    // Verify axios post was called correctly
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_case/1', caseData);
+    
+    // Verify result
+    expect(result).toEqual(mockCase);
+    expect(result.template_id).toBe(2);
+    expect(result.custom_steps_shared).toEqual([
+      { content: 'Updated Step 1', expected: 'Updated Expected 1' },
+      { content: 'Updated Step 2', expected: 'Updated Expected 2' }
+    ]);
+  });
+
+  it('updates multiple test cases with template_id and custom_steps_shared', async () => {
+    // Mock successful update (no response data)
+    mockAxiosInstance.post.mockResolvedValue({ data: {} });
+    
+    // Test data with template_id and custom_steps_shared
+    const caseData = {
+      template_id: 2,
+      custom_steps_shared: [
+        { content: 'Bulk Step 1', expected: 'Bulk Expected 1' },
+        { content: 'Bulk Step 2', expected: 'Bulk Expected 2' }
+      ]
+    };
+    const caseIds = [1, 2, 3];
+    
+    // Test method
+    await client.cases.updateCases(1, 1, caseData, caseIds);  // projectId: 1, suiteId: 1
+    
+    // Verify axios post was called correctly
+    expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v2/update_cases/1?suite_id=1', {
+      ...caseData,
+      case_ids: caseIds
+    });
+  });
 }); 

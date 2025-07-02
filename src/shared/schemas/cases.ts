@@ -20,9 +20,22 @@ export const addTestCaseSchema = z.object({
 	estimate: z.string().optional().describe("Test case estimated time"),
 	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
 	refs: z.string().optional().describe("Test case references"),
+	templateId: z
+		.number()
+		.optional()
+		.describe("Template ID (use 2 for custom_steps_shared support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
+	customStepsShared: z
+		.array(
+			z.object({
+				content: z.string().describe("Step content"),
+				expected: z.string().describe("Expected result"),
+			}),
+		)
+		.optional()
+		.describe("Shared test steps array (requires template_id=2)"),
 });
 
 // Schema for updating a test case
@@ -34,9 +47,22 @@ export const updateTestCaseSchema = z.object({
 	estimate: z.string().optional().describe("Test case estimated time"),
 	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
 	refs: z.string().optional().describe("Test case references"),
+	templateId: z
+		.number()
+		.optional()
+		.describe("Template ID (use 2 for custom_steps_shared support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
+	customStepsShared: z
+		.array(
+			z.object({
+				content: z.string().describe("Step content"),
+				expected: z.string().describe("Expected result"),
+			}),
+		)
+		.optional()
+		.describe("Shared test steps array (requires template_id=2)"),
 });
 
 // Schema for deleting a test case
@@ -78,9 +104,22 @@ export const updateTestCasesSchema = z.object({
 	estimate: z.string().optional().describe("Test case estimated time"),
 	milestoneId: z.number().optional().describe("TestRail Milestone ID"),
 	refs: z.string().optional().describe("Test case references"),
+	templateId: z
+		.number()
+		.optional()
+		.describe("Template ID (use 2 for custom_steps_shared support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
+	customStepsShared: z
+		.array(
+			z.object({
+				content: z.string().describe("Step content"),
+				expected: z.string().describe("Expected result"),
+			}),
+		)
+		.optional()
+		.describe("Shared test steps array (requires template_id=2)"),
 });
 
 // Create Zod objects from each schema

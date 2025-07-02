@@ -264,3 +264,62 @@ export const TestRailCaseHistorySchema = z.object({
 	),
 });
 export type TestRailCaseHistory = z.infer<typeof TestRailCaseHistorySchema>;
+
+// -----------------------------------------------
+// Client API data schemas (snake_case for TestRail API)
+// -----------------------------------------------
+
+/**
+ * Schema for data when adding a test case via client API
+ */
+export const addCaseDataSchema = z
+	.object({
+		title: z.string().optional(),
+		type_id: z.number().optional(),
+		priority_id: z.number().optional(),
+		template_id: z.number().optional(),
+		estimate: z.string().optional(),
+		milestone_id: z.number().optional(),
+		refs: z.string().optional(),
+		custom_preconds: z.string().optional(),
+		custom_steps: z.string().optional(),
+		custom_expected: z.string().optional(),
+		custom_steps_shared: z
+			.array(
+				z.object({
+					content: z.string(),
+					expected: z.string(),
+				}),
+			)
+			.optional(),
+	})
+	.strict();
+
+/**
+ * Schema for data when updating a test case via client API
+ */
+export const updateCaseDataSchema = z
+	.object({
+		title: z.string().optional(),
+		type_id: z.number().optional(),
+		priority_id: z.number().optional(),
+		template_id: z.number().optional(),
+		estimate: z.string().optional(),
+		milestone_id: z.number().optional(),
+		refs: z.string().optional(),
+		custom_preconds: z.string().optional(),
+		custom_steps: z.string().optional(),
+		custom_expected: z.string().optional(),
+		custom_steps_shared: z
+			.array(
+				z.object({
+					content: z.string(),
+					expected: z.string(),
+				}),
+			)
+			.optional(),
+	})
+	.strict();
+
+export type AddCaseData = z.infer<typeof addCaseDataSchema>;
+export type UpdateCaseData = z.infer<typeof updateCaseDataSchema>;

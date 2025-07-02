@@ -5,6 +5,10 @@ import {
 	TestRailCaseField,
 	TestRailCaseType,
 	TestRailCaseHistory,
+	addCaseDataSchema,
+	updateCaseDataSchema,
+	AddCaseData,
+	UpdateCaseData,
 } from "../../shared/schemas/cases.js";
 import { handleApiError } from "./utils.js";
 import {
@@ -101,12 +105,15 @@ export class CasesClient extends BaseTestRailClient {
 	 */
 	async addCase(
 		sectionId: AddTestCaseInput["sectionId"],
-		data: Record<string, unknown>,
+		data: AddCaseData,
 	): Promise<TestRailCase> {
 		try {
+			// Validate data with Zod schema
+			const validatedData = addCaseDataSchema.parse(data);
+
 			const response: AxiosResponse<TestRailCase> = await this.client.post(
 				`/api/v2/add_case/${sectionId}`,
-				data,
+				validatedData,
 			);
 			return response.data;
 		} catch (error) {
@@ -125,12 +132,15 @@ export class CasesClient extends BaseTestRailClient {
 	 */
 	async updateCase(
 		caseId: UpdateTestCaseInput["caseId"],
-		data: Record<string, unknown>,
+		data: UpdateCaseData,
 	): Promise<TestRailCase> {
 		try {
+			// Validate data with Zod schema
+			const validatedData = updateCaseDataSchema.parse(data);
+
 			const response: AxiosResponse<TestRailCase> = await this.client.post(
 				`/api/v2/update_case/${caseId}`,
-				data,
+				validatedData,
 			);
 			return response.data;
 		} catch (error) {
@@ -262,12 +272,15 @@ export class CasesClient extends BaseTestRailClient {
 	async updateCases(
 		projectId: GetTestCasesInput["projectId"],
 		suiteId: number,
-		data: Record<string, unknown>,
+		data: UpdateCaseData,
 		caseIds: UpdateTestCaseInput["caseId"][],
 	): Promise<void> {
 		try {
+			// Validate data with Zod schema
+			const validatedData = updateCaseDataSchema.parse(data);
+
 			const endpoint = `/api/v2/update_cases/${projectId}?suite_id=${suiteId}`;
-			await this.client.post(endpoint, { ...data, case_ids: caseIds });
+			await this.client.post(endpoint, { ...validatedData, case_ids: caseIds });
 		} catch (error) {
 			throw handleApiError(error, "Failed to update test cases");
 		}

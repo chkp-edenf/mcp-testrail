@@ -313,7 +313,7 @@ describe('Cases API', () => {
     };
     mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
     
-    // Test data with template_id and custom_steps_shared
+    // Test data with template_id and custom_steps_shared (typed)
     const caseData = {
       title: 'Test Case with Custom Steps',
       template_id: 2,
@@ -340,6 +340,23 @@ describe('Cases API', () => {
     ]);
   });
 
+  it('rejects invalid data when creating a test case', async () => {
+    // Test data with invalid types
+    const invalidCaseData = {
+      title: 123, // should be string
+      type_id: 'invalid', // should be number
+      custom_steps_shared: [
+        { content: 'Step 1' } // missing 'expected' field
+      ]
+    } as any;
+    
+    // Test method should throw validation error
+    await expect(client.cases.addCase(1, invalidCaseData)).rejects.toThrow();
+    
+    // Verify axios post was not called
+    expect(mockAxiosInstance.post).not.toHaveBeenCalled();
+  });
+
   it('updates a test case with template_id and custom_steps_shared', async () => {
     // Mock response
     const mockCase = { 
@@ -361,7 +378,7 @@ describe('Cases API', () => {
     };
     mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
     
-    // Test data with template_id and custom_steps_shared
+    // Test data with template_id and custom_steps_shared (typed)
     const caseData = {
       title: 'Updated Test Case with Custom Steps',
       template_id: 2,
@@ -386,11 +403,26 @@ describe('Cases API', () => {
     ]);
   });
 
+  it('rejects invalid data when updating a test case', async () => {
+    // Test data with invalid types
+    const invalidCaseData = {
+      title: null, // should be string or undefined
+      priority_id: 'high', // should be number
+      custom_steps_shared: 'invalid' // should be array
+    } as any;
+    
+    // Test method should throw validation error
+    await expect(client.cases.updateCase(1, invalidCaseData)).rejects.toThrow();
+    
+    // Verify axios post was not called
+    expect(mockAxiosInstance.post).not.toHaveBeenCalled();
+  });
+
   it('updates multiple test cases with template_id and custom_steps_shared', async () => {
     // Mock successful update (no response data)
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
-    // Test data with template_id and custom_steps_shared
+    // Test data with template_id and custom_steps_shared (typed)
     const caseData = {
       template_id: 2,
       custom_steps_shared: [
@@ -408,5 +440,22 @@ describe('Cases API', () => {
       ...caseData,
       case_ids: caseIds
     });
+  });
+
+  it('rejects invalid data when updating multiple test cases', async () => {
+    // Test data with invalid types
+    const invalidCaseData = {
+      template_id: 'two', // should be number
+      custom_steps_shared: [
+        { content: 123, expected: 'Expected 1' } // content should be string
+      ]
+    } as any;
+    const caseIds = [1, 2, 3];
+    
+    // Test method should throw validation error
+    await expect(client.cases.updateCases(1, 1, invalidCaseData, caseIds)).rejects.toThrow();
+    
+    // Verify axios post was not called
+    expect(mockAxiosInstance.post).not.toHaveBeenCalled();
   });
 }); 

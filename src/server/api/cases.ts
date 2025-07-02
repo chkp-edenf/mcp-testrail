@@ -174,7 +174,7 @@ export function registerCaseTools(
 	// Add a new test case
 	server.tool(
 		"addCase",
-		"Creates a new test case in TestRail. REQUIRED: sectionId, title. OPTIONAL: typeId, priorityId, templateId, customSteps, customExpected, customStepsShared, etc. Use getCaseTypes to find valid typeId values. NOTE: templateId=2 is required to use customStepsShared (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
+		"Creates a new test case in TestRail. REQUIRED: sectionId, title. OPTIONAL: typeId, priorityId, templateId, customSteps, customExpected, customStepsSeparated, etc. Use getCaseTypes to find valid typeId values. NOTE: templateId=2 is required to use customStepsSeparated (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
 		{
 			sectionId: addTestCaseSchema.shape.sectionId,
 			title: addTestCaseSchema.shape.title,
@@ -187,7 +187,7 @@ export function registerCaseTools(
 			customPrerequisites: addTestCaseSchema.shape.customPrerequisites,
 			customSteps: addTestCaseSchema.shape.customSteps,
 			customExpected: addTestCaseSchema.shape.customExpected,
-			customStepsShared: addTestCaseSchema.shape.customStepsShared,
+			customStepsSeparated: addTestCaseSchema.shape.customStepsSeparated,
 		},
 		async (args, extra) => {
 			try {
@@ -203,7 +203,7 @@ export function registerCaseTools(
 					customPrerequisites,
 					customSteps,
 					customExpected,
-					customStepsShared,
+					customStepsSeparated,
 				} = args;
 				// Build test case data
 				const data: Record<string, unknown> = {};
@@ -253,8 +253,8 @@ export function registerCaseTools(
 				if (customExpected) {
 					data.custom_expected = customExpected;
 				}
-				if (customStepsShared) {
-					data.custom_steps_shared = customStepsShared;
+				if (customStepsSeparated) {
+					data.custom_steps_separated = customStepsSeparated;
 				}
 
 				// Remove empty, undefined, null fields to avoid API errors
@@ -291,7 +291,7 @@ export function registerCaseTools(
 	// Update an existing test case
 	server.tool(
 		"updateCase",
-		"Updates an existing test case. REQUIRED: caseId. OPTIONAL: title, typeId, priorityId, templateId, customSteps, customExpected, customStepsShared, etc. Only specified fields will be updated. NOTE: templateId=2 is required to use customStepsShared (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
+		"Updates an existing test case. REQUIRED: caseId. OPTIONAL: title, typeId, priorityId, templateId, customSteps, customExpected, customStepsSeparated, etc. Only specified fields will be updated. NOTE: templateId=2 is required to use customStepsSeparated (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
 		{
 			caseId: updateTestCaseSchema.shape.caseId,
 			title: updateTestCaseSchema.shape.title,
@@ -304,7 +304,7 @@ export function registerCaseTools(
 			customPrerequisites: updateTestCaseSchema.shape.customPrerequisites,
 			customSteps: updateTestCaseSchema.shape.customSteps,
 			customExpected: updateTestCaseSchema.shape.customExpected,
-			customStepsShared: updateTestCaseSchema.shape.customStepsShared,
+			customStepsSeparated: updateTestCaseSchema.shape.customStepsSeparated,
 		},
 		async (args, extra) => {
 			try {
@@ -320,7 +320,7 @@ export function registerCaseTools(
 					customPrerequisites,
 					customSteps,
 					customExpected,
-					customStepsShared,
+					customStepsSeparated,
 				} = args;
 				// Build update data
 				const data: Record<string, unknown> = {};
@@ -370,8 +370,8 @@ export function registerCaseTools(
 				if (customExpected) {
 					data.custom_expected = customExpected;
 				}
-				if (customStepsShared) {
-					data.custom_steps_shared = customStepsShared;
+				if (customStepsSeparated) {
+					data.custom_steps_separated = customStepsSeparated;
 				}
 
 				const testCase = await testRailClient.cases.updateCase(caseId, data);
@@ -593,7 +593,7 @@ export function registerCaseTools(
 	// Update multiple test cases
 	server.tool(
 		"updateCases",
-		"Updates multiple test cases simultaneously with the same field values / 複数のテストケースを同じフィールド値で一括更新します. NOTE: templateId=2 is required to use customStepsShared (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
+		"Updates multiple test cases simultaneously with the same field values / 複数のテストケースを同じフィールド値で一括更新します. NOTE: templateId=2 is required to use customStepsSeparated (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
 		{
 			projectId: updateTestCasesSchema.shape.projectId,
 			suiteId: updateTestCasesSchema.shape.suiteId,
@@ -608,7 +608,7 @@ export function registerCaseTools(
 			customPrerequisites: updateTestCasesSchema.shape.customPrerequisites,
 			customSteps: updateTestCasesSchema.shape.customSteps,
 			customExpected: updateTestCasesSchema.shape.customExpected,
-			customStepsShared: updateTestCasesSchema.shape.customStepsShared,
+			customStepsSeparated: updateTestCasesSchema.shape.customStepsSeparated,
 		},
 		async (args, extra) => {
 			try {
@@ -626,7 +626,7 @@ export function registerCaseTools(
 					customPrerequisites,
 					customSteps,
 					customExpected,
-					customStepsShared,
+					customStepsSeparated,
 				} = args;
 
 				// Build update data
@@ -677,8 +677,8 @@ export function registerCaseTools(
 				if (customExpected) {
 					data.custom_expected = customExpected;
 				}
-				if (customStepsShared) {
-					data.custom_steps_shared = customStepsShared;
+				if (customStepsSeparated) {
+					data.custom_steps_separated = customStepsSeparated;
 				}
 
 				// Remove empty, undefined, null fields to avoid API errors

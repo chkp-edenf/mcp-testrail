@@ -292,7 +292,7 @@ describe('Cases API', () => {
     });
   });
 
-  it('creates a test case with template_id and custom_steps_shared', async () => {
+  it('creates a test case with template_id and custom_steps_separated', async () => {
     // Mock response
     const mockCase = { 
       id: 1, 
@@ -306,20 +306,20 @@ describe('Cases API', () => {
       updated_by: 1,
       updated_on: 1609459300,
       suite_id: 1,
-      custom_steps_shared: [
+      custom_steps_separated: [
         { content: 'Step 1', expected: 'Expected 1' },
         { content: 'Step 2', expected: 'Expected 2' }
       ]
     };
     mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
     
-    // Test data with template_id and custom_steps_shared (typed)
+    // Test data with template_id and custom_steps_separated (typed)
     const caseData = {
       title: 'Test Case with Custom Steps',
       template_id: 2,
       type_id: 1,
       priority_id: 2,
-      custom_steps_shared: [
+      custom_steps_separated: [
         { content: 'Step 1', expected: 'Expected 1' },
         { content: 'Step 2', expected: 'Expected 2' }
       ]
@@ -334,7 +334,7 @@ describe('Cases API', () => {
     // Verify result
     expect(result).toEqual(mockCase);
     expect(result.template_id).toBe(2);
-    expect(result.custom_steps_shared).toEqual([
+    expect(result.custom_steps_separated).toEqual([
       { content: 'Step 1', expected: 'Expected 1' },
       { content: 'Step 2', expected: 'Expected 2' }
     ]);
@@ -345,7 +345,7 @@ describe('Cases API', () => {
     const invalidCaseData = {
       title: 123, // should be string
       type_id: 'invalid', // should be number
-      custom_steps_shared: [
+      custom_steps_separated: [
         { content: 'Step 1' } // missing 'expected' field
       ]
     } as any;
@@ -357,7 +357,7 @@ describe('Cases API', () => {
     expect(mockAxiosInstance.post).not.toHaveBeenCalled();
   });
 
-  it('updates a test case with template_id and custom_steps_shared', async () => {
+  it('updates a test case with template_id and custom_steps_separated', async () => {
     // Mock response
     const mockCase = { 
       id: 1, 
@@ -371,18 +371,18 @@ describe('Cases API', () => {
       updated_by: 1,
       updated_on: 1609459400,
       suite_id: 1,
-      custom_steps_shared: [
+      custom_steps_separated: [
         { content: 'Updated Step 1', expected: 'Updated Expected 1' },
         { content: 'Updated Step 2', expected: 'Updated Expected 2' }
       ]
     };
     mockAxiosInstance.post.mockResolvedValue({ data: mockCase });
     
-    // Test data with template_id and custom_steps_shared (typed)
+    // Test data with template_id and custom_steps_separated (typed)
     const caseData = {
       title: 'Updated Test Case with Custom Steps',
       template_id: 2,
-      custom_steps_shared: [
+      custom_steps_separated: [
         { content: 'Updated Step 1', expected: 'Updated Expected 1' },
         { content: 'Updated Step 2', expected: 'Updated Expected 2' }
       ]
@@ -397,7 +397,7 @@ describe('Cases API', () => {
     // Verify result
     expect(result).toEqual(mockCase);
     expect(result.template_id).toBe(2);
-    expect(result.custom_steps_shared).toEqual([
+    expect(result.custom_steps_separated).toEqual([
       { content: 'Updated Step 1', expected: 'Updated Expected 1' },
       { content: 'Updated Step 2', expected: 'Updated Expected 2' }
     ]);
@@ -408,7 +408,7 @@ describe('Cases API', () => {
     const invalidCaseData = {
       title: null, // should be string or undefined
       priority_id: 'high', // should be number
-      custom_steps_shared: 'invalid' // should be array
+      custom_steps_separated: 'invalid' // should be array
     } as any;
     
     // Test method should throw validation error
@@ -418,14 +418,14 @@ describe('Cases API', () => {
     expect(mockAxiosInstance.post).not.toHaveBeenCalled();
   });
 
-  it('updates multiple test cases with template_id and custom_steps_shared', async () => {
+  it('updates multiple test cases with template_id and custom_steps_separated', async () => {
     // Mock successful update (no response data)
     mockAxiosInstance.post.mockResolvedValue({ data: {} });
     
-    // Test data with template_id and custom_steps_shared (typed)
+    // Test data with template_id and custom_steps_separated (typed)
     const caseData = {
       template_id: 2,
-      custom_steps_shared: [
+      custom_steps_separated: [
         { content: 'Bulk Step 1', expected: 'Bulk Expected 1' },
         { content: 'Bulk Step 2', expected: 'Bulk Expected 2' }
       ]
@@ -446,7 +446,7 @@ describe('Cases API', () => {
     // Test data with invalid types
     const invalidCaseData = {
       template_id: 'two', // should be number
-      custom_steps_shared: [
+      custom_steps_separated: [
         { content: 123, expected: 'Expected 1' } // content should be string
       ]
     } as any;

@@ -23,11 +23,11 @@ export const addTestCaseSchema = z.object({
 	templateId: z
 		.number()
 		.optional()
-		.describe("Template ID (use 2 for custom_steps_shared support)"),
+		.describe("Template ID (use 2 for custom_steps_separated support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
-	customStepsShared: z
+	customStepsSeparated: z
 		.array(
 			z.object({
 				content: z.string().describe("Step content"),
@@ -35,7 +35,7 @@ export const addTestCaseSchema = z.object({
 			}),
 		)
 		.optional()
-		.describe("Shared test steps array (requires template_id=2)"),
+		.describe("Separated test steps array (requires template_id=2)"),
 });
 
 // Schema for updating a test case
@@ -50,11 +50,11 @@ export const updateTestCaseSchema = z.object({
 	templateId: z
 		.number()
 		.optional()
-		.describe("Template ID (use 2 for custom_steps_shared support)"),
+		.describe("Template ID (use 2 for custom_steps_separated support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
-	customStepsShared: z
+	customStepsSeparated: z
 		.array(
 			z.object({
 				content: z.string().describe("Step content"),
@@ -62,7 +62,7 @@ export const updateTestCaseSchema = z.object({
 			}),
 		)
 		.optional()
-		.describe("Shared test steps array (requires template_id=2)"),
+		.describe("Separated test steps array (requires template_id=2)"),
 });
 
 // Schema for deleting a test case
@@ -107,11 +107,11 @@ export const updateTestCasesSchema = z.object({
 	templateId: z
 		.number()
 		.optional()
-		.describe("Template ID (use 2 for custom_steps_shared support)"),
+		.describe("Template ID (use 2 for custom_steps_separated support)"),
 	customPrerequisites: z.string().optional().describe("Prerequisites"),
 	customSteps: z.string().optional().describe("Test case steps"),
 	customExpected: z.string().optional().describe("Expected results"),
-	customStepsShared: z
+	customStepsSeparated: z
 		.array(
 			z.object({
 				content: z.string().describe("Step content"),
@@ -119,7 +119,7 @@ export const updateTestCasesSchema = z.object({
 			}),
 		)
 		.optional()
-		.describe("Shared test steps array (requires template_id=2)"),
+		.describe("Separated test steps array (requires template_id=2)"),
 });
 
 // Create Zod objects from each schema
@@ -284,7 +284,7 @@ export const addCaseDataSchema = z
 		custom_preconds: z.string().optional(),
 		custom_steps: z.string().optional(),
 		custom_expected: z.string().optional(),
-		custom_steps_shared: z
+		custom_steps_separated: z
 			.array(
 				z.object({
 					content: z.string(),
@@ -310,7 +310,7 @@ export const updateCaseDataSchema = z
 		custom_preconds: z.string().optional(),
 		custom_steps: z.string().optional(),
 		custom_expected: z.string().optional(),
-		custom_steps_shared: z
+		custom_steps_separated: z
 			.array(
 				z.object({
 					content: z.string(),

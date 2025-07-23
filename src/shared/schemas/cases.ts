@@ -36,6 +36,19 @@ export const addTestCaseSchema = z.object({
 		)
 		.optional()
 		.describe("Separated test steps array (requires template_id=2)"),
+	// Company-specific custom fields
+	customPlatforms: z
+		.array(z.number())
+		.optional()
+		.describe("Platform IDs (1:Platform, 2:Win, 3:Mac, 4:Core, 5:Lin, 6:iOS, 7:Android, 8:CPIP, 9:EU, 10:NGN)"),
+	customAutomationCoverage: z
+		.array(z.number())
+		.optional()
+		.describe("Automation coverage IDs (1:Win_Automated, 2:Win_Backlog, 3:Mac_Automated, 4:Mac_Backlog, 5:PlatformUI_Automated, 6:PlatformUI_Backlog, 7:PlatformE2E_Automated, 8:PlatformE2E_Backlog, 9:For_Review, 10:Manual, 11:GhostInspector, etc.)"),
+	customTestPhase: z
+		.number()
+		.optional()
+		.describe("Test phase ID (1:Regression, 2:Acceptance, 3:Smoke, 4:Longevity)"),
 });
 
 // Schema for updating a test case
@@ -292,6 +305,9 @@ export const addCaseDataSchema = z
 				}),
 			)
 			.optional(),
+		custom_platforms: z.array(z.number()).optional(),
+		custom_automationcoverage: z.array(z.number()).optional(),
+		custom_test_phase: z.number().optional(),
 	})
 	.strict();
 
@@ -318,6 +334,9 @@ export const updateCaseDataSchema = z
 				}),
 			)
 			.optional(),
+		custom_platforms: z.array(z.number()).optional(),
+		custom_automationcoverage: z.array(z.number()).optional(),
+		custom_test_phase: z.number().optional(),
 	})
 	.strict();
 

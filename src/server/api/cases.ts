@@ -174,7 +174,7 @@ export function registerCaseTools(
 	// Add a new test case
 	server.tool(
 		"addCase",
-		"Creates a new test case in TestRail. REQUIRED: sectionId, title. OPTIONAL: typeId, priorityId, templateId, customSteps, customExpected, customStepsSeparated, etc. Use getCaseTypes to find valid typeId values. NOTE: templateId=2 is required to use customStepsSeparated (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
+		"Creates a new test case in TestRail. REQUIRED: sectionId, title. OPTIONAL: typeId, priorityId, templateId, customSteps, customExpected, customStepsSeparated, customPlatforms, customAutomationCoverage, customTestPhase, etc. Use getCaseTypes to find valid typeId values. NOTE: templateId=2 is required to use customStepsSeparated (array of step objects with 'content' and 'expected' fields). For simple text steps, use customSteps and customExpected instead.",
 		{
 			sectionId: addTestCaseSchema.shape.sectionId,
 			title: addTestCaseSchema.shape.title,
@@ -188,6 +188,9 @@ export function registerCaseTools(
 			customSteps: addTestCaseSchema.shape.customSteps,
 			customExpected: addTestCaseSchema.shape.customExpected,
 			customStepsSeparated: addTestCaseSchema.shape.customStepsSeparated,
+			customPlatforms: addTestCaseSchema.shape.customPlatforms,
+			customAutomationCoverage: addTestCaseSchema.shape.customAutomationCoverage,
+			customTestPhase: addTestCaseSchema.shape.customTestPhase,
 		},
 		async (args, extra) => {
 			try {
@@ -204,6 +207,9 @@ export function registerCaseTools(
 					customSteps,
 					customExpected,
 					customStepsSeparated,
+					customPlatforms,
+					customAutomationCoverage,
+					customTestPhase,
 				} = args;
 				// Build test case data
 				const data: Record<string, unknown> = {};
@@ -255,6 +261,15 @@ export function registerCaseTools(
 				}
 				if (customStepsSeparated) {
 					data.custom_steps_separated = customStepsSeparated;
+				}
+				if (customPlatforms) {
+					data.custom_platforms = customPlatforms;
+				}
+				if (customAutomationCoverage) {
+					data.custom_automationcoverage = customAutomationCoverage;
+				}
+				if (customTestPhase) {
+					data.custom_test_phase = customTestPhase;
 				}
 
 				// Remove empty, undefined, null fields to avoid API errors
